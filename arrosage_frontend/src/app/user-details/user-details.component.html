@@ -1,0 +1,14 @@
+<!-- Modal pour les détails de l'utilisateur -->
+<div class="modal" *ngIf="user" id="detailsModal">
+    <div class="modal-content">
+      <span class="close" (click)="closeModal()">&times;</span>
+      <h2>Détails de l'utilisateur</h2>
+      <p><strong>Prénom:</strong> {{ user.firstName }}</p>
+      <p><strong>Nom:</strong> {{ user.lastName }}</p>
+      <p><strong>Email:</strong> {{ user.email }}</p>
+      <p><strong>Adresse:</strong> {{ user.address }}</p>
+      <p><strong>Rôle:</strong> {{ user.role }}</p>
+      <p><strong>Téléphone:</strong> {{ user.phone }}</p>
+    </div>
+  </div>
+  
