@@ -1,0 +1,39 @@
+<!-- Modal pour la modification de l'utilisateur -->
+<div class="modal" *ngIf="user" id="editModal">
+    <div class="modal-content">
+      <span class="close" (click)="closeModal()">&times;</span>
+      <h2>Modifier l'utilisateur</h2>
+      <form (ngSubmit)="onSubmit()" #editForm="ngForm">
+        <div>
+          <label for="firstName">Prénom</label>
+          <input type="text" id="firstName" [(ngModel)]="user.firstName" name="firstName" required>
+        </div>
+        <div>
+          <label for="lastName">Nom</label>
+          <input type="text" id="lastName" [(ngModel)]="user.lastName" name="lastName" required>
+        </div>
+        <div>
+          <label for="email">Email</label>
+          <input type="email" id="email" [(ngModel)]="user.email" name="email" required>
+        </div>
+        <div>
+          <label for="address">Adresse</label>
+          <input type="text" id="address" [(ngModel)]="user.address" name="address" required>
+        </div>
+        <div>
+          <label for="role">Rôle</label>
+          <select id="role" [(ngModel)]="user.role" name="role" required>
+            <option value="admin">Admin</option>
+            <option value="utilisateur">Utilisateur</option>
+          </select>
+        </div>
+        <div>
+          <label for="phone">Téléphone</label>
+          <input type="text" id="phone" [(ngModel)]="user.phone" name="phone" required (input)="validatePhone()">
+          <span *ngIf="phoneError">Le numéro de téléphone n'est pas valide.</span>
+        </div>
+        <button type="submit" [disabled]="!editForm.valid || phoneError">Modifier</button>
+      </form>
+    </div>
+  </div>
+  
