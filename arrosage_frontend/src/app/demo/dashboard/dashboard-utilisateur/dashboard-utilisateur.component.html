@@ -1,0 +1,83 @@
+<div class="dashboard">
+    <!-- Navbar -->
+   
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Statistiques -->
+        <div class="stats">
+            <div class="card">
+                <i class="fas fa-tint large-icon"></i>
+                <h3>Humidité du Sol</h3>
+                <div class="value">78%</div>
+            </div>
+            <div class="card">
+                <i class="fas fa-sun large-icon"></i>
+                <h3>Luminosité</h3>
+                <div class="value">820 lux</div>
+            </div>
+            <div class="card">
+                <i class="fas fa-temperature-high large-icon"></i>
+                <h3>Température & Humidité</h3>
+                <div class="value">38°C / 40%</div>
+            </div>
+        </div>
+
+        <!-- Section Options + Réservoir + Zones -->
+        <div class="bottom-section">
+            <!-- Partie gauche : Options + Réservoir -->
+            <div class="left-section">
+                <div class="options">
+                    <button class="btn2"><i class="fas fa-clock"></i> Programmer un arrosage</button>
+                    <button class="btn3"><i class="fas fa-plus-circle"></i> Ajouter une Zone</button>
+                    <button class="btn4"><i class="fas fa-history"></i> Voir Historique</button>
+                </div>
+
+                <!-- Réservoir sous les options -->
+                <div class="reservoir">
+                    <h2 class="reservoir-title">Volume Réservoir</h2>
+                    <div class="reservoir-content">
+                        <div class="reservoir-controls">
+                            <button class="arr"><i class="fas fa-play"></i> Arroser</button>
+                            <button class="aret"><i class="fas fa-stop"></i> Arrêter</button>
+                            <div class="volume">{{ reservoirVolume }}%</div>
+                        </div>
+                        <i class="fas fa-fill-drip large-reservoir-icon"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historique des Arrosages -->
+            <div class="zones-container">
+                <h3><i class="fas fa-history"></i> Historique des Arrosages</h3>
+                
+                <!-- Filtres Jour, Semaine, Mois -->
+                <div class="filters">
+                    <button class="btn-filter">Jour</button>
+                    <button class="btn-filter">Semaine</button>
+                    <button class="btn-filter">Mois</button>
+                </div>
+                
+                <!-- Liste des arrosages -->
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Heure</th>
+                            <th>Durée</th>
+                            <th>Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let arrosage of arrosages">
+                            <td>{{ arrosage.date }}</td>
+                            <td>{{ arrosage.heure }}</td>
+                            <td>{{ arrosage.duree }}</td>
+                            <td>{{ arrosage.type }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
