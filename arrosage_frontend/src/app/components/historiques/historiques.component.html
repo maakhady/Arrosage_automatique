@@ -1,0 +1,113 @@
+<div class="container">
+  <div class="historiques">
+    <div class="header-container">
+      <h2>Historiques d'arrosage</h2>
+      <div class="date-container" *ngIf="periode === 'jour'">
+        <!-- <input 
+          type="date" 
+          [ngModel]="jourSelectionne | date:'yyyy-MM-dd'"
+          (ngModelChange)="setJourSelectionne($event)"> -->
+        <span class="date-actuelle">{{ dateActuelle | date:'dd/MM/yyyy' }}</span>
+      </div>
+    </div>
+
+    <!-- Filtres pour la période -->
+    <div class="filtres">
+      <button 
+        [class.active]="periode === 'jour'"
+        (click)="setPeriode('jour')">
+        Jour
+      </button>
+      <button 
+        [class.active]="periode === 'semaine'"
+        (click)="setPeriode('semaine')">
+        Semaine
+      </button>
+      <button 
+        [class.active]="periode === 'mois'"
+        (click)="setPeriode('mois')">
+        Mois
+      </button>
+    </div>
+
+    <!-- Filtres supplémentaires -->
+    <div class="filtres-avances" [ngSwitch]="periode">
+      <!-- Sélection de la semaine -->
+      <div *ngSwitchCase="'semaine'">
+        <select [(ngModel)]="jourSemaine" (ngModelChange)="filtrerArrosages()">
+          <option value="all">Tous les jours</option>
+          <option value="1">Lundi</option>
+          <option value="2">Mardi</option>
+          <option value="3">Mercredi</option>
+          <option value="4">Jeudi</option>
+          <option value="5">Vendredi</option>
+          <option value="6">Samedi</option>
+          <option value="0">Dimanche</option>
+        </select>
+      </div>
+
+      <!-- Sélection du mois -->
+      <div *ngSwitchCase="'mois'">
+        <select [(ngModel)]="moisSelectionne" (ngModelChange)="filtrerArrosages()">
+          <option value="all">Tous les mois</option>
+          <option value="0">Janvier</option>
+          <option value="1">Février</option>
+          <option value="2">Mars</option>
+          <option value="3">Avril</option>
+          <option value="4">Mai</option>
+          <option value="5">Juin</option>
+          <option value="6">Juillet</option>
+          <option value="7">Août</option>
+          <option value="8">Septembre</option>
+          <option value="9">Octobre</option>
+          <option value="10">Novembre</option>
+          <option value="11">Décembre</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Tableau des historiques d'arrosage -->
+    <table class="arrosage-table">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Prénom</th>
+          <th>Date d'arrosage</th>
+          <th>Heure d'arrosage</th>
+          <th>Durée d'arrosage</th>
+          <th>Type d'arrosage</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let arrosage of arrosagesFiltres">
+          <td>{{ arrosage.nom }}</td>
+          <td>{{ arrosage.prenom }}</td>
+          <td>{{ arrosage.date | date: 'dd/MM/yyyy' }}</td>
+          <td>{{ arrosage.heure }}</td>
+          <td>{{ arrosage.duree }} minutes</td>
+          <td>{{ arrosage.type }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Pagination -->
+  <div class="pagination" *ngIf="nombreTotalPages > 1">
+    <button 
+      [disabled]="pageCourante === 1"
+      (click)="changerPage(pageCourante - 1)"
+      class="btn-page">
+      &laquo; Précédent
+    </button>
+    
+    <span class="page-info">
+      Page {{ pageCourante }} sur {{ nombreTotalPages }}
+    </span>
+
+    <button 
+      [disabled]="pageCourante === nombreTotalPages"
+      (click)="changerPage(pageCourante + 1)"
+      class="btn-page">
+      Suivant &raquo;
+    </button>
+  </div>
+</div>

@@ -1,0 +1,70 @@
+<div class="main-container">
+  <div class="auth-container-wrapper">
+    <div class="auth-container">
+      <div class="auth-card">
+        <div class="header">
+          <h1 style="text-align: center;">Connexion</h1>
+          <img src="/assets/images/logo.png" alt="Logo" class="logo">
+        </div>
+
+        <form [formGroup]="authForm" (ngSubmit)="onSubmit()" #form="ngForm">
+          <div class="form-group">
+            <div class="password-input-wrapper" style="justify-content: center;">
+              <input
+                type="password"
+                formControlName="digit1"
+                class="form-control"
+                maxlength="1"
+                (input)="onInputChange($event, 'digit1', input1)"
+                #input1
+              >
+              <input
+                type="password"
+                formControlName="digit2"
+                class="form-control"
+                maxlength="1"
+                (input)="onInputChange($event, 'digit2', input2)"
+                #input2
+              >
+              <input
+                type="password"
+                formControlName="digit3"
+                class="form-control"
+                maxlength="1"
+                (input)="onInputChange($event, 'digit3', input3)"
+                #input3
+              >
+              <input
+                type="password"
+                formControlName="digit4"
+                class="form-control"
+                maxlength="1"
+                (input)="onInputChange($event, 'digit4', input4)"
+                #input4
+              >
+            </div>
+
+            <div class="error-container">
+              <div class="error-message" *ngIf="authForm.errors?.['invalidCode'] && authForm.touched">
+                Le code secret est requis
+              </div>
+              <div class="error-message" *ngIf="errorMessage">
+                {{ errorMessage }}
+              </div>
+            </div>
+
+            <!-- Message pour les tentatives restantes -->
+            <div class="attempts-message" *ngIf="attempts > 0 && remainingAttempts > 0">
+              Tentatives restantes : {{ remainingAttempts }}
+            </div>
+
+            <!-- Remplacer le popup par un message -->
+            <div class="rfid-message" *ngIf="attempts >= 3">
+              Vous avez saisi un code secret incorrect trois fois. Veuillez utiliser votre carte RFID pour vous connecter.
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

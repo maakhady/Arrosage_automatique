@@ -1,0 +1,179 @@
+<app-header></app-header>
+<div class="gestion-utilisateurs">
+  
+  <h1>Gestion des Utilisateurs</h1>
+  
+  <div class="header-actions">
+    <div class="search-bar">
+      <input type="text" placeholder="Rechercher par Prénom, Email, Matricule..." [(ngModel)]="searchQuery" />
+      <button class="filter-btn">Filtre</button>
+    </div>
+    <div class="action-buttons">
+      <button class="home-btn" (click)="redirectToDashboard()" title="Tableau de Bord">
+        <fa-icon [icon]="faHome"></fa-icon> Accueil
+      </button>
+      <button class="delete-btn" (click)="supprimerSelection()">Supprimer</button>
+      
+      <!-- Bouton pour ajouter un utilisateur -->
+      <button class="add-btn" (click)="ajouterUtilisateur()">+ Ajouter</button>
+      
+      <!-- Bouton pour déclencher le champ de fichier -->
+        <button class="csv-btn" (click)="fileInput.click()">Ajouter par CSV</button>
+
+        <!-- Champ de fichier caché -->
+        <input type="file" accept=".csv" (change)="onFileSelected($event)" #fileInput style="display: none;" />
+    </div>
+  </div>
+
+  <table class="user-table">
+    <thead>
+      <tr>
+        <th>
+          <!-- Checkbox principal pour tout sélectionner/désélectionner -->
+          <input 
+            type="checkbox" 
+            [checked]="selectAll" 
+            (change)="toggleSelectAll()"
+            title="Tout sélectionner"
+          />
+        </th>
+        <th>Matricule</th>
+        <th>Prénom et Nom</th>
+        <th>Email</th>
+        <th>Rôle</th>
+        <th>Statut</th>
+        <th>Actions</th>
+        <th>Assignation</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let user of filteredUsers">
+        <td>
+          <input 
+            type="checkbox" 
+            [(ngModel)]="user.selected"
+            [class.visible]="selectAll"
+            [ngStyle]="{'visibility': selectAll ? 'visible' : 'hidden'}"
+          />
+        </td>
+        <td>{{ user.matricule }}</td>
+        <td>{{ user.prenom }} {{ user.nom }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.role }}</td>
+        <td>
+          <span [class.active]="user.actif" [class.inactive]="!user.actif">
+            {{ user.actif ? 'Actif' : 'Inactif' }}
+          </span>
+        </td>
+        <td>
+            <button class="action-btn" id="see" title="Voir" (click)="voirUtilisateur(user._id)">
+                <fa-icon [icon]="faEye"></fa-icon>
+            </button>
+          <button class="action-btn" id="edit" title="Éditer" (click)="ouvrirModaleModification(user)">
+            <fa-icon [icon]="faEdit"></fa-icon>
+          </button>
+          <button class="action-btn" id="delete" title="Supprimer" (click)="ouvrirModaleSuppression(user._id)">
+            <fa-icon [icon]="faTrash"></fa-icon>
+          </button>
+          <button class="action-btn" id="block" title="Bloquer" (click)="toggleActivationUtilisateur(user._id)">
+            <fa-icon [icon]="faBan"></fa-icon>
+          </button>
+        </td>
+        <td>
+          <button class="assign-btn" title="Assigner" (click)="assignerCarteRFID(user._id)">
+            <fa-icon [icon]="faUserPlus"></fa-icon>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+          <td colspan="7">
+            <div class="pagination">
+              <button (click)="previousPage()" [disabled]="currentPage === 1">Précédent</button>
+              <span>Page {{ currentPage }} sur {{ totalPages }}</span>
+              <button (click)="nextPage()" [disabled]="currentPage === totalPages">Suivant</button>
+            </div>
+          </td>
+        </tr>
+      </tfoot>
+</table>
+
+
+
+<!-- Modale d'ajout d'utilisateur -->
+<div class="modal-overlay" *ngIf="showAddModal">
+  <div class="modal">
+    <h2>Ajouter un utilisateur</h2>
+    <form (ngSubmit)="onSubmitAddUser()" #addUserForm="ngForm">
+      <div class="form-group">
+        <label for="prenom">Prénom</label>
+        <input type="text" id="prenom" name="prenom" [(ngModel)]="newUser.prenom" required />
+      </div>
+      <div class="form-group">
+        <label for="nom">Nom</label>
+        <input type="text" id="nom" name="nom" [(ngModel)]="newUser.nom" required />
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" [(ngModel)]="newUser.email" required />
+      </div>
+      <div class="form-group">
+        <label for="role">Rôle</label>
+        <select id="role" name="role" [(ngModel)]="newUser.role" required>
+          <option value="admin">Admin</option>
+          <option value="user">Utilisateur</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="cancel-btn" (click)="closeAddModal()">Annuler</button>
+        <button type="submit" class="submit-btn" [disabled]="addUserForm.invalid">Ajouter</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- Modale de confirmation de suppression -->
+<div class="modal-overlay" *ngIf="showDeleteModal">
+  <div class="modal">
+    <h2>Confirmer la suppression</h2>
+    <p>Êtes-vous sûr de vouloir supprimer cet utilisateur ?</p>
+    <div class="modal-actions">
+      <button type="button" class="cancel-btn" (click)="closeDeleteModal()">Annuler</button>
+      <button type="button" class="delete-btn" (click)="confirmDelete()">Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modale de modification d'utilisateur -->
+<div class="modal-overlay" *ngIf="showEditModal">
+  <div class="modal">
+    <h2>Modifier un utilisateur</h2>
+    <form (ngSubmit)="onSubmitEditUser()" #editUserForm="ngForm">
+      <div class="form-group">
+        <label for="prenom">Prénom</label>
+        <input type="text" id="prenom" name="prenom" [(ngModel)]="userToEdit!.prenom" required />
+      </div>
+      <div class="form-group">
+        <label for="nom">Nom</label>
+        <input type="text" id="nom" name="nom" [(ngModel)]="userToEdit!.nom" required />
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" [(ngModel)]="userToEdit!.email" required />
+      </div>
+      <div class="form-group">
+        <label for="role">Rôle</label>
+        <select id="role" name="role" [(ngModel)]="userToEdit!.role" required>
+          <option value="admin">Admin</option>
+          <option value="user">Utilisateur</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="cancel-btn" (click)="closeEditModal()">Annuler</button>
+        <button type="submit" class="submit-btn" [disabled]="editUserForm.invalid">Modifier</button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,62 @@
+<app-header></app-header>
+
+<div class="historique-container">
+    <h2>Historique des Actions</h2>
+  
+    <!-- Barre de recherche -->
+    <div class="search-bar">
+      <input
+        type="text"
+        [(ngModel)]="searchQuery"
+        placeholder="Rechercher par action, utilisateur, etc."
+        (input)="filtrer()"
+      />
+    </div>
+  
+    <!-- Tableau des actions -->
+    <table class="historique-table">
+      <thead>
+        <tr>
+          <th (click)="trier('utilisateur.prenom')">
+            Utilisateur
+            <fa-icon
+              [icon]="sortField === 'utilisateur.prenom' ? (sortOrder === 'asc' ? faSortUp : faSortDown) : faSort"
+            ></fa-icon>
+          </th>
+          <th (click)="trier('action')">
+            Action
+            <fa-icon
+              [icon]="sortField === 'action' ? (sortOrder === 'asc' ? faSortUp : faSortDown) : faSort"
+            ></fa-icon>
+          </th>
+          <th (click)="trier('details')">
+            Détails
+            <fa-icon
+              [icon]="sortField === 'details' ? (sortOrder === 'asc' ? faSortUp : faSortDown) : faSort"
+            ></fa-icon>
+          </th>
+          <th (click)="trier('date')">
+            Date
+            <fa-icon
+              [icon]="sortField === 'date' ? (sortOrder === 'asc' ? faSortUp : faSortDown) : faSort"
+            ></fa-icon>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let action of historique">
+          <td>{{ action.utilisateur.prenom }} {{ action.utilisateur.nom }}</td>
+          <td>{{ action.action }}</td>
+          <td>{{ action.details }}</td>
+          <td>{{ action.date | date: 'dd/MM/yyyy HH:mm' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  
+    <!-- Pagination -->
+    <div class="pagination">
+      <button (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1">Précédent</button>
+      <span>Page {{ currentPage }} sur {{ totalPages }}</span>
+      <button (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages">Suivant</button>
+    </div>
+  </div>

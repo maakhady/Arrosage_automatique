@@ -1,0 +1,66 @@
+<app-header></app-header>
+
+<div class="user-details-container">
+  <div class="header">
+    <button class="back-btn" (click)="retourListe()">
+      <fa-icon [icon]="faArrowLeft"></fa-icon> Retour
+    </button>
+    <h1>Détails de l'utilisateur</h1>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <p>Chargement...</p>
+  </div>
+
+  <div *ngIf="error" class="error-message">
+    <p>{{ error }}</p>
+  </div>
+
+  <div *ngIf="user && !loading" class="user-details">
+    <div class="user-info-card">
+      <div class="user-header">
+        <div class="user-avatar">
+          {{ user?.prenom?.[0] }}{{ user?.nom?.[0] }}
+        </div>
+        <div class="user-status" [class.active]="user?.actif">
+          {{ user?.actif ? 'Actif' : 'Inactif' }}
+        </div>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-item">
+          <label>Matricule</label>
+          <p>{{ user?.matricule }}</p>
+        </div>
+        <div class="info-item">
+          <label>Prénom</label>
+          <p>{{ user?.prenom }}</p>
+        </div>
+        <div class="info-item">
+          <label>Nom</label>
+          <p>{{ user?.nom }}</p>
+        </div>
+        <div class="info-item">
+          <label>Email</label>
+          <p>{{ user?.email ?? 'Non renseigné' }}</p>
+        </div>
+        <div class="info-item">
+          <label>Rôle</label>
+          <p>{{ user?.role }}</p>
+        </div>
+        <div class="info-item">
+            <label>Date de création</label>
+            <p>{{ user.date_creation | date:'dd/MM/yyyy HH:mm' }}</p>
+        </div>
+        <div class="info-item" *ngIf="user.date_modification">
+            <label>Date de modification</label>
+            <p>{{ user.date_modification | date:'dd/MM/yyyy HH:mm' }}</p>
+        </div>
+        <!-- <div class="info-item" *ngIf="user?.dernierAcces">
+          <label>Dernier accès</label>
+          <p>{{ user?.dernierAcces | date:'dd/MM/yyyy HH:mm' }}</p>
+        </div> -->
+      </div>
+    </div>
+  </div>
+</div>

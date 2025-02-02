@@ -1,0 +1,100 @@
+.user-details-container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.user-details-container .header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2rem;
+    gap: 1rem;
+}
+
+.user-details-container .header .back-btn {
+    padding: 0.5rem 1rem;
+    background-color: #f0f0f0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.user-details-container .header .back-btn:hover {
+    background-color: #e0e0e0;
+}
+
+.user-details-container .header h1 {
+    margin: 0;
+}
+
+.user-details-container .loading, 
+.user-details-container .error-message {
+    text-align: center;
+    padding: 2rem;
+}
+
+.user-details-container .error-message {
+    color: #dc3545;
+}
+
+.user-details-container .user-details .user-info-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+}
+
+.user-details-container .user-details .user-info-card .user-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.user-details-container .user-details .user-info-card .user-header .user-avatar {
+    width: 60px;
+    height: 60px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.user-details-container .user-details .user-info-card .user-header .user-status {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 500;
+    background-color: #dc3545;
+    color: white;
+}
+
+.user-details-container .user-details .user-info-card .user-header .user-status.active {
+    background-color: #28a745;
+}
+
+.user-details-container .user-details .user-info-card .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.user-details-container .user-details .user-info-card .info-grid .info-item label {
+    font-size: 0.875rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.user-details-container .user-details .user-info-card .info-grid .info-item p {
+    margin: 0;
+    font-size: 1rem;
+    color: #333;
+    font-weight: 500;
+}

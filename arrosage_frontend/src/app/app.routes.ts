@@ -1,15 +1,30 @@
 import { Routes } from '@angular/router';
+import { AuthComponent } from './components/auth/auth.component';
+import { GestionUtilisateursComponent } from './components/gestion-utilisateurs/gestion-utilisateurs.component';
+import { HistoriquesComponent } from './components/historiques/historiques.component';
+import { UserProfileComponent } from './components/user-profile/user-profile.component';
+import { UserDetailsComponent } from './components/user-details/user-details.component';
+import { HistoriqueActionsComponent } from './components/historique-actions/historique-actions.component';
 import { UserListComponent } from './user-list/user-list.component';
 import { UserRegistrationComponent } from './user-registration/user-registration.component';
-import { UserDetailsComponent } from './user-details/user-details.component';
 import { UserEditComponent } from './user-edit/user-edit.component';
 import { AssignRfidComponent } from './assign-rfid/assign-rfid.component';
+import { DashboardAdminComponent } from './demo/dashboard/dashboard-admin/dashboard-admin.component';
+import { DashboardUtilisateurComponent } from './demo/dashboard/dashboard-utilisateur/dashboard-utilisateur.component';
 
 export const routes: Routes = [
-  { path: 'register', component: UserRegistrationComponent },
-  { path: 'users', component: UserListComponent },
-  { path: 'users/:id', component: UserDetailsComponent },
-  { path: 'users/assign-rfid/:id', component: AssignRfidComponent },
-  { path: 'users/edit/:id', component: UserEditComponent },
-  { path: '', redirectTo: '/users', pathMatch: 'full' }
+    { path: '', component: AuthComponent },  // Route par défaut -> Auth
+    { path: 'register', component: UserRegistrationComponent },
+    { path: 'users', component: UserListComponent },
+    { path: 'users/:id', component: UserDetailsComponent },
+    { path: 'users/assign-rfid/:id', component: AssignRfidComponent },
+    { path: 'users/edit/:id', component: UserEditComponent },
+    { path: 'dashboard', loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent) },
+    { path: 'demo/dashboard/dashboard-admin', component: DashboardAdminComponent },
+    { path: 'demo/dashboard/dashboard-utilisateur', component: DashboardUtilisateurComponent },
+    { path: 'gestion-utilisateurs', component: GestionUtilisateursComponent },
+    { path: 'historiques', component: HistoriquesComponent },
+    { path: 'user-profile', component: UserProfileComponent },
+    { path: 'historique-actions', component: HistoriqueActionsComponent },
+    { path: '**', redirectTo: '' } // Redirection pour les routes inconnues
 ];
