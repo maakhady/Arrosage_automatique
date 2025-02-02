@@ -26,11 +26,11 @@ const historiqueArrosageSchema = new mongoose.Schema({
     },
     humiditeSol: {
         type: Number,
-        required: true
+        required: false
     },
     luminosite: {
         type: Number,
-        required: true
+        required: false
     },
     parametreUtilise: {
         type: String,

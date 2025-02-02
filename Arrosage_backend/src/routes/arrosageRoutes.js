@@ -51,4 +51,9 @@ router.patch('/:id/toggle',
    arrosageControleur.toggleArrosage
 );
 
+
+// Routes pour les statistiques
+router.get('/historique/jour', auth, arrosageControleur. getHistoriqueParJour);
+router.get('/historique/semaine', auth, arrosageControleur. getHistoriqueParSemaine);
+router.get('/historique/mois', auth, arrosageControleur. getHistoriqueParMois);
 module.exports = router;
