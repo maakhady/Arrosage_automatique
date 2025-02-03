@@ -1,43 +1,57 @@
 const express = require('express');
 const router = express.Router();
-const historiqueArrosageController = require('../controllers/historiqueArrosageControleur');
 const auth = require('../middleware/auth');
-const { validateHistoriqueInputs, validateDateParams, validatePeriodeParam } = require('../middleware/validators/historiqueValidators');
+const historiqueController = require('../controllers/historiqueArrosageControleur');
 
-// Routes
-router.post('/', 
-    auth,
-    validateHistoriqueInputs,
-    historiqueArrosageController.creerHistorique
-);
+// Application du middleware d'authentification pour toutes les routes
+router.use(auth);
 
-router.get('/',
-    auth,
-    validateDateParams,
-    historiqueArrosageController.getHistoriqueComplet
-);
+/**
+ * @route GET /api/historique
+ * @description Obtenir l'historique complet des arrosages avec pagination
+ * @param {number} page - Numéro de page (défaut: 1)
+ * @param {number} limit - Éléments par page (défaut: 10)
+ * @param {string} dateDebut - Date début filtrage (YYYY-MM-DD)
+ * @param {string} dateFin - Date fin filtrage (YYYY-MM-DD)
+ * @access Privé
+ */
+router.get('/', historiqueController.getHistoriqueComplet);
 
-router.get('/plante/:planteId',
-    auth,
-    validateDateParams,
-    historiqueArrosageController.getHistoriquePlante
-);
+/**
+ * @route GET /api/historique/plante/:planteId
+ * @description Obtenir l'historique d'une plante spécifique
+ * @param {string} planteId - ID MongoDB de la plante
+ * @param {number} page - Numéro de page (défaut: 1)
+ * @param {number} limit - Éléments par page (défaut: 10)
+ * @param {string} dateDebut - Date début filtrage (YYYY-MM-DD)
+ * @param {string} dateFin - Date fin filtrage (YYYY-MM-DD)
+ * @access Privé
+ */
+router.get('/plante/:planteId', historiqueController.getHistoriquePlante);
 
-router.get('/statistiques',
-    auth,
-    validateDateParams,
-    historiqueArrosageController.getStatistiques
-);
+/**
+ * @route GET /api/historique/statistiques
+ * @description Obtenir les statistiques générales
+ * @param {string} dateDebut - Date début (YYYY-MM-DD)
+ * @param {string} dateFin - Date fin (YYYY-MM-DD)
+ * @access Privé
+ */
+router.get('/statistiques', historiqueController.getStatistiques);
 
-router.get('/statistiques/:periode',
-    auth,
-    validatePeriodeParam,
-    historiqueArrosageController.getStatistiquesPeriode
-);
+/**
+ * @route GET /api/historique/statistiques/:periode
+ * @description Obtenir les statistiques par période
+ * @param {string} periode - 'semaine' ou 'mois'
+ * @access Privé
+ */
+router.get('/statistiques/:periode', historiqueController.getStatistiquesPeriode);
 
-router.delete('/:historiqueId',
-    auth,
-    historiqueArrosageController.supprimerHistorique
-);
+/**
+ * @route DELETE /api/historique/:historiqueId
+ * @description Supprimer un historique
+ * @param {string} historiqueId - ID MongoDB de l'historique
+ * @access Privé
+ */
+router.delete('/:historiqueId', historiqueController.supprimerHistorique);
 
 module.exports = router;

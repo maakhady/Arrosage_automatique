@@ -3,81 +3,27 @@ const Plante = require('../models/Plante');
 const Arrosage = require('../models/Arrosage');
 const mongoose = require('mongoose');
 
-// Créer un nouvel enregistrement dans l'historique
-const creerHistorique = async (req, res) => {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
+// Fonction utilitaire pour créer un historique
+const creerHistoriqueArrosage = async (arrosage) => {
     try {
-        const { id_arrosage } = req.body;
-
-        if (!mongoose.Types.ObjectId.isValid(id_arrosage)) {
-            return res.status(400).json({
-                success: false,
-                message: 'ID d\'arrosage invalide'
-            });
-        }
-
-        // Vérifier si l'arrosage existe et récupérer ses informations
-        const arrosage = await Arrosage.findById(id_arrosage)
-            .populate('plante')
-            .session(session);
-
-        if (!arrosage) {
-            await session.abortTransaction();
-            return res.status(404).json({
-                success: false,
-                message: 'Arrosage non trouvé'
-            });
-        }
-
-        // Vérifier si un historique existe déjà pour cet arrosage
-        const historiqueExistant = await HistoriqueArrosage.findOne({ 
-            id_arrosage: id_arrosage 
-        }).session(session);
-
-        if (historiqueExistant) {
-            await session.abortTransaction();
-            return res.status(409).json({
-                success: false,
-                message: 'Un historique existe déjà pour cet arrosage'
-            });
-        }
-
-        // Créer l'historique avec toutes les informations de l'arrosage
         const historique = new HistoriqueArrosage({
-            plante: arrosage.plante._id,
-            utilisateur: req.user._id,
+            plante: arrosage.plante,
+            utilisateur: arrosage.utilisateur,
             id_arrosage: arrosage._id,
             type: arrosage.type,
             heureDebut: arrosage.heureDebut,
             heureFin: arrosage.heureFin,
             volumeEau: arrosage.volumeEau,
-            parametresArrosage: arrosage.type === 'automatique' ? {
-                humiditeSolRequise: arrosage.parametresArrosage.humiditeSolRequise,
-                luminositeRequise: arrosage.parametresArrosage.luminositeRequise,
-                volumeEau: arrosage.parametresArrosage.volumeEau
-            } : undefined
+            parametresArrosage: arrosage.parametresArrosage,
+            actif: arrosage.actif
         });
 
-        await historique.save({ session });
-        await session.commitTransaction();
-
-        res.status(201).json({
-            success: true,
-            message: 'Historique créé avec succès',
-            historique
-        });
+        const savedHistorique = await historique.save();
+        console.log("Historique créé avec succès:", savedHistorique);
+        return savedHistorique;
     } catch (error) {
-        await session.abortTransaction();
-        console.error('Erreur création historique:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Erreur lors de la création de l\'historique',
-            details: error.message
-        });
-    } finally {
-        session.endSession();
+        console.error("Erreur lors de la création de l'historique:", error);
+        throw error;
     }
 };
 
@@ -412,13 +358,70 @@ const getStatistiquesPeriode = async (req, res) => {
             { $sort: { date: 1, nomPlante: 1 } }
         ]);
 
-        // Le reste du code reste identique...
-        
+        // Créer le résumé des statistiques
+        const resume = {
+            periode: periode,
+            dateDebut: dateDebut,
+            dateFin: dateActuelle,
+            totalArrosages: statistiques.reduce((sum, stat) => sum + stat.nombreArrosages, 0),
+            totalEau: statistiques.reduce((sum, stat) => sum + stat.volumeEauTotal, 0)
+        };
+
+        // Grouper les statistiques par plante
+        const statsParPlante = statistiques.reduce((acc, stat) => {
+            const key = stat.plante.toString();
+            if (!acc[key]) {
+                acc[key] = {
+                    plante: stat.plante,
+                    nomPlante: stat.nomPlante,
+                    categoriePlante: stat.categoriePlante,
+                    totalArrosages: 0,
+                    totalEau: 0,
+                    arrosagesAutomatiques: 0,
+                    arrosagesManuels: 0,
+                    humiditeMoyenne: 0,
+                    luminositeMoyenne: 0,
+                    donneesDates: []
+                };
+            }
+            
+            acc[key].totalArrosages += stat.nombreArrosages;
+            acc[key].totalEau += stat.volumeEauTotal;
+            acc[key].arrosagesAutomatiques += stat.arrosagesAutomatiques;
+            acc[key].arrosagesManuels += stat.arrosagesManuels;
+            acc[key].humiditeMoyenne = 
+                (acc[key].humiditeMoyenne + stat.humiditeSolMoyenne) / 2;
+            acc[key].luminositeMoyenne = 
+                (acc[key].luminositeMoyenne + stat.luminositeMoyenne) / 2;
+            acc[key].donneesDates.push({
+                date: stat.date,
+                volumeEau: stat.volumeEauTotal,
+                nombreArrosages: stat.nombreArrosages
+            });
+            
+            return acc;
+        }, {});
+
+        // Calculer les totaux globaux
+        const totaux = {
+            totalPlantes: Object.keys(statsParPlante).length,
+            totalArrosages: resume.totalArrosages,
+            totalEau: resume.totalEau,
+            totalAutomatiques: statistiques.reduce((sum, stat) => 
+                sum + stat.arrosagesAutomatiques, 0),
+            totalManuels: statistiques.reduce((sum, stat) => 
+                sum + stat.arrosagesManuels, 0),
+            moyenneHumidite: statistiques.reduce((sum, stat) => 
+                sum + stat.humiditeSolMoyenne, 0) / statistiques.length || 0,
+            moyenneLuminosite: statistiques.reduce((sum, stat) => 
+                sum + stat.luminositeMoyenne, 0) / statistiques.length || 0
+        };
+
         res.json({
             success: true,
             resume,
             statistiques,
-            statsParPlante,
+            statsParPlante: Object.values(statsParPlante),
             totaux
         });
     } catch (error) {
@@ -478,8 +481,9 @@ const supprimerHistorique = async (req, res) => {
     }
 };
 
+// Exporter toutes les fonctions
 module.exports = {
-    creerHistorique,
+    creerHistoriqueArrosage,
     getHistoriqueComplet,
     getHistoriquePlante,
     getStatistiques,

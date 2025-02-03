@@ -606,11 +606,11 @@ const arrosageManuelPlante = async (req, res) => {
                 minutes: finArrosage.getMinutes(),
                 secondes: finArrosage.getSeconds()
             },
-            volumeEau: volumeEauFinal, // Assurez-vous que cette valeur est correcte
+            volumeEau: volumeEauFinal,
             parametresArrosage: {
                 humiditeSolRequise: plante.humiditeSol,
                 luminositeRequise: plante.luminosite,
-                volumeEau: volumeEauFinal // Ce champ est également défini ici
+                volumeEau: volumeEauFinal
             },
             actif: true
         });
@@ -618,8 +618,24 @@ const arrosageManuelPlante = async (req, res) => {
         const arrosageSauve = await arrosage.save();
         console.log('Arrosage sauvegardé:', arrosageSauve);
         
-        // Créer l'historique en utilisant la fonction utilitaire
-        const historiqueSauve = await creerHistoriqueArrosage(arrosageSauve);
+        // Créer directement l'historique au lieu d'utiliser creerHistoriqueArrosage
+        const historique = new HistoriqueArrosage({
+            plante: arrosageSauve.plante,
+            utilisateur: arrosageSauve.utilisateur,
+            id_arrosage: arrosageSauve._id,
+            type: arrosageSauve.type,
+            heureDebut: arrosageSauve.heureDebut,
+            heureFin: arrosageSauve.heureFin,
+            volumeEau: volumeEauFinal, // S'assurer que le volumeEau est bien défini
+            parametresArrosage: {
+                humiditeSolRequise: plante.humiditeSol,
+                luminositeRequise: plante.luminosite,
+                volumeEau: volumeEauFinal
+            },
+            actif: arrosageSauve.actif
+        });
+
+        const historiqueSauve = await historique.save();
         console.log('Historique créé:', historiqueSauve);
 
         res.json({
@@ -681,6 +697,7 @@ const arrosageManuelGlobal = async (req, res) => {
         for (const plante of plantes) {
             const maintenant = new Date();
             const finArrosage = new Date(maintenant.getTime() + 300000);
+            const volumeEauPlante = plante.volumeEau;
 
             const arrosage = new Arrosage({
                 plante: plante._id,
@@ -696,24 +713,42 @@ const arrosageManuelGlobal = async (req, res) => {
                     minutes: finArrosage.getMinutes(),
                     secondes: finArrosage.getSeconds()
                 },
-                volumeEau: plante.volumeEau,
+                volumeEau: volumeEauPlante,
                 parametresArrosage: {
                     humiditeSolRequise: plante.humiditeSol,
                     luminositeRequise: plante.luminosite,
-                    volumeEau: plante.volumeEau
+                    volumeEau: volumeEauPlante
                 }
             });
 
-            await arrosage.save();
-            const historique = await creerHistoriqueArrosage(arrosage);
+            const arrosageSauve = await arrosage.save();
             
+            // Créer directement l'historique au lieu d'utiliser creerHistoriqueArrosage
+            const historique = new HistoriqueArrosage({
+                plante: arrosageSauve.plante,
+                utilisateur: arrosageSauve.utilisateur,
+                id_arrosage: arrosageSauve._id,
+                type: arrosageSauve.type,
+                heureDebut: arrosageSauve.heureDebut,
+                heureFin: arrosageSauve.heureFin,
+                volumeEau: volumeEauPlante,
+                parametresArrosage: {
+                    humiditeSolRequise: plante.humiditeSol,
+                    luminositeRequise: plante.luminosite,
+                    volumeEau: volumeEauPlante
+                },
+                actif: arrosageSauve.actif
+            });
+
+            const historiqueSauve = await historique.save();
+
             resultatArrosages.push({
                 plante: {
                     id: plante._id,
                     nom: plante.nom
                 },
-                arrosage,
-                historique
+                arrosage: arrosageSauve,
+                historique: historiqueSauve
             });
         }
 
@@ -725,6 +760,13 @@ const arrosageManuelGlobal = async (req, res) => {
         });
     } catch (error) {
         console.error('Erreur arrosage manuel global:', error);
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({
+                success: false,
+                message: 'Erreur de validation',
+                details: error.message
+            });
+        }
         res.status(500).json({
             success: false,
             message: 'Erreur lors de l\'arrosage manuel global',
@@ -732,7 +774,6 @@ const arrosageManuelGlobal = async (req, res) => {
         });
     }
 };
-
 module.exports = {
     creerArrosage,
     getMesArrosages,
