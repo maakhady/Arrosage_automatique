@@ -6,7 +6,7 @@ import { UserDetailsComponent } from '../user-details/user-details.component';
 import { UserEditComponent } from '../user-edit/user-edit.component';
 import { AssignRfidComponent } from '../assign-rfid/assign-rfid.component';
 declare var bootstrap: any; // Import Bootstrap
-import * as Papa from 'papaparse'; // Import PapaParse for CSV parsing
+// import * as Papa from 'papaparse'; // Import PapaParse for CSV parsing
 
 interface User {
   id: string;
@@ -127,29 +127,29 @@ export class UserListComponent implements OnInit {
     );
   }
 
-  importCSV(event: any) {
-    const file = event.target.files[0];
-    if (file) {
-      Papa.parse(file, {
-        header: true,
-        complete: (results: Papa.ParseResult<any>) => {
-          const validUsers = results.data.filter((row: any) => this.validateCSVRow(row));
-          this.users = this.users.concat(validUsers.map((row: any) => ({
-            id: (this.users.length + 1).toString(),
-            matricule: row.matricule,
-            firstName: row.firstName,
-            lastName: row.lastName,
-            email: row.email,
-            address: row.address,
-            role: row.role,
-            status: 'active',
-            selected: false
-          })));
-          this.filteredUsers = this.users; // Mettre à jour la liste filtrée
-        }
-      });
-    }
-  }
+  // importCSV(event: any) {
+  //   const file = event.target.files[0];
+  //   if (file) {
+  //     Papa.parse(file, {
+  //       header: true,
+  //       complete: (results: Papa.ParseResult<any>) => {
+  //         const validUsers = results.data.filter((row: any) => this.validateCSVRow(row));
+  //         this.users = this.users.concat(validUsers.map((row: any) => ({
+  //           id: (this.users.length + 1).toString(),
+  //           matricule: row.matricule,
+  //           firstName: row.firstName,
+  //           lastName: row.lastName,
+  //           email: row.email,
+  //           address: row.address,
+  //           role: row.role,
+  //           status: 'active',
+  //           selected: false
+  //         })));
+  //         this.filteredUsers = this.users; // Mettre à jour la liste filtrée
+  //       }
+  //     });
+  //   }
+  // }
 
   validateCSVRow(row: any): boolean {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

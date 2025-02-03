@@ -4,13 +4,13 @@
   </div>
   <div class="controls">
     <div class="actions">
-      <button (click)="deleteSelectedUsers()" class="delete-button" [disabled]="!anySelected"><i class="fas fa-trash"></i> Supprimer</button>
-      <button (click)="blockSelectedUsers()" class="block-button" [disabled]="!anySelected"><i class="fas fa-lock"></i> Bloquer</button>
+      <button (click)="deleteSelectedUsers()" class="delete-button" [disabled]="!anySelected"><i class="fas fa-trash"></i> Suppression Multiples</button>
+      <!-- <button (click)="blockSelectedUsers()" class="block-button" [disabled]="!anySelected"><i class="fas fa-lock"></i> Bloquer</button> -->
       <button (click)="openRegistrationModal()" class="add-button"><i class="fas fa-user-plus"></i> Ajouter Utilisateur</button>
       <button class="import-button" (click)="triggerFileInput()">
         <i class="fas fa-file-csv"></i> Importer CSV
       </button>
-      <input #fileInput type="file" (change)="importCSV($event)" accept=".csv" style="display: none;">
+      <!-- <input #fileInput type="file" (change)="importCSV($event)" accept=".csv" style="display: none;"> -->
     </div>
     <div class="search-bar">
       <input type="text" [(ngModel)]="searchQuery" (input)="filterUsers()" placeholder="Rechercher par prénom et nom, email ou matricule">

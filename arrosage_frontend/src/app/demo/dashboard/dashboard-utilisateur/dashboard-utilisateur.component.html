@@ -1,56 +1,38 @@
 <app-header></app-header>
 <div class="dashboard">
-    <!-- Navbar et autres éléments -->
-
     <!-- Main Content -->
     <div class="main-content">
-        <!-- Statistiques -->
-        <div class="stats">
-            <!-- Autres cartes -->
-            <div class="card">
-                <i class="fas fa-tint large-icon"></i>
-                <h3>Humidité du Sol</h3>
-                <div class="value">78%</div>
-            </div>
-            <div class="card">
-                <i class="fas fa-sun large-icon"></i>
-                <h3>Luminosité</h3>
-                <div class="value">820 lux</div>
-            </div>
-        <!-- </div> -->
-
-        <!-- Réservoir -->
-         <div class="reservoir">
-          <h2>Volume du Réservoir</h2>
-        <div class="reservoir-content">
-          <div class="reservoir-controls">
-              <button class="arr" (click)="startWatering()">
-                  <i class="fas fa-play"></i> Arroser
-              </button>
-              <button class="aret" (click)="stopWatering()">
-                  <i class="fas fa-stop"></i> Arrêter
-              </button>
-              <!-- <div class="volume">{{ reservoirVolume }}%</div> -->
+      <!-- Statistiques -->
+      <div class="stats">
+          <!-- Autres cartes -->
+          <div class="card">
+              <i class="fas fa-tint large-icon"></i>
+              <h3>Humidité du Sol</h3>
+              <div class="value">78%</div>
           </div>
-          <div style="position: relative;">
-              <i class="fas fa-fill-drip large-reservoir-icon" [class.bend]="isWatering"></i>
-              <div class="rain-container" [class.active]="isWatering">
-                  <div class="raindrop"></div>
-                  <div class="raindrop"></div>
-                  <div class="raindrop"></div>
-                  <div class="raindrop"></div>
-                  <div class="raindrop"></div>
-                  <div class="raindrop"></div>
-                  <div class="raindrop"></div>
-                  <div class="raindrop"></div>
+          <div class="card">
+              <i class="fas fa-sun large-icon"></i>
+              <h3>Luminosité</h3>
+              <div class="value">820 lux</div>
+          </div>
+
+          <!-- Réservoir intégré dans stats -->
+          <div class="card reservoir">
+              <h2 class="reservoir-title">Volume Réservoir</h2>
+              <div class="reservoir-content">
+                  <div class="reservoir-controls">
+                      <button class="arr" (click)="startWatering()">
+                          <i class="fas fa-play"></i> Arroser
+                      </button>
+                      <button class="aret" (click)="stopWatering()">
+                          <i class="fas fa-stop"></i> Arrêter
+                      </button>
+                      <div class="volume">{{ reservoirVolume }}%</div>
+                  </div>
+                  <i class="fas fa-fill-drip large-reservoir-icon" [class.bend]="isWatering"></i>
               </div>
           </div>
-           <!-- Conteneur du volume -->
-          <div class="reservoir-volume-container">
-            <div class="reservoir-volume-fill" [class.decrease]="isWatering"></div>
-        </div>
       </div>
-    </div>
   </div>
 
     <!-- Section Options + Réservoir + Zones -->
@@ -65,39 +47,26 @@
                 <button class="btn4"><i class="fas fa-history"></i> Voir Historique</button>
             </div>
 
-            <!-- Réservoir sous les options -->
-            <div class="reservoir">
-                <h2 class="reservoir-title">Volume Réservoir</h2>
-                <div class="reservoir-content">
-                    <div class="reservoir-controls">
-                        <!-- Bouton Arroser -->
-                        <button class="arr" (click)="startWatering()">
-                            <i class="fas fa-play"></i> Arroser
-                        </button>
-                        <!-- Bouton Arrêter -->
-                        <button class="aret" (click)="stopWatering()">
-                            <i class="fas fa-stop"></i> Arrêter
-                        </button>
-                        <div class="volume">{{ reservoirVolume }}%</div>
-                    </div>
-                    <!-- Icône du réservoir avec animation -->
-                    <i class="fas fa-fill-drip large-reservoir-icon" [class.bend]="isWatering"></i>
-                </div>
-            </div>
+
         </div>
 
         <!-- Historique des Arrosages -->
         <div class="zones-container">
             <h3><i class="fas fa-history"></i> Historique des Arrosages</h3>
-            
-            <!-- Filtres Jour, Semaine, Mois -->
+
+            <!-- Filtres -->
             <div class="filters">
-                <button class="btn-filter">Jour</button>
-                <button class="btn-filter">Semaine</button>
-                <button class="btn-filter">Mois</button>
+                <div class="left-buttons">
+                    <button class="btn-filter">Jour</button>
+                    <button class="btn-filter">Semaine</button>
+                    <button class="btn-filter">Mois</button>
+                </div>
+                <div class="right-button">
+                    <button class="btn-filter">Voir Graphe</button>
+                </div>
             </div>
-            
-            <!-- Liste des arrosages -->
+
+            <!-- Table d'historique -->
             <table class="history-table">
                 <thead>
                     <tr>
@@ -144,32 +113,6 @@
         </div>
 
         <div class="modal-body">
-            <h5>Horaires programmés</h5>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nom</th>
-                            <th>Prénom</th>
-                            <th>Date</th>
-                            <th>Heure</th>
-                            <th>Durée</th>
-                            <th>Type</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let time of scheduledTimes">
-                            <td>{{time.name}}</td>
-                            <td>{{time.firstName}}</td>
-                            <td>{{time.date}}</td>
-                            <td>{{time.hour}}</td>
-                            <td>{{time.duration}} minutes</td>
-                            <td>{{time.type}}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
             <div class="form-group">
                 <label>Heure</label>
                 <input type="time" [(ngModel)]="newSchedule.hour">

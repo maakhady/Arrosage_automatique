@@ -11,35 +11,73 @@ const historiqueArrosageSchema = new mongoose.Schema({
         ref: 'Utilisateur',
         required: true
     },
-    date: {
-        type: Date,
-        default: Date.now
+    id_arrosage: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Arrosage',
+        required: true
     },
     type: {
         type: String,
         enum: ['manuel', 'automatique'],
         required: true
     },
+    heureDebut: {
+        heures: {
+            type: Number,
+            min: 0,
+            max: 23,
+            required: true
+        },
+        minutes: {
+            type: Number,
+            min: 0,
+            max: 59,
+            required: true
+        },
+        secondes: {
+            type: Number,
+            min: 0,
+            max: 59,
+            required: true
+        }
+    },
+    heureFin: {
+        heures: {
+            type: Number,
+            min: 0,
+            max: 23,
+            required: true
+        },
+        minutes: {
+            type: Number,
+            min: 0,
+            max: 59,
+            required: true
+        },
+        secondes: {
+            type: Number,
+            min: 0,
+            max: 59,
+            required: true
+        }
+    },
     volumeEau: {
         type: Number,
-        required: true
+        required: true,
+        min: 0
     },
-    humiditeSol: {
-        type: Number,
-        required: true
+    parametresArrosage: {
+        humiditeSolRequise: Number,
+        luminositeRequise: Number,
+        volumeEau: Number
     },
-    luminosite: {
-        type: Number,
-        required: true
+    actif: {
+        type: Boolean,
+        default: true
     },
-    parametreUtilise: {
-        type: String,
-        required: true
-    },
-    id_arrosage: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Arrosage',
-        required: true
+    date: {
+        type: Date,
+        default: Date.now
     }
 });
 
