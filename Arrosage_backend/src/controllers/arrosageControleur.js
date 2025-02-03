@@ -1,10 +1,72 @@
+const mongoose = require('mongoose');
 const Arrosage = require('../models/Arrosage');
 const Plante = require('../models/Plante');
+const HistoriqueArrosage = require('../models/HistoriqueArrosage');
+
+// Fonction utilitaire pour créer un historique
+
+// const creerHistoriqueArrosage = async (arrosage) => {
+//     try {
+//         console.log("Création de l'historique pour l'arrosage:", {
+//             id: arrosage._id,
+//             type: arrosage.type,
+//             volumeEau: arrosage.volumeEau
+//         });
+
+//         const historique = new HistoriqueArrosage({
+//             plante: arrosage.plante,
+//             utilisateur: arrosage.utilisateur,
+//             id_arrosage: arrosage._id,
+//             type: arrosage.type,
+//             heureDebut: arrosage.heureDebut,
+//             heureFin: arrosage.heureFin,
+//             volumeEau: arrosage.volumeEau,
+//             parametresArrosage: arrosage.parametresArrosage,
+//             actif: arrosage.actif
+//         });
+
+//         const savedHistorique = await historique.save();
+//         console.log("Historique créé avec succès", savedHistorique);
+//         return savedHistorique;
+//     } catch (error) {
+//         console.error("Erreur lors de la création de l'historique:", error);
+//         throw error;
+//     }
+// };
+
+const creerHistoriqueArrosage = async (arrosage) => {
+    try {
+        console.log("Création de l'historique pour l'arrosage:", {
+            id: arrosage._id,
+            type: arrosage.type,
+            volumeEau: arrosage.volumeEau // Assurez-vous que cette valeur est correcte
+        });
+
+        const historique = new HistoriqueArrosage({
+            plante: arrosage.plante,
+            utilisateur: arrosage.utilisateur,
+            id_arrosage: arrosage._id,
+            type: arrosage.type,
+            heureDebut: arrosage.heureDebut,
+            heureFin: arrosage.heureFin,
+            volumeEau: arrosage.volumeEau, // Utilisez directement arrosage.volumeEau
+            parametresArrosage: arrosage.parametresArrosage,
+            actif: arrosage.actif
+        });
+
+        const savedHistorique = await historique.save();
+        console.log("Historique créé avec succès", savedHistorique);
+        return savedHistorique;
+    } catch (error) {
+        console.error("Erreur lors de la création de l'historique:", error);
+        throw error;
+    }
+};
 
 // Créer un nouvel arrosage
 const creerArrosage = async (req, res) => {
     try {
-        const { plante, type, heureDebut, heureFin, volumeEau } = req.body;
+        const { plante, type, heureDebut, heureFin, volumeEau, parametresArrosage } = req.body;
 
         // Log des données reçues pour le débogage
         console.log('Données reçues:', {
@@ -12,10 +74,11 @@ const creerArrosage = async (req, res) => {
             type,
             heureDebut,
             heureFin,
-            volumeEau
+            volumeEau,
+            parametresArrosage
         });
 
-        // Vérification plus détaillée des champs requis
+        // Vérification des champs requis
         if (!plante) {
             return res.status(400).json({
                 success: false,
@@ -97,51 +160,126 @@ const creerArrosage = async (req, res) => {
             });
         }
 
-        // Création de l'arrosage
-        const nouvelArrosage = new Arrosage({
-            plante,
-            utilisateur: req.user._id,
-            type,
-            heureDebut,
-            heureFin,
-            volumeEau,
-            actif: true
-        });
+        // Validation des paramètres d'arrosage automatique
+        if (type === 'automatique') {
+            if (!parametresArrosage) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Paramètres d\'arrosage requis pour le mode automatique'
+                });
+            }
 
-        await nouvelArrosage.save();
+            // Vérification des paramètres spécifiques
+            if (!parametresArrosage.humiditeSolRequise || !parametresArrosage.luminositeRequise) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Humidité du sol et luminosité requises pour l\'arrosage automatique'
+                });
+            }
 
-        res.status(201).json({
-            success: true,
-            message: 'Arrosage programmé avec succès',
-            arrosage: nouvelArrosage
-        });
-    } catch (error) {
-        console.error('Erreur création arrosage:', error);
-        
-        // Gestion plus détaillée des erreurs
-        if (error.name === 'ValidationError') {
-            return res.status(400).json({
-                success: false,
-                message: 'Erreur de validation',
-                details: error.message
-            });
-        }
-        
-        if (error.name === 'CastError') {
-            return res.status(400).json({
-                success: false,
-                message: 'Format d\'ID invalide',
-                details: error.message
-            });
+            // Vérification de la cohérence avec les caractéristiques de la plante
+            if (parametresArrosage.humiditeSolRequise < planteExiste.humiditeSol) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'L\'humidité requise ne peut pas être inférieure à l\'humidité minimale de la plante'
+                });
+            }
+
+            if (volumeEau > planteExiste.volumeEau) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Le volume d\'eau ne peut pas dépasser le volume maximal de la plante'
+                });
+            }
         }
 
-        res.status(500).json({
+       // Création de l'objet arrosage
+       const nouvelArrosage = new Arrosage({
+        plante,
+        utilisateur: req.user._id,
+        type,
+        heureDebut,
+        heureFin,
+        volumeEau: Number(volumeEau),
+        parametresArrosage: type === 'automatique' ? {
+            humiditeSolRequise: parametresArrosage.humiditeSolRequise,
+            luminositeRequise: parametresArrosage.luminositeRequise,
+            volumeEau: Number(volumeEau)
+        } : undefined,
+        actif: true
+    });
+
+    // Sauvegarder l'arrosage
+    const arrosageSauve = await nouvelArrosage.save();
+    console.log('Arrosage sauvegardé:', arrosageSauve);
+
+    // Créer l'historique avec les bonnes valeurs pour volumeEau
+    const donneesHistorique = {
+        plante: arrosageSauve.plante,
+        utilisateur: arrosageSauve.utilisateur,
+        id_arrosage: arrosageSauve._id,
+        type: arrosageSauve.type,
+        heureDebut: {
+            heures: arrosageSauve.heureDebut.heures,
+            minutes: arrosageSauve.heureDebut.minutes,
+            secondes: arrosageSauve.heureDebut.secondes
+        },
+        heureFin: {
+            heures: arrosageSauve.heureFin.heures,
+            minutes: arrosageSauve.heureFin.minutes,
+            secondes: arrosageSauve.heureFin.secondes
+        },
+        volumeEau: Number(volumeEau) // Utiliser la valeur originale
+    };
+
+    // Ajouter les paramètres d'arrosage si nécessaire
+    if (type === 'automatique') {
+        donneesHistorique.parametresArrosage = {
+            humiditeSolRequise: parametresArrosage.humiditeSolRequise,
+            luminositeRequise: parametresArrosage.luminositeRequise,
+            volumeEau: Number(volumeEau) // Utiliser la valeur originale
+        };
+    }
+
+    console.log('Données historique avant création:', donneesHistorique);
+
+    const historique = new HistoriqueArrosage(donneesHistorique);
+    const historiqueSauve = await historique.save();
+
+    console.log('Historique sauvegardé:', historiqueSauve);
+
+    res.status(201).json({
+        success: true,
+        message: 'Arrosage programmé avec succès',
+        arrosage: arrosageSauve,
+        historique: historiqueSauve
+    });
+} catch (error) {
+    console.error('Erreur création arrosage:', error);
+    
+    if (error.name === 'ValidationError') {
+        return res.status(400).json({
             success: false,
-            message: 'Erreur lors de la création de l\'arrosage'
+            message: 'Erreur de validation',
+            details: error.message
         });
     }
-};
+    
+    if (error.name === 'CastError') {
+        return res.status(400).json({
+            success: false,
+            message: 'Format d\'ID invalide',
+            details: error.message
+        });
+    }
 
+    res.status(500).json({
+        success: false,
+        message: 'Erreur lors de la création de l\'arrosage',
+        details: error.message
+    });
+}
+};
 // Obtenir tous les arrosages de l'utilisateur
 const getMesArrosages = async (req, res) => {
     try {
@@ -181,7 +319,21 @@ const getArrosageParId = async (req, res) => {
         res.json({
             success: true,
             arrosage
+        });const nouvelArrosage = new Arrosage({
+            plante,
+            utilisateur: req.user._id,
+            type,
+            heureDebut,
+            heureFin,
+            volumeEau: Number(volumeEau),
+            parametresArrosage: type === 'automatique' ? {
+                humiditeSolRequise: parametresArrosage.humiditeSolRequise,
+                luminositeRequise: parametresArrosage.luminositeRequise,
+                volumeEau: Number(volumeEau)
+            } : undefined,
+            actif: true
         });
+    
     } catch (error) {
         console.error('Erreur récupération arrosage:', error);
         res.status(500).json({
@@ -194,43 +346,134 @@ const getArrosageParId = async (req, res) => {
 // Modifier un arrosage
 const modifierArrosage = async (req, res) => {
     try {
-        const { type, heureDebut, heureFin, volumeEau, actif } = req.body;
-        const updates = {};
+        const { 
+            type, 
+            heureDebut, 
+            heureFin, 
+            volumeEau, 
+            actif,
+            parametresArrosage 
+        } = req.body;
+        
+        console.log('Données de modification reçues:', {
+            type,
+            heureDebut,
+            heureFin,
+            volumeEau,
+            actif,
+            parametresArrosage
+        });
 
-        if (type) updates.type = type;
-        if (heureDebut && isHeureValide(heureDebut)) updates.heureDebut = heureDebut;
-        if (heureFin && isHeureValide(heureFin)) updates.heureFin = heureFin;
-        if (volumeEau) updates.volumeEau = volumeEau;
-        if (actif !== undefined) updates.actif = actif;
+        // Vérifier d'abord si l'arrosage existe
+        const arrosageExistant = await Arrosage.findOne({
+            _id: req.params.id,
+            utilisateur: req.user._id
+        }).populate('plante');
 
-        updates.date_modification = Date.now();
-
-        const arrosage = await Arrosage.findOneAndUpdate(
-            {
-                _id: req.params.id,
-                utilisateur: req.user._id
-            },
-            updates,
-            { new: true, runValidators: true }
-        ).populate('plante', 'nom categorie');
-
-        if (!arrosage) {
+        if (!arrosageExistant) {
             return res.status(404).json({
                 success: false,
                 message: 'Arrosage non trouvé'
             });
         }
 
+        // Préparer les mises à jour
+        const updates = {
+            date_modification: Date.now()
+        };
+
+        // Mise à jour des champs si fournis
+        if (type) updates.type = type;
+        if (heureDebut && isHeureValide(heureDebut)) updates.heureDebut = heureDebut;
+        if (heureFin && isHeureValide(heureFin)) updates.heureFin = heureFin;
+        if (volumeEau) updates.volumeEau = Number(volumeEau);
+        if (actif !== undefined) updates.actif = actif;
+
+        // Vérification du volume d'eau par rapport à la plante
+        const volumeEauFinal = Number(volumeEau || arrosageExistant.volumeEau);
+        if (volumeEauFinal > arrosageExistant.plante.volumeEau) {
+            return res.status(400).json({
+                success: false,
+                message: 'Le volume d\'eau ne peut pas dépasser le volume maximal de la plante'
+            });
+        }
+
+        // Gestion des paramètres d'arrosage automatique
+        if (parametresArrosage) {
+            const typeArrosage = type || arrosageExistant.type;
+            if (typeArrosage === 'automatique') {
+                updates.parametresArrosage = {
+                    humiditeSolRequise: parametresArrosage.humiditeSolRequise,
+                    luminositeRequise: parametresArrosage.luminositeRequise,
+                    volumeEau: volumeEauFinal
+                };
+
+                // Vérification de l'humidité minimale
+                if (parametresArrosage.humiditeSolRequise < arrosageExistant.plante.humiditeSol) {
+                    return res.status(400).json({
+                        success: false,
+                        message: 'L\'humidité requise ne peut pas être inférieure à l\'humidité minimale de la plante'
+                    });
+                }
+            }
+        }
+
+        console.log('Mises à jour à appliquer:', updates);
+
+        // Mettre à jour l'arrosage
+        const arrosageMisAJour = await Arrosage.findOneAndUpdate(
+            { _id: req.params.id, utilisateur: req.user._id },
+            updates,
+            { new: true, runValidators: true }
+        ).populate('plante', 'nom categorie');
+
+        // Créer l'historique
+        const historique = new HistoriqueArrosage({
+            plante: arrosageMisAJour.plante._id,
+            utilisateur: arrosageMisAJour.utilisateur,
+            id_arrosage: arrosageMisAJour._id,
+            type: arrosageMisAJour.type,
+            heureDebut: arrosageMisAJour.heureDebut,
+            heureFin: arrosageMisAJour.heureFin,
+            volumeEau: volumeEauFinal,
+            parametresArrosage: arrosageMisAJour.type === 'automatique' ? {
+                humiditeSolRequise: arrosageMisAJour.parametresArrosage.humiditeSolRequise,
+                luminositeRequise: arrosageMisAJour.parametresArrosage.luminositeRequise,
+                volumeEau: volumeEauFinal
+            } : undefined,
+            actif: arrosageMisAJour.actif
+        });
+
+        await historique.save();
+
         res.json({
             success: true,
             message: 'Arrosage modifié avec succès',
-            arrosage
+            arrosage: arrosageMisAJour,
+            historique
         });
     } catch (error) {
         console.error('Erreur modification arrosage:', error);
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({
+                success: false,
+                message: 'Erreur de validation',
+                details: error.message
+            });
+        }
+        
+        if (error.name === 'CastError') {
+            return res.status(400).json({
+                success: false,
+                message: 'Format d\'ID invalide',
+                details: error.message
+            });
+        }
+
         res.status(500).json({
             success: false,
-            message: 'Erreur lors de la modification de l\'arrosage'
+            message: 'Erreur lors de la modification de l\'arrosage',
+            details: error.message
         });
     }
 };
@@ -315,6 +558,20 @@ const arrosageManuelPlante = async (req, res) => {
         const { planteId } = req.params;
         const { volumeEau } = req.body;
 
+        console.log('Données reçues pour arrosage manuel:', {
+            planteId,
+            volumeEau
+        });
+
+        // Vérifier si l'ID de la plante est valide
+        if (!mongoose.Types.ObjectId.isValid(planteId)) {
+            return res.status(400).json({
+                success: false,
+                message: 'ID de plante invalide'
+            });
+        }
+
+        // Vérifier si la plante existe
         const plante = await Plante.findById(planteId);
         if (!plante) {
             return res.status(404).json({
@@ -323,8 +580,17 @@ const arrosageManuelPlante = async (req, res) => {
             });
         }
 
+        // Vérifier le volume d'eau
+        const volumeEauFinal = Number(volumeEau || plante.volumeEau);
+        if (volumeEauFinal > plante.volumeEau) {
+            return res.status(400).json({
+                success: false,
+                message: 'Le volume d\'eau ne peut pas dépasser le volume maximal de la plante'
+            });
+        }
+
         const maintenant = new Date();
-        const finArrosage = new Date(maintenant.getTime() + 300000); // Ajoute 5 minute
+        const finArrosage = new Date(maintenant.getTime() + 300000); // Ajoute 5 minutes
 
         const arrosage = new Arrosage({
             plante: planteId,
@@ -340,18 +606,37 @@ const arrosageManuelPlante = async (req, res) => {
                 minutes: finArrosage.getMinutes(),
                 secondes: finArrosage.getSeconds()
             },
-            volumeEau: volumeEau || plante.volumeEau
+            volumeEau: volumeEauFinal, // Assurez-vous que cette valeur est correcte
+            parametresArrosage: {
+                humiditeSolRequise: plante.humiditeSol,
+                luminositeRequise: plante.luminosite,
+                volumeEau: volumeEauFinal // Ce champ est également défini ici
+            },
+            actif: true
         });
-
-        await arrosage.save();
+        
+        const arrosageSauve = await arrosage.save();
+        console.log('Arrosage sauvegardé:', arrosageSauve);
+        
+        // Créer l'historique en utilisant la fonction utilitaire
+        const historiqueSauve = await creerHistoriqueArrosage(arrosageSauve);
+        console.log('Historique créé:', historiqueSauve);
 
         res.json({
             success: true,
             message: 'Arrosage manuel déclenché avec succès',
-            arrosage
+            arrosage: arrosageSauve,
+            historique: historiqueSauve
         });
     } catch (error) {
         console.error('Erreur arrosage manuel plante:', error);
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({
+                success: false,
+                message: 'Erreur de validation',
+                details: error.message
+            });
+        }
         res.status(500).json({
             success: false,
             message: 'Erreur lors de l\'arrosage manuel',
@@ -359,7 +644,6 @@ const arrosageManuelPlante = async (req, res) => {
         });
     }
 };
-
 // Arrêt d'urgence de l'arrosage
 const arreterArrosage = async (req, res) => {
     try {
@@ -383,7 +667,6 @@ const arreterArrosage = async (req, res) => {
 // Arrosage manuel de toutes les plantes
 const arrosageManuelGlobal = async (req, res) => {
     try {
-        // Récupérer toutes les plantes
         const plantes = await Plante.find();
 
         if (plantes.length === 0) {
@@ -393,10 +676,11 @@ const arrosageManuelGlobal = async (req, res) => {
             });
         }
 
-        // Créer des enregistrements d'arrosage pour chaque plante
-        const arrosages = await Promise.all(plantes.map(async (plante) => {
+        const resultatArrosages = [];
+
+        for (const plante of plantes) {
             const maintenant = new Date();
-            const finArrosage = new Date(maintenant.getTime() + 300000); // Ajoute 1 minute
+            const finArrosage = new Date(maintenant.getTime() + 300000);
 
             const arrosage = new Arrosage({
                 plante: plante._id,
@@ -412,18 +696,32 @@ const arrosageManuelGlobal = async (req, res) => {
                     minutes: finArrosage.getMinutes(),
                     secondes: finArrosage.getSeconds()
                 },
-                volumeEau: plante.volumeEau
+                volumeEau: plante.volumeEau,
+                parametresArrosage: {
+                    humiditeSolRequise: plante.humiditeSol,
+                    luminositeRequise: plante.luminosite,
+                    volumeEau: plante.volumeEau
+                }
             });
 
             await arrosage.save();
-            return arrosage;
-        }));
+            const historique = await creerHistoriqueArrosage(arrosage);
+            
+            resultatArrosages.push({
+                plante: {
+                    id: plante._id,
+                    nom: plante.nom
+                },
+                arrosage,
+                historique
+            });
+        }
 
         res.json({
             success: true,
             message: 'Arrosage manuel global déclenché avec succès',
             nombrePlantes: plantes.length,
-            arrosages
+            resultats: resultatArrosages
         });
     } catch (error) {
         console.error('Erreur arrosage manuel global:', error);
