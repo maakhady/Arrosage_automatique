@@ -14,9 +14,8 @@ export class AuthGuard implements CanActivate {
     return this.authService.verifierAuth().pipe(
       map((response) => {
         if (response.success) {
-          return true; // Autoriser l'accès à la route
+          return true;
         } else {
-          // Rediriger vers la page d'accueil (AuthComponent) si l'utilisateur n'est pas authentifié
           return this.router.createUrlTree(['/']);
         }
       })

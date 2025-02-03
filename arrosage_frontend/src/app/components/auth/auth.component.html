@@ -9,37 +9,46 @@
 
         <form [formGroup]="authForm" (ngSubmit)="onSubmit()" #form="ngForm">
           <div class="form-group">
+            <p class="instruction-message">Veuillez renseigner votre code secret pour vous connecter.</p>
             <div class="password-input-wrapper" style="justify-content: center;">
               <input
-                type="password"
+                type="text"
                 formControlName="digit1"
                 class="form-control"
                 maxlength="1"
                 (input)="onInputChange($event, 'digit1', input1)"
+                (keydown)="filterInput($event, 'digit1', input1)"
+                (focus)="showTemporaryValue(input1)"
                 #input1
               >
               <input
-                type="password"
+                type="text"
                 formControlName="digit2"
                 class="form-control"
                 maxlength="1"
                 (input)="onInputChange($event, 'digit2', input2)"
+                (keydown)="filterInput($event, 'digit2', input2)"
+                (focus)="showTemporaryValue(input2)"
                 #input2
               >
               <input
-                type="password"
+                type="text"
                 formControlName="digit3"
                 class="form-control"
                 maxlength="1"
                 (input)="onInputChange($event, 'digit3', input3)"
+                (keydown)="filterInput($event, 'digit3', input3)"
+                (focus)="showTemporaryValue(input3)"
                 #input3
               >
               <input
-                type="password"
+                type="text"
                 formControlName="digit4"
                 class="form-control"
                 maxlength="1"
                 (input)="onInputChange($event, 'digit4', input4)"
+                (keydown)="filterInput($event, 'digit4', input4)"
+                (focus)="showTemporaryValue(input4)"
                 #input4
               >
             </div>
@@ -62,6 +71,9 @@
             <div class="rfid-message" *ngIf="attempts >= 3">
               Vous avez saisi un code secret incorrect trois fois. Veuillez utiliser votre carte RFID pour vous connecter.
             </div>
+
+            <!-- Message indiquant l'option RFID visible après la saisie -->
+            <p class="rfid-instruction-message" *ngIf="showRfidMessage">Vous pouvez également vous connecter avec votre carte RFID.</p>
           </div>
         </form>
       </div>

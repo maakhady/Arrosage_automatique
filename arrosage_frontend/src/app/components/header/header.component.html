@@ -1,1 +1,28 @@
-<p>header works!</p>
+<div class="header">
+    <img src="assets/images/logo.png" class="logo">
+    <nav class="navbar">
+      <ul>
+        <li (click)="toggleMenu($event)">
+          <a href="javascript:void(0)">
+            <fa-icon [icon]="faUser"></fa-icon> <!-- Icône d'utilisateur -->
+          </a>
+          <div class="dropdown" *ngIf="menuVisible">
+            <ul class="dropdown-links">
+              <li>
+                <a [routerLink]="['/user-profile']">
+                  <fa-icon [icon]="faUserCircle"></fa-icon> <!-- Icône de profil -->
+                  <span>Voir le profil</span>
+                </a>
+              </li>
+              <li>
+                <a href="#logout" (click)="onLogout()">
+                  <fa-icon [icon]="faSignOutAlt"></fa-icon> <!-- Icône de déconnexion -->
+                  <span>Déconnexion</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </li>
+      </ul>
+    </nav>
+  </div>

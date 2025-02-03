@@ -1,1 +1,21 @@
-<p>menu works!</p>
+<div class="menu-container">
+    <button class="menu-item menu-header" (click)="onManageUsers()" style="background-color: #4EB49C;">
+      <fa-icon [icon]="faUsers" style="color: #fff;"></fa-icon>
+      <h3 style="color: #fff;">Gestion des utilisateurs</h3>
+    </button>
+    
+    <button class="menu-item" (click)="onSchedule()" style="background-color: #50A24C;">
+      <fa-icon [icon]="faClock" style="color: #fff;"></fa-icon>
+      <span style="color: #fff;">Programmer un arrosage</span>
+    </button>
+
+    <button class="menu-item" (click)="onAddZone()" style="background-color: #0D99FF;">
+      <fa-icon [icon]="faPlusCircle" style="color: #fff;"></fa-icon>
+      <span style="color: #fff;">Gestion des plantes</span>
+    </button>
+
+    <!-- <button class="menu-item" (click)="onViewHistory()" style="background-color: #DAA974;">
+      <fa-icon [icon]="faHistory" style="color: #fff;"></fa-icon>
+      <span style="color: #fff;">Voir Historique</span>
+    </button> -->
+  </div>

@@ -1,0 +1,172 @@
+.animate-drop {
+    animation: dropAnimation 1s infinite linear;
+  }
+
+  @keyframes dropAnimation {
+    0% { transform: translateY(-10px); opacity: 1; }
+    100% { transform: translateY(20px); opacity: 0; }
+  }
+
+  /* Styles pour le réservoir d'eau */
+  .w-20 {
+    width: 80px; 
+  }
+
+  .h-28 {
+    height: 112px;
+  }
+
+  /* Styles supplémentaires pour le design */
+  .bg-green-600 {
+    background-color: #4CAF50;
+  }
+
+  .bg-green-700 {
+    background-color: #388E3C;
+  }
+
+  .bg-red-500 {
+    background-color: #F44336;
+  }
+
+  .bg-red-600 {
+    background-color: #D32F2F;
+  }
+
+  .text-green-700 {
+    color: #388E3C;
+  }
+
+  .text-blue-400 {
+    color: #64B5F6;
+  }
+
+  .border-green-200 {
+    border-color: #C8E6C9;
+  }
+
+  .shadow-lg {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .rounded-lg {
+    border-radius: 8px;
+  }
+
+  .p-6 {
+    padding: 24px;
+  }
+
+  .mt-4 {
+    margin-top: 16px;
+  }
+
+  .mt-6 {
+    margin-top: 24px;
+  }
+
+  .mb-4 {
+    margin-bottom: 16px;
+  }
+
+  .text-xl {
+    font-size: 20px;
+  }
+
+  .font-semibold {
+    font-weight: 600;
+  }
+
+  .text-center {
+    text-align: center;
+  }
+
+  .flex {
+    display: flex;
+  }
+
+  .flex-col {
+    flex-direction: column;
+  }
+
+  .space-y-3 > * + * {
+    margin-top: 12px;
+  }
+
+  .w-full {
+    width: 100%;
+  }
+
+  .py-3 {
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  .px-5 {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .rounded-lg {
+    border-radius: 8px;
+  }
+
+  .shadow-md {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .transition {
+    transition: all 0.2s;
+  }
+
+  .duration-200 {
+    transition-duration: 0.2s;
+  }
+
+  .transform {
+    transform: scale(1);
+  }
+
+  .hover:scale-105:hover {
+    transform: scale(1.05);
+  }
+
+  .focus:outline-none:focus {
+    outline: none;
+  }
+
+  .relative {
+    position: relative;
+  }
+
+  .absolute {
+    position: absolute;
+  }
+
+  /* .top-[-30px] {
+    top: -30px;
+  } */
+
+  .overflow-hidden {
+    overflow: hidden;
+  }
+
+  .bg-blue-400 {
+    background-color: #64B5F6;
+  }
+
+  .transition-all {
+    transition: all 0.5s;
+  }
+
+  .duration-500 {
+    transition-duration: 0.5s;
+  }
+
+  .text-gray-600 {
+    color: #666;
+  }
+
+  .font-medium {
+    font-weight: 500;
+  }

@@ -1,11 +1,12 @@
+<app-header></app-header>
 <div class="dashboard">
-    <!-- Navbar -->
-   
+    <!-- Navbar et autres éléments -->
 
     <!-- Main Content -->
     <div class="main-content">
         <!-- Statistiques -->
         <div class="stats">
+            <!-- Autres cartes -->
             <div class="card">
                 <i class="fas fa-tint large-icon"></i>
                 <h3>Humidité du Sol</h3>
@@ -16,52 +17,140 @@
                 <h3>Luminosité</h3>
                 <div class="value">820 lux</div>
             </div>
-            <div class="card">
-                <i class="fas fa-temperature-high large-icon"></i>
-                <h3>Température & Humidité</h3>
-                <div class="value">38°C / 40%</div>
+        <!-- </div> -->
+
+        <!-- Réservoir -->
+         <div class="reservoir">
+          <h2>Volume du Réservoir</h2>
+        <div class="reservoir-content">
+          <div class="reservoir-controls">
+              <button class="arr" (click)="startWatering()">
+                  <i class="fas fa-play"></i> Arroser
+              </button>
+              <button class="aret" (click)="stopWatering()">
+                  <i class="fas fa-stop"></i> Arrêter
+              </button>
+              <!-- <div class="volume">{{ reservoirVolume }}%</div> -->
+          </div>
+          <div style="position: relative;">
+              <i class="fas fa-fill-drip large-reservoir-icon" [class.bend]="isWatering"></i>
+              <div class="rain-container" [class.active]="isWatering">
+                  <div class="raindrop"></div>
+                  <div class="raindrop"></div>
+                  <div class="raindrop"></div>
+                  <div class="raindrop"></div>
+                  <div class="raindrop"></div>
+                  <div class="raindrop"></div>
+                  <div class="raindrop"></div>
+                  <div class="raindrop"></div>
+              </div>
+          </div>
+           <!-- Conteneur du volume -->
+          <div class="reservoir-volume-container">
+            <div class="reservoir-volume-fill" [class.decrease]="isWatering"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <!-- Section Options + Réservoir + Zones -->
+    <div class="bottom-section">
+        <!-- Partie gauche : Options + Réservoir -->
+        <div class="left-section">
+            <!-- Options -->
+            <div class="options">
+                <button class="btn1">Gestion des utilisateurs</button>
+                <button class="btn2" (click)="openModal()"><i class="fas fa-clock"></i> Programmer un arrosage</button>
+                <button class="btn3"><i class="fas fa-plus-circle"></i> Gestion des plantes</button>
+                <button class="btn4"><i class="fas fa-history"></i> Voir Historique</button>
+            </div>
+
+            <!-- Réservoir sous les options -->
+            <div class="reservoir">
+                <h2 class="reservoir-title">Volume Réservoir</h2>
+                <div class="reservoir-content">
+                    <div class="reservoir-controls">
+                        <!-- Bouton Arroser -->
+                        <button class="arr" (click)="startWatering()">
+                            <i class="fas fa-play"></i> Arroser
+                        </button>
+                        <!-- Bouton Arrêter -->
+                        <button class="aret" (click)="stopWatering()">
+                            <i class="fas fa-stop"></i> Arrêter
+                        </button>
+                        <div class="volume">{{ reservoirVolume }}%</div>
+                    </div>
+                    <!-- Icône du réservoir avec animation -->
+                    <i class="fas fa-fill-drip large-reservoir-icon" [class.bend]="isWatering"></i>
+                </div>
             </div>
         </div>
 
-        <!-- Section Options + Réservoir + Zones -->
-        <div class="bottom-section">
-            <!-- Partie gauche : Options + Réservoir -->
-            <div class="left-section">
-                <div class="options">
-                    <button class="btn2"><i class="fas fa-clock"></i> Programmer un arrosage</button>
-                    <button class="btn3"><i class="fas fa-plus-circle"></i> Ajouter une Zone</button>
-                    <button class="btn4"><i class="fas fa-history"></i> Voir Historique</button>
-                </div>
-
-                <!-- Réservoir sous les options -->
-                <div class="reservoir">
-                    <h2 class="reservoir-title">Volume Réservoir</h2>
-                    <div class="reservoir-content">
-                        <div class="reservoir-controls">
-                            <button class="arr"><i class="fas fa-play"></i> Arroser</button>
-                            <button class="aret"><i class="fas fa-stop"></i> Arrêter</button>
-                            <div class="volume">{{ reservoirVolume }}%</div>
-                        </div>
-                        <i class="fas fa-fill-drip large-reservoir-icon"></i>
-                    </div>
-                </div>
+        <!-- Historique des Arrosages -->
+        <div class="zones-container">
+            <h3><i class="fas fa-history"></i> Historique des Arrosages</h3>
+            
+            <!-- Filtres Jour, Semaine, Mois -->
+            <div class="filters">
+                <button class="btn-filter">Jour</button>
+                <button class="btn-filter">Semaine</button>
+                <button class="btn-filter">Mois</button>
             </div>
+            
+            <!-- Liste des arrosages -->
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Prénom</th>
+                        <th>Date</th>
+                        <th>Heure</th>
+                        <th>Durée</th>
+                        <th>Type</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let arrosage of arrosages; let i = index">
+                        <td>{{ arrosage.nom }}</td>
+                        <td>{{ arrosage.prenom }}</td>
+                        <td>{{ arrosage.date }}</td>
+                        <td>{{ arrosage.heure }}</td>
+                        <td>{{ arrosage.duree }}</td>
+                        <td>{{ arrosage.type }}</td>
+                        <td>
+                            <button class="action-button" (click)="editSchedule(i)">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-button1" (click)="deleteSchedule(i)">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
-            <!-- Historique des Arrosages -->
-            <div class="zones-container">
-                <h3><i class="fas fa-history"></i> Historique des Arrosages</h3>
-                
-                <!-- Filtres Jour, Semaine, Mois -->
-                <div class="filters">
-                    <button class="btn-filter">Jour</button>
-                    <button class="btn-filter">Semaine</button>
-                    <button class="btn-filter">Mois</button>
-                </div>
-                
-                <!-- Liste des arrosages -->
-                <table class="history-table">
+<!-- Modal de programmation -->
+<div class="modal-overlay" *ngIf="showModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4>{{ isEditing ? 'Modifier' : 'Ajouter' }} un arrosage</h4>
+            <button class="close-button" (click)="closeModal()">
+                <fa-icon [icon]="faTimes"></fa-icon>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <h5>Horaires programmés</h5>
+            <div class="table-container">
+                <table>
                     <thead>
                         <tr>
+                            <th>Nom</th>
+                            <th>Prénom</th>
                             <th>Date</th>
                             <th>Heure</th>
                             <th>Durée</th>
@@ -69,15 +158,58 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let arrosage of arrosages">
-                            <td>{{ arrosage.date }}</td>
-                            <td>{{ arrosage.heure }}</td>
-                            <td>{{ arrosage.duree }}</td>
-                            <td>{{ arrosage.type }}</td>
+                        <tr *ngFor="let time of scheduledTimes">
+                            <td>{{time.name}}</td>
+                            <td>{{time.firstName}}</td>
+                            <td>{{time.date}}</td>
+                            <td>{{time.hour}}</td>
+                            <td>{{time.duration}} minutes</td>
+                            <td>{{time.type}}</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
+
+            <div class="form-group">
+                <label>Heure</label>
+                <input type="time" [(ngModel)]="newSchedule.hour">
+            </div>
+
+            <div class="form-group">
+                <label>Préférence</label>
+                <select [(ngModel)]="newSchedule.preference">
+                    <option value="none">Aucune préférence</option>
+                    <option value="humidity">Humidité du sol</option>
+                    <option value="light">Luminosité</option>
+                </select>
+            </div>
+
+            <div class="form-group" *ngIf="newSchedule.preference !== 'none'">
+                <label>Seuil</label>
+                <div class="threshold-input">
+                    <input type="number" [(ngModel)]="newSchedule.threshold" min="0" max="100">
+                    <span>%</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Durée (minutes)</label>
+                <input type="number" [(ngModel)]="newSchedule.duration" min="1">
+            </div>
+
+            <div class="form-group">
+                <label>Type</label>
+                <select [(ngModel)]="newSchedule.type">
+                    <option value="automatique">Automatique</option>
+                    <option value="manuel">Manuel</option>
+                </select>
+            </div>
+
+            <button class="add-button" (click)="saveSchedule()">{{ isEditing ? 'Modifier' : 'Ajouter' }}</button>
+        </div>
+
+        <div class="modal-footer">
+            <button class="cancel-button" (click)="closeModal()">Annuler</button>
         </div>
     </div>
 </div>

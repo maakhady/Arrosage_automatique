@@ -1,1 +1,55 @@
-<p>dashboard works!</p>
+<div class="dashboard">
+    <app-header></app-header>
+
+  <div class="cards-wrapper">
+    <div class="cards-container">
+      <app-weather-card
+        class="card-item"
+        title="Humidité du sol"
+        [value]="78"
+        unit=" %"
+        valueColor="#10b981"
+        icon="fa-cloud-rain"
+        iconColor="#60a5fa"
+        iconSize="2x"
+      ></app-weather-card>
+
+      <app-weather-card
+        class="card-item"
+        title="Luminosité"
+        [value]="820"
+        unit=" lux"
+        valueColor="#f97316"
+        icon="fa-sun"
+        iconColor="#fbbf24"
+        iconSize="2x"
+      ></app-weather-card>
+
+      <app-weather-card
+        class="card-item"
+        title="Température"
+        [value]="38"
+        unit=" °C"
+        valueColor="#ef4444"
+        [showHumidity]="true"
+        [humidityValue]="40"
+        icon="fa-thermometer-half"
+        iconColor="#ef4444"
+        iconSize="2x"
+      ></app-weather-card>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="sidebar">
+      <app-menu></app-menu>
+      <!-- <app-water-tank></app-water-tank> -->
+      <app-zones></app-zones>
+    </div>
+    <div class="main">
+      <!-- <app-zones></app-zones> -->
+       
+      <!-- <app-historiques></app-historiques> -->
+    </div>
+  </div>
+</div>
