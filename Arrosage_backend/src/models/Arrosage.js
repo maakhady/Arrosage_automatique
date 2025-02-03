@@ -16,7 +16,7 @@ const arrosageSchema = new mongoose.Schema({
         enum: ['manuel', 'automatique'],
         required: true
     },
-    heureDebut: {
+    heureDebut: {                                                       
         heures: {
             type: Number,
             min: 0,
