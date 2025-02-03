@@ -2,7 +2,7 @@ import { Component, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WeatherCardComponent } from '../weather-card/weather-card.component';
 import { MenuComponent } from '../menu/menu.component';
-import { WaterTankComponent } from '../water-tank/water-tank.component';
+// import { WaterTankComponent } from '../water-tank/water-tank.component';
 import { ZonesComponent } from '../zones/zones.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faUser, faBell, faSignOutAlt, faUserCircle } from '@fortawesome/free-solid-svg-icons';
@@ -17,7 +17,7 @@ import { HistoriquesComponent } from '../historiques/historiques.component';
     CommonModule,
     WeatherCardComponent,
     MenuComponent,
-    WaterTankComponent,
+    // WaterTankComponent,
     ZonesComponent,
     FontAwesomeModule,
     HeaderComponent,
@@ -74,7 +74,7 @@ import { HistoriquesComponent } from '../historiques/historiques.component';
         </div>
         <div class="main">
           <!-- <app-zones></app-zones> -->
-           
+
           <app-historiques></app-historiques>
         </div>
       </div>
@@ -224,7 +224,7 @@ export class DashboardComponent {
   }
 
   onLogout() {
-    this.authService.logout().subscribe(response => {
+    this.authService.logoutAll().subscribe(response => {
       if (response.success) {
         // Rediriger l'utilisateur vers la page de connexion ou une autre page
         console.log('Déconnexion réussie');

@@ -37,9 +37,9 @@ body {
     border-radius: 25px;
     padding: 4rem;
     text-align: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
-    border-right: #4caf50 solid 5px;
-    border-bottom: #4caf50 solid 7px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    /* border-right: #4caf50 solid 3px;
+    border-bottom: #4caf50 solid 2px; */
 }
 
 .card h3 {
@@ -110,15 +110,18 @@ body {
 }
 
 .options button:hover {
-    background-color: #388E3C; /* Vert légèrement plus foncé au survol */
+    background-color: #38628e; /* Vert légèrement plus foncé au survol */
 }
 
+.btn5 {
+  background-color: #4EB49C;
+}
 .btn2 {
     background-color: #45a049;
 }
 
 .btn3 {
-    background-color: #2975D8; /* Bleu doux pour les actions neutres */
+    background-color: #2992d8; /* Bleu doux pour les actions neutres */
 }
 
 .btn4 {
@@ -127,20 +130,20 @@ body {
 
 /* Réservoir sous les options */
 .reservoir {
-    background: #f4f4f4;
+    background: white;
     border-radius: 25px;
-    padding: 2rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Ombre subtile */
+    padding: 4rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* Ombre subtile */
     display: flex;
     flex-direction: column;
     align-items: center;
-    border-right: #4CAF50 solid 5px;
-    border-bottom: #4CAF50 solid 7px;
+    /* border-right: #4CAF50 solid 5px;
+    border-bottom: #4CAF50 solid 7px; */
 }
 
 .reservoir-title {
     font-size: 2rem;
-    font-weight: bold;
+    /* font-weight: bold; */
     text-align: center;
     margin-bottom: 1rem;
 }
@@ -210,16 +213,22 @@ body {
     border-radius: 25px;
     padding: 5.5rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Ombre subtile */
-    border-right: #4CAF50 solid 5px;
-    border-bottom: #4CAF50 solid 7px;
+    /* border-right: #4CAF50 solid 5px;
+    border-bottom: #4CAF50 solid 7px; */
 }
 
 /* Boutons de filtre (Jour, Semaine, Mois) */
 .filters {
     display: flex;
-    justify-content: flex-start;
+    /* justify-content: flex-start; */
+    justify-content: space-between;
     gap: 1rem;
     margin-bottom: 1rem;
+}
+
+.left-buttons {
+  display: flex;
+  gap: 1rem;
 }
 
 .btn-filter {
@@ -242,7 +251,7 @@ body {
     border-collapse: collapse;
 }
 
-.history-table th, 
+.history-table th,
 .history-table td {
     padding: 1rem;
     text-align: center;
@@ -274,7 +283,7 @@ body {
     .zones-container {
         width: 100%;
     }
-    .history-table th, 
+    .history-table th,
     .history-table td {
         padding: 0.5rem;
     }

@@ -11,13 +11,14 @@ import { RouterModule } from '@angular/router';
   imports: [FontAwesomeModule, CommonModule, RouterModule], // Ajouter FontAwesomeModule ici
   template: `
     <div class="header">
-      <h1>Naatangué</h1>
+      <img src="Log1 Naatangé.png" style="width: 100px;">
+      <!-- <h1>Naatangué</h1> -->
       <nav class="navbar">
         <ul>
           <li>
-            <a href="#notifications">
-              <fa-icon [icon]="faBell"></fa-icon> <!-- Icône de notifications -->
-            </a>
+            <!-- <a href="#notifications">
+              <fa-icon [icon]="faBell"></fa-icon>
+            </a> -->
           </li>
           <li (click)="toggleMenu($event)">
             <a href="javascript:void(0)">
@@ -60,13 +61,13 @@ import { RouterModule } from '@angular/router';
     right: 0; /* S'assurer qu'il est aligné à droite */
     z-index: 1000; /* Assurez-vous qu'il est au-dessus des autres éléments */
   }
-  
+
   .header h1 {
     margin: 0; /* Supprimer la marge de h1 */
     font-size: 24px; /* Ajuster la taille de la police */
     font-weight: bold;
   }
-  
+
     .navbar ul {
       list-style: none;
       display: flex;
@@ -74,12 +75,12 @@ import { RouterModule } from '@angular/router';
       padding: 0;
       margin-left: auto;
     }
-  
+
     .navbar li {
       margin-left: 20px; /* Ajuster l'espacement entre les éléments */
       position: relative;
     }
-  
+
     .navbar a {
       text-decoration: none;
       color: white;
@@ -87,11 +88,11 @@ import { RouterModule } from '@angular/router';
       display: flex;
       align-items: center;
     }
-  
+
     .navbar a:hover {
       color: #e0e0e0;
     }
-  
+
     .dropdown {
       position: absolute;
       top: 100%; /* Positionner le menu déroulant */
@@ -103,7 +104,7 @@ import { RouterModule } from '@angular/router';
       z-index: 1000;
       width: 180px;
     }
-  
+
     .dropdown-links {
       list-style: none;
       margin: 0;
@@ -112,12 +113,12 @@ import { RouterModule } from '@angular/router';
       flex-direction: column;
       gap: 5px;
     }
-  
+
     .dropdown-links li {
       padding: 8px 12px;
       text-align: left;
     }
-  
+
     .dropdown-links li a {
       color: #333;
       text-decoration: none;
@@ -126,7 +127,7 @@ import { RouterModule } from '@angular/router';
       gap: 8px;
       font-size: 14px;
     }
-  
+
     .dropdown-links li a:hover {
       background-color: #f0f0f0;
       color: #50A24C;
@@ -148,7 +149,7 @@ export class HeaderComponent {
   }
 
   onLogout() {
-    this.authService.logout().subscribe(response => {
+    this.authService.logoutAll().subscribe(response => {
       if (response.success) {
         console.log('Déconnexion réussie');
       } else {

@@ -17,16 +17,16 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
           // Si l'erreur contient une redirection spécifique
           if (error.error?.redirectTo) {
             router.navigate([error.error.redirectTo], {
-              state: { 
+              state: {
                 sessionExpired: true,
-                message: error.error.message 
+                message: error.error.message
               }
             });
           } else {
             // Déconnexion et redirection par défaut
-            authService.logout();
+            authService.logoutAll();
             router.navigate(['/'], {
-              state: { 
+              state: {
                 sessionExpired: true,
                 message: 'Session expirée. Veuillez vous reconnecter.'
               }
