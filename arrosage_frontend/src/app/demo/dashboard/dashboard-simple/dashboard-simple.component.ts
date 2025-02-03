@@ -4,17 +4,15 @@ import { HeaderComponent } from '../../../components/header/header.component';
 import { FormsModule } from '@angular/forms';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
-import { RouterLink } from '@angular/router'; // Ajoutez cet import
-
 
 @Component({
-  selector: 'app-dashboard-utilisateur',
+  selector: 'app-dashboard-simple',
   standalone: true,
-  imports: [CommonModule, HeaderComponent, FormsModule, FontAwesomeModule, RouterLink ],
-  templateUrl: './dashboard-utilisateur.component.html',
-  styleUrls: ['./dashboard-utilisateur.component.css']
+  imports: [CommonModule, HeaderComponent, FormsModule, FontAwesomeModule],
+  templateUrl: './dashboard-simple.component.html',
+  styleUrls: ['./dashboard-simple.component.css']
 })
-export class DashboardUtilisateurComponent implements OnInit {
+export class DashboardSimpleComponent implements OnInit {
   reservoirVolume = 50; // Volume initial du réservoir
   isWatering = false; // État de l'arrosage
   showModal = false; // État du modal

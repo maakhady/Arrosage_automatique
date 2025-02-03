@@ -321,11 +321,7 @@ body {
     border-radius: 25px;
     padding: 5.5rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border-right: #4CAF50 solid 5px;
-    border-bottom: #4CAF50 solid 7px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Ombre subtile */
-    /* border-right: #4CAF50 solid 5px;
-    border-bottom: #4CAF50 solid 7px; */
+
 }
 
 /* Boutons de filtre */
@@ -562,6 +558,21 @@ body {
     .reservoir-controls {
         width: 100%;
     }
+}
+
+.left-section {
+  padding: 1rem;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 500px;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 @media (max-width: 768px) {

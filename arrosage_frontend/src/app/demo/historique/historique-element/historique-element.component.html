@@ -1,0 +1,56 @@
+<div class="container mx-auto p-4">
+  <!-- Sélecteur de période -->
+  <div class="mb-6">
+    <div class="flex gap-4">
+      <button (click)="changePeriod('semaine')"
+              class="px-4 py-2 rounded transition duration-300"
+              [class]="selectedPeriod === 'semaine' ? 'bg-blue-500 text-white' : 'bg-gray-200'">
+        Semaine
+      </button>
+      <button (click)="changePeriod('mois')"
+              class="px-4 py-2 rounded transition duration-300"
+              [class]="selectedPeriod === 'mois' ? 'bg-blue-500 text-white' : 'bg-gray-200'">
+        Mois
+      </button>
+    </div>
+  </div>
+
+  <!-- Graphique -->
+  <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+    <canvas id="combinedChart"></canvas>
+  </div>
+
+  <!-- Volume d'eau -->
+  <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+    <h3 class="text-lg font-semibold text-center mb-6">Volume d'eau total</h3>
+    <div class="flex justify-center">
+      <div class="relative w-48 h-48">
+        <svg class="transform -rotate-90 w-full h-full">
+          <!-- Cercle de fond -->
+          <circle
+            class="stroke-gray-200"
+            stroke-width="12"
+            fill="none"
+            r="85"
+            cx="96"
+            cy="96"
+          />
+          <!-- Cercle de progression -->
+          <circle
+            class="stroke-blue-500 transition-all duration-500 ease-in-out"
+            stroke-width="12"
+            fill="none"
+            r="85"
+            cx="96"
+            cy="96"
+            [attr.stroke-dasharray]="circumference"
+            [attr.stroke-dashoffset]="dashOffset"
+          />
+        </svg>
+        <div class="absolute inset-0 flex items-center justify-center">
+          <span class="text-3xl font-bold text-blue-500">{{waterVolume}}%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

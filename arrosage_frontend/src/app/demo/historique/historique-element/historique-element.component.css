@@ -1,0 +1,167 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+/* // Styles pour le conteneur principal */
+.container {
+  padding: 20px;
+  margin: 0 auto;
+  max-width: 1200px;
+}
+
+/* // Styles pour les boutons de sélection de période */
+.flex {
+  button {
+    transition: all 0.3s ease;
+    font-weight: 500;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+}
+
+/* // Styles pour les cartes */
+.bg-white {
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+  }
+}
+
+/* // Styles pour le graphique */
+canvas {
+  width: 100% !important;
+  height: 400px !important;
+  margin: 0 auto;
+}
+
+/* // Styles pour l'indicateur circulaire */
+.relative {
+  svg {
+    circle {
+      transition: stroke-dashoffset 0.5s ease;
+    }
+  }
+}
+
+/* // Media queries pour la responsivité */
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+
+  canvas {
+    height: 300px !important;
+  }
+
+  .grid {
+    gap: 1rem;
+  }
+}
+
+/* // Styles pour les animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bg-white {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* // Styles pour améliorer l'accessibilité */
+button {
+  &:focus {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+  }
+
+  &:focus:not(:focus-visible) {
+    outline: none;
+  }
+}
+
+/* // Styles pour le texte */
+.text-lg {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.text-2xl {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+
+/* // Styles pour les espaces */
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.mb-6 {
+  margin-bottom: 1.5rem;
+}
+
+/* // Style pour l'indicateur de volume d'eau */
+.relative.w-40 {
+  width: 10rem;
+  height: 10rem;
+  margin: 0 auto;
+
+  .absolute {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+/* // Correction des problèmes de débordement */
+.overflow-hidden {
+  overflow: hidden;
+}
+
+/* // Amélioration de la lisibilité du graphique */
+.chart-container {
+  background: white;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* // Style pour la grille responsive */
+.grid {
+  display: grid;
+  grid-gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .md\:grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .md\:col-span-2 {
+    grid-column: span 2 / span 2;
+  }
+}

@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { WaterTankComponent } from './water-tank.component';
+import { DashboardSimpleComponent } from './dashboard-simple.component';
 
-describe('WaterTankComponent', () => {
-  let component: WaterTankComponent;
-  let fixture: ComponentFixture<WaterTankComponent>;
+describe('DashboardSimpleComponent', () => {
+  let component: DashboardSimpleComponent;
+  let fixture: ComponentFixture<DashboardSimpleComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [WaterTankComponent]
+      imports: [DashboardSimpleComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(WaterTankComponent);
+    fixture = TestBed.createComponent(DashboardSimpleComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

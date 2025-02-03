@@ -41,12 +41,9 @@
         <div class="left-section">
             <!-- Options -->
             <div class="options">
-                <button class="btn1"><i class="fa-solid fa-user"></i>Gestion des utilisateurs</button>
                 <button class="btn2" (click)="openModal()"><i class="fas fa-clock"></i> Programmer un arrosage</button>
                 <button class="btn3"><i class="fas fa-plus-circle"></i> Gestion des plantes</button>
-                <button class="btn4" [routerLink]="['/historique-element']">
-                  <i class="fas fa-history"></i> Voir Historique
-                </button>
+                <button class="btn4"><i class="fas fa-history"></i> Voir Historique</button>
             </div>
 
 
@@ -54,7 +51,7 @@
 
         <!-- Historique des Arrosages -->
         <div class="zones-container">
-            <h3><i class="fas fa-history"></i> Programme des Arrosages</h3><br>
+            <h3><i class="fas fa-history"></i> Programme des Arrosages</h3> <br>
 
             <!-- Filtres -->
             <!-- <div class="filters">
