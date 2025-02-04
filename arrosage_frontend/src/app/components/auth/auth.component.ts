@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -12,7 +12,7 @@ import { AuthService, AuthResponse } from './../../services/auth.service';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, HttpClientModule]
 })
-export class AuthComponent implements OnInit {
+export class AuthComponent implements OnInit, OnDestroy {
   authForm: FormGroup;
   isLogin = true;
   showPassword = false;
@@ -21,7 +21,10 @@ export class AuthComponent implements OnInit {
   showPopup = false;
   remainingAttempts = 3;
   errorMessage: string | null = null;
-  showRfidMessage = false; // Nouvelle variable pour contrôler l'affichage du message RFID
+  showRfidMessage = false;
+  timer: number = 0; // Timer en secondes
+  timerInterval: any; // Intervalle pour le timer
+  isLocked: boolean = false; // État de verrouillage des champs
 
   constructor(
     private fb: FormBuilder,
@@ -38,13 +41,72 @@ export class AuthComponent implements OnInit {
 
   ngOnInit(): void {
     this.focusInput('digit1');
+    this.checkLockState(); // Vérifier l'état de verrouillage au chargement
+  }
+
+  ngOnDestroy(): void {
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval); // Nettoyer l'intervalle
+    }
+  }
+
+  // Vérifier l'état de verrouillage au chargement
+  checkLockState(): void {
+    const lockUntil = localStorage.getItem('lockUntil');
+    if (lockUntil) {
+      const now = new Date().getTime();
+      const lockTime = parseInt(lockUntil, 10);
+
+      if (now < lockTime) {
+        this.isLocked = true;
+        this.startTimer(Math.floor((lockTime - now) / 1000)); // Démarrer le timer avec le temps restant
+      } else {
+        localStorage.removeItem('lockUntil'); // Supprimer le verrouillage expiré
+      }
+    }
+  }
+
+  // Démarrer le timer
+  startTimer(duration: number): void {
+    this.timer = duration;
+    this.timerInterval = setInterval(() => {
+      this.timer--;
+      if (this.timer <= 0) {
+        clearInterval(this.timerInterval);
+        this.isLocked = false;
+        localStorage.removeItem('lockUntil'); // Supprimer le verrouillage
+      }
+    }, 1000);
+  }
+
+  // Verrouiller les champs pendant 3 minutes
+  lockInputs(): void {
+    const lockDuration = 3 * 60; // 3 minutes en secondes
+    const lockUntil = new Date().getTime() + lockDuration * 1000;
+
+    localStorage.setItem('lockUntil', lockUntil.toString()); // Stocker dans localStorage
+    this.isLocked = true;
+    this.startTimer(lockDuration);
+  }
+
+  // Formater le timer en minutes:secondes
+  formatTimer(seconds: number): string {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${this.padZero(minutes)}:${this.padZero(remainingSeconds)}`;
+  }
+
+  // Ajouter un zéro devant les nombres < 10
+  padZero(value: number): string {
+    return value < 10 ? `0${value}` : `${value}`;
   }
 
   onInputChange(event: Event, digit: string, inputElement: HTMLInputElement): void {
+    if (this.isLocked) return; // Ignorer si les champs sont verrouillés
+
     const input = event.target as HTMLInputElement;
     const value = input.value;
 
-    // Afficher le message RFID lorsque l'utilisateur commence à saisir
     this.showRfidMessage = true;
 
     if (value.length === 1) {
@@ -64,11 +126,12 @@ export class AuthComponent implements OnInit {
   }
 
   filterInput(event: KeyboardEvent, digit: string, inputElement: HTMLInputElement): void {
+    if (this.isLocked) return; // Ignorer si les champs sont verrouillés
+
     if (!/^[0-9]$/.test(event.key) && event.key !== 'Backspace') {
       event.preventDefault();
     }
 
-    // Gérer la suppression
     if (event.key === 'Backspace') {
       const prevDigit = parseInt(digit.charAt(digit.length - 1)) - 1;
       if (prevDigit > 0) {
@@ -84,6 +147,8 @@ export class AuthComponent implements OnInit {
   }
 
   showTemporaryValue(inputElement: HTMLInputElement): void {
+    if (this.isLocked) return; // Ignorer si les champs sont verrouillés
+
     const value = inputElement.value;
     inputElement.type = 'text';
     setTimeout(() => {
@@ -99,8 +164,8 @@ export class AuthComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.authForm.invalid) {
-      console.error('Formulaire invalide');
+    if (this.authForm.invalid || this.isLocked) {
+      console.error('Formulaire invalide ou champs verrouillés');
       this.focusInput('digit1');
       return;
     }
@@ -135,6 +200,7 @@ export class AuthComponent implements OnInit {
 
     if (this.attempts >= 3) {
       this.showPopup = true;
+      this.lockInputs(); // Verrouiller les champs pendant 3 minutes
     }
 
     this.authForm.reset();
@@ -144,7 +210,7 @@ export class AuthComponent implements OnInit {
     }, 3000);
 
     this.focusInput('digit1');
-    this.showRfidMessage = false; // Réinitialiser l'affichage du message RFID
+    this.showRfidMessage = false;
   }
 
   closePopup(): void {

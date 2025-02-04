@@ -77,6 +77,7 @@ export class AuthService {
       )
     );
   }
+  
 
   loginAvecRFID(cardId: string): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login/rfid`, { cardId }).pipe(
@@ -113,7 +114,7 @@ export class AuthService {
   }
 
   verifierAuth(): Observable<AuthResponse> {
-    return this.http.get<AuthResponse>(`${this.apiUrl}/verify`).pipe(
+    return this.http.get<AuthResponse>(`${this.apiUrl}/verifier`).pipe(
       tap((response) => {
         if (!response.success) {
           console.log('Utilisateur non authentifié, déconnexion automatique');

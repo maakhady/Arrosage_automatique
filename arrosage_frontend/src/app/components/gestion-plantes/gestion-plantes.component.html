@@ -1,0 +1,152 @@
+<app-header>
+ 
+</app-header>
+
+<div class="container">
+  <div class="header">
+    <h1>Gestion des Plantes</h1>
+  </div>
+  <div class="controls">
+    <div class="actions">
+      <button (click)="openPlantModal()" class="add-button">
+        <i class="fas fa-leaf"></i> Ajouter Plante
+      </button>
+      <button (click)="confirmDeleteSelectedPlantes()" class="delete-button" [disabled]="!anySelected">
+        <i class="fas fa-trash"></i> Supprimer Sélectionnées
+      </button>
+
+      <a href="/../demo/dashboard/dashboard-utilisateur" class="home-icon">
+        <i class="fas fa-home fa-2x"></i>
+      </a>
+    </div>
+    <div class="search-bar">
+      <input type="text" [(ngModel)]="searchQuery" (input)="filterPlantes()" placeholder="Rechercher par nom ou catégorie">
+    </div>
+  </div>
+
+  <!-- Message de succès -->
+  <div *ngIf="successMessage" class="alert alert-success mt-2">
+    {{ successMessage }}
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th><input type="checkbox" (change)="selectAllPlantes($event)"></th>
+        <th>Nom</th>
+        <th>Catégorie</th>
+        <th>Humidité du Sol</th>
+        <th>Volume d'Eau</th>
+        <th>Luminosité</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let plante of filteredPlantes">
+        <td><input type="checkbox" [(ngModel)]="plante.selected" (change)="updateButtonState()"></td>
+        <td>{{ plante.nom }}</td>
+        <td>{{ plante.categorie }}</td>
+        <td>{{ plante.humiditeSol }}%</td>
+        <td>{{ plante.volumeEau }} ml</td>
+        <td>{{ plante.luminosite }} lux</td>
+        <td>
+          <button (click)="viewPlante(plante)"><i class="fas fa-eye"></i></button>
+          <button (click)="editPlante(plante)"><i class="fas fa-edit"></i></button>
+          <button (click)="confirmDeletePlante(plante)"><i class="fas fa-trash"></i></button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Modal Bootstrap pour l'ajout/modification de plante -->
+  <div #planteModal class="modal fade" id="planteModal" tabindex="-1" aria-labelledby="planteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="planteModalLabel">{{ isEditing ? 'Modifier la Plante' : 'Ajouter une Plante' }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form (ngSubmit)="onSubmit()" #planteForm="ngForm">
+            <div class="form-group">
+              <label for="nom">Nom de la plante</label>
+              <input type="text" class="form-control" id="nom" [(ngModel)]="currentPlante.nom" name="nom" required>
+            </div>
+            <div class="form-group">
+              <label for="categorie">Catégorie</label>
+              <input type="text" class="form-control" id="categorie" [(ngModel)]="currentPlante.categorie" name="categorie" required>
+            </div>
+            <div class="form-group">
+              <label for="humiditeSol">Humidité du Sol (%)</label>
+              <input type="number" class="form-control" id="humiditeSol" [(ngModel)]="currentPlante.humiditeSol" name="humiditeSol" required>
+            </div>
+            <div class="form-group">
+              <label for="volumeEau">Volume d'Eau (ml)</label>
+              <input type="number" class="form-control" id="volumeEau" [(ngModel)]="currentPlante.volumeEau" name="volumeEau" required>
+            </div>
+            <div class="form-group">
+              <label for="luminosite">Luminosité (lux)</label>
+              <input type="number" class="form-control" id="luminosite" [(ngModel)]="currentPlante.luminosite" name="luminosite" required>
+            </div>
+            <div class="modal-footer">
+              <button type="submit" class="btn-submit">{{ isEditing ? 'Modifier' : 'Ajouter' }}</button>
+              <button type="button" class="btn-cancel" data-bs-dismiss="modal">Annuler</button>
+            </div>
+          </form>
+          <div *ngIf="error" class="alert alert-danger mt-2">
+            {{ error }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de confirmation pour la suppression -->
+  <div #confirmDeleteModal class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmation de suppression</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p *ngIf="planteToDelete">Êtes-vous sûr de vouloir supprimer la plante "{{ planteToDelete.nom }}" ?</p>
+          <p *ngIf="!planteToDelete && selectedPlantes.length > 0">Êtes-vous sûr de vouloir supprimer les plantes suivantes ?</p>
+          <ul *ngIf="!planteToDelete && selectedPlantes.length > 0">
+            <li *ngFor="let plante of selectedPlantes">{{ plante.nom }}</li>
+          </ul>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-danger" (click)="deletePlantes()">Supprimer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal pour afficher les informations de la plante -->
+  <div #viewPlantModal class="modal fade" id="viewPlantModal" tabindex="-1" aria-labelledby="viewPlantModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="viewPlantModalLabel">{{ currentPlante.nom }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body d-flex">
+          <div class="plant-icon">
+            <i class="fas fa-seedling fa-5x"></i>
+          </div>
+          <div class="ms-4">
+            <p><strong>Catégorie:</strong> {{ currentPlante.categorie }}</p>
+            <p><strong>Humidité du Sol:</strong> {{ currentPlante.humiditeSol }}%</p>
+            <p><strong>Volume d'Eau:</strong> {{ currentPlante.volumeEau }} ml</p>
+            <p><strong>Luminosité:</strong> {{ currentPlante.luminosite }} lux</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -27,7 +27,7 @@ export class HeaderComponent {
   }
 
   onLogout() {
-    this.authService.logout().subscribe(response => {
+    this.authService.logoutAll().subscribe(response => {
       if (response.success) {
         console.log('Déconnexion réussie');
       } else {

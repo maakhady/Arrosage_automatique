@@ -19,6 +19,7 @@
                 (input)="onInputChange($event, 'digit1', input1)"
                 (keydown)="filterInput($event, 'digit1', input1)"
                 (focus)="showTemporaryValue(input1)"
+                [disabled]="isLocked"
                 #input1
               >
               <input
@@ -29,6 +30,7 @@
                 (input)="onInputChange($event, 'digit2', input2)"
                 (keydown)="filterInput($event, 'digit2', input2)"
                 (focus)="showTemporaryValue(input2)"
+                [disabled]="isLocked"
                 #input2
               >
               <input
@@ -39,6 +41,7 @@
                 (input)="onInputChange($event, 'digit3', input3)"
                 (keydown)="filterInput($event, 'digit3', input3)"
                 (focus)="showTemporaryValue(input3)"
+                [disabled]="isLocked"
                 #input3
               >
               <input
@@ -49,8 +52,14 @@
                 (input)="onInputChange($event, 'digit4', input4)"
                 (keydown)="filterInput($event, 'digit4', input4)"
                 (focus)="showTemporaryValue(input4)"
+                [disabled]="isLocked"
                 #input4
               >
+            </div>
+
+            <!-- Afficher le timer formaté -->
+            <div class="timer-message" *ngIf="isLocked">
+              Veuillez patienter {{ formatTimer(timer) }} avant de réessayer.
             </div>
 
             <div class="error-container">

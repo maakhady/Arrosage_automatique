@@ -29,8 +29,8 @@ body {
     padding: 4rem;
     text-align: center;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
-    border-right: #4caf50 solid 5px;
-    border-bottom: #4caf50 solid 7px;
+    /* border-right: #4caf50 solid 5px; */
+    /* border-bottom: #4caf50 solid 7px; */
 }
 
 .card h3 {
@@ -148,15 +148,16 @@ body {
 
 /* Réservoir sous les options */
 .reservoir {
-    background: #f4f4f4;
+    background: #fff;
     border-radius: 25px;
     padding: 2rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
     align-items: center;
-    border-right: #4CAF50 solid 5px;
-    border-bottom: #4CAF50 solid 7px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+    /* border-right: #4CAF50 solid 5px; */
+    /* border-bottom: #4CAF50 solid 7px; */
 }
 
 .reservoir-title {
@@ -217,12 +218,16 @@ body {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     text-align: center;
     width: 50%;
+    display: flex;             /* Utiliser Flexbox */
+    flex-direction: column;    /* Aligner les éléments verticalement */
+    align-items: center;       /* Centrer les éléments horizontalement */
 }
 
 .reservoir-controls button {
     color: white;
     font-size: 1.2rem;
     transition: background-color 0.2s ease-in-out;
+    margin: 0.5rem 0;         /* Ajouter un espacement vertical entre les boutons */
 }
 
 .reservoir-controls button:hover {
@@ -314,8 +319,8 @@ body {
     border-radius: 25px;
     padding: 5.5rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border-right: #4CAF50 solid 5px;
-    border-bottom: #4CAF50 solid 7px;
+    /* border-right: #4CAF50 solid 5px;
+    border-bottom: #4CAF50 solid 7px; */
 }
 
 /* Boutons de filtre */
@@ -369,10 +374,6 @@ body {
     color: #FF7043;
 }
 
-/* menu.component.css */
-.menu-container {
-    /* Vos styles existants */
-  }
   
   .modal-overlay {
     position: fixed;
@@ -388,21 +389,22 @@ body {
   }
   
   .modal-content {
-    background-color: white;
+    background: white;
     border-radius: 8px;
     width: 90%;
-    max-width: 800px;
-    max-height: 90vh;
-    overflow-y: auto;
-  }
+    max-width: 600px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
   
-  .modal-header {
-    padding: 1rem;
-    border-bottom: 1px solid #ddd;
+.modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-  }
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
   
   .modal-body {
     padding: 1rem;
@@ -419,9 +421,10 @@ body {
   .close-button {
     background: none;
     border: none;
+    font-size: 1.5rem;
     cursor: pointer;
-    font-size: 1.2rem;
-  }
+    color: #666;
+}
   
   .table-container {
     margin: 1rem 0;
@@ -445,8 +448,63 @@ body {
   }
   
   .form-group {
-    margin-bottom: 1rem;
-  }
+    margin-bottom: 20px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.time-inputs {
+    display: flex;
+    gap: 10px;
+}
+
+.time-inputs > div {
+    flex: 1;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.cancel-button, .save-button {
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+}
+
+.cancel-button {
+    background: #f1f1f1;
+    color: #333;
+}
+
+.save-button {
+    background: #4CAF50;
+    color: white;
+}
+
+.save-button:disabled {
+    background: #cccccc;
+    cursor: not-allowed;
+}
   
   .form-group label {
     display: block;
@@ -498,6 +556,21 @@ body {
     border-radius: 4px;
     cursor: pointer;
   }
+
+  .left-section {
+    padding: 1rem;               /* Ajoute du remplissage */
+    background: white;           /* Couleur de fond */
+    border-radius: 15px;         /* Coins arrondis */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);  /* Ombre */
+    width: 100%;                 /* Prendre toute la largeur disponible */
+    max-width: 500px;          /* Ajustez la largeur maximale selon vos besoins */
+}
+
+.options {
+    display: flex;               /* Pour aligner les boutons */
+    flex-direction: column;      /* Alignement vertical */
+    gap: 10px;                   /* Espace entre les boutons */
+}
   
   /* Hover effects */
   .add-button:hover,
@@ -508,6 +581,124 @@ body {
   .cancel-button:hover {
     background-color: #5a6268;
   }
+
+
+  .home-icon {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: #50A24C;
+    text-decoration: none;
+  }
+  
+  .home-icon:hover {
+    color: #408239;
+  }
+  
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: #50A24C;
+    color: white;
+    margin: -20px -20px 20px -20px;
+    border-radius: 10px 10px 0 0;
+  }
+  
+  .modal-header h4 {
+    margin: 0;
+  }
+  
+  .close-button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  
+  .form-group input,
+  .form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .add-button,
+  .cancel-button {
+    background-color: #50A24C;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .add-button:hover,
+  .cancel-button:hover {
+    background-color: #408239;
+  }
+
+  .modal-footer {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+}
+
+.cancel-button, .save-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.cancel-button {
+    background-color: #f44336; /* Rouge */
+    color: white;
+}
+
+.save-button {
+    background-color: #4CAF50; /* Vert */
+    color: white;
+}
+
+.save-button:disabled {
+    background-color: #ccc; /* Couleur pour désactiver le bouton */
+}
 
 /* Responsive */
 @media (max-width: 1200px) {

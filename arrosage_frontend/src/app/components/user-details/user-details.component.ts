@@ -1,6 +1,7 @@
 // user-details.component.ts
 
 import { Component, OnInit } from '@angular/core';
+import { HttpClientModule } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { UtilisateurService } from '../../services/user.service';
 import { HeaderComponent } from '../header/header.component';
@@ -13,7 +14,7 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-user-details',
   standalone: true,
-  imports: [HeaderComponent, FontAwesomeModule, CommonModule],
+  imports: [HeaderComponent, FontAwesomeModule, CommonModule, HttpClientModule],
   templateUrl: './user-details.component.html',
   styleUrls: ['./user-details.component.scss']
 })

@@ -6,7 +6,7 @@ import { AuthService } from '../services/auth.service';
 import { catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 
-export const authInterceptor: HttpInterceptorFn = (req, next) => {
+export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
   const authService = inject(AuthService);
 

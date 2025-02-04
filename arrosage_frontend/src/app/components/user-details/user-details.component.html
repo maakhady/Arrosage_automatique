@@ -20,33 +20,33 @@
     <div class="user-info-card">
       <div class="user-header">
         <div class="user-avatar">
-          {{ user?.prenom?.[0] }}{{ user?.nom?.[0] }}
+          {{ user.prenom[0] }}{{ user.nom[0] }}
         </div>
-        <div class="user-status" [class.active]="user?.actif">
-          {{ user?.actif ? 'Actif' : 'Inactif' }}
+        <div class="user-status" [class.active]="user.actif">
+          {{ user.actif ? 'Actif' : 'Inactif' }}
         </div>
       </div>
 
       <div class="info-grid">
         <div class="info-item">
           <label>Matricule</label>
-          <p>{{ user?.matricule }}</p>
+          <p>{{ user.matricule }}</p>
         </div>
         <div class="info-item">
           <label>Prénom</label>
-          <p>{{ user?.prenom }}</p>
+          <p>{{ user.prenom }}</p>
         </div>
         <div class="info-item">
           <label>Nom</label>
-          <p>{{ user?.nom }}</p>
+          <p>{{ user.nom }}</p>
         </div>
         <div class="info-item">
           <label>Email</label>
-          <p>{{ user?.email ?? 'Non renseigné' }}</p>
+          <p>{{ user.email ?? 'Non renseigné' }}</p>
         </div>
         <div class="info-item">
           <label>Rôle</label>
-          <p>{{ user?.role }}</p>
+          <p>{{ user.role }}</p>
         </div>
         <div class="info-item">
             <label>Date de création</label>

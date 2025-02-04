@@ -1,14 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HeaderComponent } from '../../../components/header/header.component';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import { RouterModule } from '@angular/router';
+import { HttpClientModule } from '@angular/common/http';
+import { AuthService } from '../../../services/auth.service';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-dashboard-utilisateur',
   standalone: true,
-  imports: [CommonModule, HeaderComponent, FormsModule, FontAwesomeModule],
+  imports: [CommonModule, HeaderComponent, FormsModule, ReactiveFormsModule, FontAwesomeModule, RouterModule, HttpClientModule],
   templateUrl: './dashboard-utilisateur.component.html',
   styleUrls: ['./dashboard-utilisateur.component.css']
 })
@@ -17,8 +21,20 @@ export class DashboardUtilisateurComponent implements OnInit {
   isWatering = false; // État de l'arrosage
   showModal = false; // État du modal
   faTimes = faTimes; // Icone FontAwesome
-  isEditing = false; // Indicateur de mode édition
+  isEditing: boolean = false; // Indicateur de mode édition
+  arrosageForm!: FormGroup;
+  // plantes: any[] = [];
   editingIndex: number | null = null; // Index de la programmation en cours de modification
+
+  form: FormGroup;
+  plantes = [
+    { _id: '1', nom: 'Piments' },
+    { _id: '2', nom: 'Oignons' },
+    { _id: '3', nom: 'Poivrons' },
+    { _id: '4', nom: 'Salades' },
+
+    // Ajoutez d'autres plantes ici
+  ];
 
   // Liste des arrosages
   arrosages = [
@@ -42,9 +58,31 @@ export class DashboardUtilisateurComponent implements OnInit {
     type: 'automatique'
   };
 
-  constructor() {}
+  constructor(private fb: FormBuilder, private authService: AuthService) {
+    this.form = this.fb.group({
+      plante: [this.plantes[0]._id], // Définit la première plante comme valeur par défaut
+    });
+  }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    // this.loadPlantes();
+  }
+
+
+  createForm() {
+    this.arrosageForm = this.fb.group({
+        type: ['manuel', Validators.required],
+        plante: ['', Validators.required],
+        heureDebutHeures: [0, [Validators.required, Validators.min(0), Validators.max(23)]],
+        heureDebutMinutes: [0, [Validators.required, Validators.min(0), Validators.max(59)]],
+        heureDebutSecondes: [0, [Validators.required, Validators.min(0), Validators.max(59)]],
+        heureFinHeures: [0, [Validators.required, Validators.min(0), Validators.max(23)]],
+        heureFinMinutes: [0, [Validators.required, Validators.min(0), Validators.max(59)]],
+        heureFinSecondes: [0, [Validators.required, Validators.min(0), Validators.max(59)]],
+        volumeEau: [0, [Validators.required, Validators.min(0)]],
+        actif: [true]
+    });
+}
 
   // Méthode pour démarrer l'arrosage
   startWatering() {
@@ -84,32 +122,35 @@ export class DashboardUtilisateurComponent implements OnInit {
     this.showModal = false;
     this.isEditing = false;
     this.editingIndex = null;
+    this.arrosageForm.reset();
     this.resetNewSchedule();
   }
 
   // Ajouter ou modifier un horaire
   saveSchedule() {
-    if (this.isEditing && this.editingIndex !== null) {
-      this.scheduledTimes[this.editingIndex] = {
-        ...this.newSchedule,
-        name: 'John', // Remplacer par le nom de l'utilisateur connecté
-        firstName: 'Doe', // Remplacer par le prénom de l'utilisateur connecté
-        date: new Date().toLocaleDateString() // Date actuelle
-      };
-      this.isEditing = false;
-      this.editingIndex = null;
-    } else {
-      this.scheduledTimes.push({
-        ...this.newSchedule,
-        name: 'John', // Remplacer par le nom de l'utilisateur connecté
-        firstName: 'Doe', // Remplacer par le prénom de l'utilisateur connecté
-        date: new Date().toLocaleDateString() // Date actuelle
-      });
-    }
+    if (this.arrosageForm.valid) {
+        const formData = this.arrosageForm.value;
+        const arrosageData = {
+            type: formData.type,
+            plante: formData.plante,
+            heureDebut: {
+                heures: formData.heureDebutHeures,
+                minutes: formData.heureDebutMinutes,
+                secondes: formData.heureDebutSecondes
+            },
+            heureFin: {
+                heures: formData.heureFinHeures,
+                minutes: formData.heureFinMinutes,
+                secondes: formData.heureFinSecondes
+            },
+            volumeEau: formData.volumeEau,
+            actif: formData.actif
+        };
 
-    console.log('Horaires programmés enregistrés:', this.scheduledTimes);
-    this.closeModal();
-  }
+       
+        this.closeModal();
+    }
+}
 
   // Modifier un horaire
   editSchedule(index: number) {
