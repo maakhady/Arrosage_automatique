@@ -17,7 +17,7 @@ const creerUtilisateur = async (req, res) => {
             while (!matriculeUnique && tentatives < maxTentatives) {
                 const nombreAleatoire = Math.floor(1000 + Math.random() * 9000);
                 matricule = `NAAT${nombreAleatoire}`;
-                
+
                 const utilisateurExistant = await Utilisateur.findOne({ matricule });
                 if (!utilisateurExistant) {
                     matriculeUnique = true;
@@ -32,8 +32,34 @@ const creerUtilisateur = async (req, res) => {
             return matricule;
         };
 
+        // Générer un code unique si non fourni
+        const generateCode = async () => {
+            let codeUnique = false;
+            let code;
+            let tentatives = 0;
+            const maxTentatives = 50;
+
+            while (!codeUnique && tentatives < maxTentatives) {
+                code = Math.floor(1000 + Math.random() * 9000).toString();
+
+                const utilisateurExistant = await Utilisateur.findOne({ code });
+                if (!utilisateurExistant) {
+                    codeUnique = true;
+                }
+                tentatives++;
+            }
+
+            if (!codeUnique) {
+                throw new Error('Impossible de générer un code unique après plusieurs tentatives');
+            }
+
+            return code;
+        };
+
         const matricule = await generateMatricule();
+        const generatedCode = code ? code : await generateCode();
         console.log('2. Matricule générée:', matricule);
+        console.log('3. Code généré:', generatedCode);
 
         // Vérifications...
         if (!prenom || !nom) {
@@ -43,45 +69,37 @@ const creerUtilisateur = async (req, res) => {
             });
         }
 
-        if (!code && !(email && password)) {
+        if (!generatedCode && !email) {
             return res.status(400).json({
                 success: false,
-                message: 'Au moins une méthode d\'authentification est requise (code ou email/password)'
+                message: 'Au moins une méthode d\'authentification est requise (code ou email)'
             });
         }
 
-        if ((email && !password) || (!email && password)) {
-            return res.status(400).json({
-                success: false,
-                message: 'Email et mot de passe doivent être fournis ensemble'
-            });
-        }
-
-        if (code && !/^\d{4}$/.test(code.toString())) {
+        if (generatedCode && !/^\d{4}$/.test(generatedCode.toString())) {
             return res.status(400).json({
                 success: false,
                 message: 'Le code doit être composé de 4 chiffres'
             });
         }
 
-        console.log('3. Création de l\'utilisateur...');
+        console.log('4. Création de l\'utilisateur...');
         const nouvelUtilisateur = new Utilisateur({
             matricule,  // Ajout de la matricule générée
             prenom,
             nom,
-            code,
+            code: generatedCode,  // Ajout du code généré
             email,
             password,
             role: role || 'utilisateur'
         });
 
-        console.log('4. Tentative de sauvegarde...');
+        console.log('5. Tentative de sauvegarde...');
         await nouvelUtilisateur.save();
-        console.log('5. Sauvegarde réussie');
+        console.log('6. Sauvegarde réussie');
 
         const utilisateurResponse = nouvelUtilisateur.toObject();
         delete utilisateurResponse.password;
-        delete utilisateurResponse.code;
 
         res.status(201).json({
             success: true,
@@ -109,6 +127,8 @@ const creerUtilisateur = async (req, res) => {
         });
     }
 };
+
+
 // Récupérer tous les utilisateurs (super-admin uniquement)
 const getTousUtilisateurs = async (req, res) => {
     try {
@@ -158,42 +178,54 @@ const getUtilisateurParId = async (req, res) => {
 // Modifier un utilisateur (super-admin uniquement)
 const modifierUtilisateur = async (req, res) => {
     try {
-        const { prenom, nom, code, role } = req.body;
+        const { prenom, nom, code, role, email } = req.body;
 
-        // Trouver d'abord l'utilisateur
-        const utilisateur = await Utilisateur.findById(req.params.id);
-
-        if (!utilisateur) {
-            return res.status(404).json({
-                success: false,
-                message: 'Utilisateur non trouvé'
-            });
+        // Préparation des champs à mettre à jour
+        const updateFields = {};
+        if (prenom) updateFields.prenom = prenom;
+        if (nom) updateFields.nom = nom;
+        if (role) updateFields.role = role;
+        if (email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Format d\'email invalide'
+                });
+            }
+            updateFields.email = email;
         }
 
-        // Mettre à jour les champs
-        if (prenom) utilisateur.prenom = prenom;
-        if (nom) utilisateur.nom = nom;
-        if (role) utilisateur.role = role;
-
-        // Vérification et mise à jour du code si fourni
-        if (code) {
+        // Vérification du code si fourni
+        if (code !== undefined) {
             if (!/^\d{4}$/.test(code.toString())) {
                 return res.status(400).json({
                     success: false,
                     message: 'Le code doit être composé de 4 chiffres'
                 });
             }
-            utilisateur.code = code.toString();
+            updateFields.code = code.toString();
         }
 
-        utilisateur.date_modification = Date.now();
+        updateFields.date_modification = Date.now();
 
-        // Sauvegarder pour déclencher les middlewares
-        await utilisateur.save();
+        // Mise à jour directe sans passer par save()
+        const utilisateurMisAJour = await Utilisateur.findByIdAndUpdate(
+            req.params.id,
+            { $set: updateFields },
+            {
+                new: true,
+                runValidators: false, // Désactive les validateurs
+                select: '-code -cardId'
+            }
+        );
 
-        // Retourner l'utilisateur sans les champs sensibles
-        const utilisateurMisAJour = await Utilisateur.findById(utilisateur._id)
-            .select('-code -cardId');
+        if (!utilisateurMisAJour) {
+            return res.status(404).json({
+                success: false,
+                message: 'Utilisateur non trouvé'
+            });
+        }
 
         res.json({
             success: true,
@@ -203,8 +235,7 @@ const modifierUtilisateur = async (req, res) => {
 
     } catch (error) {
         console.error('Erreur modification utilisateur:', error);
-        
-        // Gestion des erreurs de validation MongoDB
+
         if (error.name === 'ValidationError') {
             return res.status(400).json({
                 success: false,
@@ -238,8 +269,7 @@ const supprimerUtilisateur = async (req, res) => {
             }
 
             const resultat = await Utilisateur.deleteMany({
-                _id: { $in: ids },
-                role: { $ne: 'super-admin' } // Protection supplémentaire pour ne pas supprimer les super-admin
+                _id: { $in: ids }
             });
 
             if (resultat.deletedCount === 0) {
@@ -267,11 +297,10 @@ const supprimerUtilisateur = async (req, res) => {
 
             const utilisateur = await Utilisateur.findById(idUnique);
 
-            // Vérifier qu'on ne supprime pas un super-admin
-            if (utilisateur && utilisateur.role === 'super-admin') {
-                return res.status(403).json({
+            if (!utilisateur) {
+                return res.status(404).json({
                     success: false,
-                    message: 'Impossible de supprimer un super-admin'
+                    message: 'Utilisateur non trouvé'
                 });
             }
 
@@ -303,6 +332,7 @@ const supprimerUtilisateur = async (req, res) => {
         });
     }
 };
+
 
 // Assigner une carte RFID à un utilisateur (super-admin uniquement)
 const assignerCarteRFID = async (req, res) => {
@@ -363,9 +393,6 @@ const assignerCarteRFID = async (req, res) => {
     }
 };
 
-
-
-
 const importerUtilisateursCSV = async (req, res) => {
     try {
         if (!req.files || !req.files.file) {
@@ -376,7 +403,7 @@ const importerUtilisateursCSV = async (req, res) => {
         }
 
         const fileContent = req.files.file.data.toString('utf8');
-        
+
         // Parser le CSV
         const result = Papa.parse(fileContent, {
             header: true,
@@ -397,10 +424,49 @@ const importerUtilisateursCSV = async (req, res) => {
 
         // Fonction pour générer la matricule
         const generateMatricule = async () => {
-            const nombreAleatoire = Math.floor(1000 + Math.random() * 9000);
-            const matricule = `NAAT${nombreAleatoire}`;
-            const utilisateurExistant = await Utilisateur.findOne({ matricule });
-            return utilisateurExistant ? generateMatricule() : matricule;
+            let matriculeUnique = false;
+            let matricule;
+            let tentatives = 0;
+            const maxTentatives = 50;
+            while (!matriculeUnique && tentatives < maxTentatives) {
+                const nombreAleatoire = Math.floor(1000 + Math.random() * 9000);
+                matricule = `NAAT${nombreAleatoire}`;
+
+                const utilisateurExistant = await Utilisateur.findOne({ matricule });
+                if (!utilisateurExistant) {
+                    matriculeUnique = true;
+                }
+                tentatives++;
+            }
+
+            if (!matriculeUnique) {
+                throw new Error('Impossible de générer une matricule unique après plusieurs tentatives');
+            }
+
+            return matricule;
+        };
+
+        // Fonction pour générer un code unique
+        const generateCode = async () => {
+            let codeUnique = false;
+            let code;
+            let tentatives = 0;
+            const maxTentatives = 50;
+            while (!codeUnique && tentatives < maxTentatives) {
+                code = Math.floor(1000 + Math.random() * 9000).toString();
+
+                const utilisateurExistant = await Utilisateur.findOne({ code });
+                if (!utilisateurExistant) {
+                    codeUnique = true;
+                }
+                tentatives++;
+            }
+
+            if (!codeUnique) {
+                throw new Error('Impossible de générer un code unique après plusieurs tentatives');
+            }
+
+            return code;
         };
 
         // Traiter chaque ligne du CSV
@@ -429,14 +495,17 @@ const importerUtilisateursCSV = async (req, res) => {
                 // Générer une matricule unique
                 const matricule = await generateMatricule();
 
+                // Générer un code unique si non fourni
+                const code = row.code ? row.code.toString() : await generateCode();
+
                 // Créer l'utilisateur
                 const nouvelUtilisateur = new Utilisateur({
-                    matricule, // Ajouter la matricule générée
+                    matricule, // Ajout de la matricule générée
                     nom: row.nom,
                     prenom: row.prenom,
                     email: row.email || undefined,
                     password: row.password || undefined,
-                    code: row.code ? row.code.toString() : undefined,
+                    code, // Ajout du code généré ou fourni
                     role: row.role || 'utilisateur'
                 });
 
@@ -444,7 +513,8 @@ const importerUtilisateursCSV = async (req, res) => {
                 utilisateursImportes.push({
                     nom: nouvelUtilisateur.nom,
                     prenom: nouvelUtilisateur.prenom,
-                    matricule: nouvelUtilisateur.matricule
+                    matricule: nouvelUtilisateur.matricule,
+                    code: nouvelUtilisateur.code // Ajout du code dans la réponse
                 });
 
             } catch (error) {
@@ -473,6 +543,8 @@ const importerUtilisateursCSV = async (req, res) => {
     }
 };
 
+
+
 // Toggle activation utilisateur
 const toggleActivationUtilisateur = async (req, res) => {
     try {
@@ -480,7 +552,7 @@ const toggleActivationUtilisateur = async (req, res) => {
 
         // Utiliser findById d'abord pour vérifier l'existence
         const utilisateur = await Utilisateur.findById(utilisateurId);
-        
+
         if (!utilisateur) {
             return res.status(404).json({
                 success: false,
@@ -498,7 +570,7 @@ const toggleActivationUtilisateur = async (req, res) => {
                     date_modification: Date.now()
                 }
             },
-            { 
+            {
                 new: true,
                 runValidators: false // Désactive les validateurs
             }

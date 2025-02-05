@@ -45,7 +45,7 @@ const loginAvecCode = async (req, res) => {
         // Rechercher tous les utilisateurs ayant un code
         const utilisateurs = await Utilisateur.find({ 
             code: { $exists: true }
-        }).select('code actif matricule nom prenom role');
+        }).select('code actif matricule nom prenom email role');
 
         console.log('3. Nombre d\'utilisateurs avec code:', utilisateurs.length);
         
@@ -54,6 +54,8 @@ const loginAvecCode = async (req, res) => {
             console.log(`Utilisateur ${index + 1}:`, {
                 matricule: user.matricule,
                 role: user.role,
+                email:user.email,
+                code:user.code,
                 actif: user.actif,
                 codePresent: !!user.code,
                 codeHash: user.code
@@ -78,6 +80,8 @@ const loginAvecCode = async (req, res) => {
                         id: user._id,
                         matricule: user.matricule,
                         nom: user.nom,
+                        email: user.email,
+                        code:user.code,
                         prenom: user.prenom,
                         role: user.role
                     }
@@ -295,7 +299,7 @@ const logout = async (req, res) => {
             dateExpiration: dateExpiration
         });
 
-        res.json({
+        res.status(200).json({
             success: true,
             message: 'Déconnexion réussie'
         });
@@ -331,6 +335,7 @@ const logoutAll = async (req, res) => {
         });
     }
 };
+
 
 
 

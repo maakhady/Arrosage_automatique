@@ -71,22 +71,28 @@ const utilisateurSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     }
- });
- 
- // Middleware pour gérer la matricule et le hashage
- utilisateurSchema.pre('save', async function(next) {
+});
+
+// Middleware pour gérer la matricule, le code 
+utilisateurSchema.pre('save', async function(next) {
     try {
-        // Génération de la matricule pour un nouvel utilisateur
         if (this.isNew) {
+            // Génération de la matricule
             const generateMatricule = async () => {
                 const nombreAleatoire = Math.floor(1000 + Math.random() * 9000);
                 return `NAAT${nombreAleatoire}`;
             };
- 
+
+            // Génération du code
+            const generateCode = async () => {
+                return Math.floor(1000 + Math.random() * 9000).toString();
+            };
+
+            // Génération matricule unique
             let matriculeUnique = false;
             let tentatives = 0;
             const maxTentatives = 50;
- 
+
             while (!matriculeUnique && tentatives < maxTentatives) {
                 const matriculeCandidat = await generateMatricule();
                 const utilisateurExistant = await this.constructor.findOne({ matricule: matriculeCandidat });
@@ -97,35 +103,61 @@ const utilisateurSchema = new mongoose.Schema({
                 }
                 tentatives++;
             }
- 
+
             if (!matriculeUnique) {
                 throw new Error('Impossible de générer une matricule unique après plusieurs tentatives');
             }
+
+            // Génération code unique
+            let codeUnique = false;
+            tentatives = 0;
+
+            while (!codeUnique && tentatives < maxTentatives) {
+                const codeCandidat = await generateCode();
+                const utilisateurExistant = await this.constructor.findOne({ code: codeCandidat });
+                
+                if (!utilisateurExistant) {
+                    this.code = codeCandidat;
+                    codeUnique = true;
+                }
+                tentatives++;
+            }
+
+            if (!codeUnique) {
+                throw new Error('Impossible de générer un code unique après plusieurs tentatives');
+            }
         }
- 
-        // Hashage du password si modifié et présent
+
+        // Hashage du password uniquement si modifié et présent
         if (this.isModified('password') && this.password) {
             this.password = await bcrypt.hash(this.password, 10);
         }
- 
-        // Hashage du code si modifié et présent
-        if (this.isModified('code') && this.code) {
-            this.code = await bcrypt.hash(this.code.toString(), 10);
-        }
- 
+
         next();
     } catch (error) {
         next(error);
     }
- });
- 
- // Méthodes de vérification
- utilisateurSchema.methods.verifierPassword = async function(password) {
-    return await bcrypt.compare(password, this.password);
- };
- 
- utilisateurSchema.methods.verifierCode = async function(code) {
-    return await bcrypt.compare(code.toString(), this.code);
- };
- 
- module.exports = mongoose.model('Utilisateur', utilisateurSchema);
+});
+
+// Méthodes de vérification
+utilisateurSchema.methods.verifierPassword = async function(password) {
+    try {
+        const utilisateur = await this.constructor.findById(this._id).select('+password');
+        if (!utilisateur || !utilisateur.password) return false;
+        return await bcrypt.compare(password, utilisateur.password);
+    } catch (error) {
+        return false;
+    }
+};
+
+utilisateurSchema.methods.verifierCode = async function(code) {
+    try {
+        const utilisateur = await this.constructor.findById(this._id).select('+code');
+        if (!utilisateur || !utilisateur.code) return false;
+        return code.toString() === utilisateur.code;  // Comparaison directe sans bcrypt
+    } catch (error) {
+        return false;
+    }
+};
+
+module.exports = mongoose.model('Utilisateur', utilisateurSchema);

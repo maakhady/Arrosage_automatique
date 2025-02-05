@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const Utilisateur = require('../models/Utilisateur');
 const config = require('../config/config');
 
-mongoose.connect(config.MONGODB_URI)
+mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('Connexion à MongoDB établie pour le seeding'))
     .catch(err => console.error('Erreur de connexion MongoDB:', err));
 
@@ -16,13 +16,13 @@ const genererMatricule = async () => {
     while (!matriculeUnique && tentatives < maxTentatives) {
         const nombreAleatoire = Math.floor(1000 + Math.random() * 9000);
         matricule = `NAAT${nombreAleatoire}`;
-        
+
         const utilisateurExistant = await Utilisateur.findOne({ matricule });
-        
+
         if (!utilisateurExistant) {
             matriculeUnique = true;
         }
-        
+
         tentatives++;
     }
 
@@ -41,29 +41,29 @@ const seedSuperAdmin = async () => {
 
         const matricule = await genererMatricule();
 
-        // Création d'abord sans hachage
+        // Hacher le mot de passe
+        const hashedPassword = await bcrypt.hash('sane789@', 10);
+
+        // Création du super-admin avec le mot de passe haché
         const superAdmin = new Utilisateur({
             matricule,
             nom: 'Sane',
             prenom: 'Fatou Bintou',
-            email: 'bintou@naatange.sn',
-            telephone: '777896325',
-            code: '2002',               // Code non haché
-            password: 'sane789@',       // Mot de passe non haché
+            email: 'bintou@naatange.sn',           // Code non haché
+            password: hashedPassword,   // Mot de passe haché
             role: 'super-admin',
             actif: true,
-            tokenVersion: 0
         });
 
-        // Laisser le middleware du modèle gérer le hachage
+        // Laisser le middleware du modèle gérer le hachage du code
         await superAdmin.save();
 
         console.log('Super-admin créé avec succès!');
         console.log('Informations du compte:');
         console.log(`Matricule: ${superAdmin.matricule}`);
         console.log('Email: bintou@naatange.sn');
-        console.log('Code: 2002');
-        console.log('Password: sane789@');
+        
+        console.log('Password: sane789@ (haché)');
 
         await mongoose.connection.close();
         console.log('Connexion à MongoDB fermée');
