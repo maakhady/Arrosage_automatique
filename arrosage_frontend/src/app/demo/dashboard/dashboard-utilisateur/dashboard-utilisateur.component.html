@@ -1,3 +1,5 @@
+<app-header></app-header>
+
 <div class="dashboard">
     <!-- Navbar -->
    
@@ -28,6 +30,9 @@
             <!-- Partie gauche : Options + Réservoir -->
             <div class="left-section">
                 <div class="options">
+                    <button class="btn1" [routerLink]="['/users']">
+                        <fa-icon [icon]="faUsers"></fa-icon> Gestion des utilisateurs
+                      </button>
                     <button class="btn2"><i class="fas fa-clock"></i> Programmer un arrosage</button>
                     <button class="btn3"><i class="fas fa-plus-circle"></i> Ajouter une Zone</button>
                     <button class="btn4"><i class="fas fa-history"></i> Voir Historique</button>

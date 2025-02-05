@@ -1,39 +1,37 @@
-<!-- Modal pour la modification de l'utilisateur -->
-<div class="modal" *ngIf="user" id="editModal">
-    <div class="modal-content">
-      <span class="close" (click)="closeModal()">&times;</span>
-      <h2>Modifier l'utilisateur</h2>
-      <form (ngSubmit)="onSubmit()" #editForm="ngForm">
-        <div>
-          <label for="firstName">Prénom</label>
-          <input type="text" id="firstName" [(ngModel)]="user.firstName" name="firstName" required>
-        </div>
-        <div>
-          <label for="lastName">Nom</label>
-          <input type="text" id="lastName" [(ngModel)]="user.lastName" name="lastName" required>
-        </div>
-        <div>
-          <label for="email">Email</label>
-          <input type="email" id="email" [(ngModel)]="user.email" name="email" required>
-        </div>
-        <div>
-          <label for="address">Adresse</label>
-          <input type="text" id="address" [(ngModel)]="user.address" name="address" required>
-        </div>
-        <div>
-          <label for="role">Rôle</label>
-          <select id="role" [(ngModel)]="user.role" name="role" required>
-            <option value="admin">Admin</option>
-            <option value="utilisateur">Utilisateur</option>
-          </select>
-        </div>
-        <div>
-          <label for="phone">Téléphone</label>
-          <input type="text" id="phone" [(ngModel)]="user.phone" name="phone" required (input)="validatePhone()">
-          <span *ngIf="phoneError">Le numéro de téléphone n'est pas valide.</span>
-        </div>
-        <button type="submit" [disabled]="!editForm.valid || phoneError">Modifier</button>
-      </form>
-    </div>
+<div class="modal-content">
+  <div class="modal-header">
+    Modifier l'utilisateur
   </div>
-  
+  <div class="modal-body">
+    <form [formGroup]="editForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="matricule">Matricule</label>
+        <input id="matricule" formControlName="matricule" />
+      </div>
+      <div class="form-group">
+        <label for="prenom">Prénom</label>
+        <input id="prenom" formControlName="prenom" />
+      </div>
+      <div class="form-group">
+        <label for="nom">Nom</label>
+        <input id="nom" formControlName="nom" />
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input id="email" formControlName="email" />
+      </div>
+      <div class="form-group">
+        <label for="role">Rôle</label>
+        <select id="role" formControlName="role">
+          <option value="utilisateur">Utilisateur</option>
+          <option value="super-admin">Super Admin</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="actif">Actif</label>
+        <input type="checkbox" id="actif" formControlName="actif" />
+      </div>
+      <button type="submit" class="save-button">Enregistrer</button>
+    </form>
+  </div>
+</div>

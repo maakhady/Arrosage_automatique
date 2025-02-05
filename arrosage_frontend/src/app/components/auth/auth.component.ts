@@ -96,7 +96,7 @@ export class AuthComponent implements OnInit {
       next: (response: AuthResponse) => {
         console.log('Réponse dans le composant :', response);
         if (response.success) {
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/demo/dashboard/dashboard-utilisateur']);
         } else {
           this.handleFailedLogin();
         }

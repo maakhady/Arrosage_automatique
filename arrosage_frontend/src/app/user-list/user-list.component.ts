@@ -5,43 +5,58 @@ import { UserRegistrationComponent } from '../user-registration/user-registratio
 import { UserDetailsComponent } from '../user-details/user-details.component';
 import { UserEditComponent } from '../user-edit/user-edit.component';
 import { AssignRfidComponent } from '../assign-rfid/assign-rfid.component';
-declare var bootstrap: any; // Import Bootstrap
-import * as Papa from 'papaparse'; // Import PapaParse for CSV parsing
-
-interface User {
-  id: string;
-  matricule: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  address: string;
-  role: string;
-  status: string;
-  selected: boolean;
-  rfid?: string; // Ajouter le champ rfid si nécessaire
-}
+import { UtilisateurService, Utilisateur } from '../services/utilisateur.service';
+import { AuthService } from '../services/auth.service';
+import Swal from 'sweetalert2';
+import * as Papa from 'papaparse';
+import { HeaderComponent } from '../components/header/header.component';
+declare var bootstrap: any;
 
 @Component({
   selector: 'app-user-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, UserRegistrationComponent, UserDetailsComponent, UserEditComponent, AssignRfidComponent],
+  imports: [CommonModule, FormsModule, UserRegistrationComponent, UserDetailsComponent, UserEditComponent, AssignRfidComponent, HeaderComponent],
   templateUrl: './user-list.component.html',
   styleUrls: ['./user-list.component.css']
 })
 export class UserListComponent implements OnInit {
-  users: User[] = [
-    { id: '1', matricule: '001', firstName: 'John', lastName: 'Doe', email: 'john.doe@example.com', address: '123 Street', role: 'utilisateur', status: 'active', selected: false },
-    { id: '2', matricule: '002', firstName: 'Jane', lastName: 'Doe', email: 'jane.doe@example.com', address: '456 Avenue', role: 'admin', status: 'active', selected: false }
-  ];
-  filteredUsers: User[] = [];
-  selectedUser: User | null = null;
+  users: Utilisateur[] = [];
+  filteredUsers: Utilisateur[] = [];
+  selectedUser: Utilisateur | null = null;
   searchQuery: string = '';
   anySelected: boolean = false;
+  userToDelete: Utilisateur | null = null;
+  userToBlock: Utilisateur | null = null;
+
+  // Propriétés de pagination
+  currentPage: number = 1;
+  itemsPerPage: number = 8;
 
   @ViewChild('fileInput') fileInput!: ElementRef;
 
+  constructor(private utilisateurService: UtilisateurService, private authService: AuthService) {}
+
   ngOnInit() {
-    this.filteredUsers = this.users; // Initialiser la liste filtrée avec tous les utilisateurs
+    this.loadUsers();
+  }
+
+  loadUsers() {
+    this.utilisateurService.getTousUtilisateurs().subscribe(
+      (response: any) => {
+        const users = response.utilisateurs || response;
+        if (Array.isArray(users)) {
+          this.users = users;
+          this.filterUsers();
+        } else {
+          this.users = [];
+          this.filteredUsers = [];
+        }
+      },
+      error => {
+        this.users = [];
+        this.filteredUsers = [];
+      }
+    );
   }
 
   selectAllUsers(event: any) {
@@ -54,37 +69,134 @@ export class UserListComponent implements OnInit {
     this.anySelected = this.filteredUsers.some(user => user.selected);
   }
 
-  deleteSelectedUsers() {
-    const selectedUsers = this.filteredUsers.filter(user => user.selected);
-    console.log('Users deleted successfully', selectedUsers);
-    this.ngOnInit(); // Rafraîchir la liste des utilisateurs
+  openDeleteConfirmationModal(user?: Utilisateur) {
+    if (user) {
+      this.userToDelete = user;
+      Swal.fire({
+        title: 'Confirmer la suppression',
+        text: 'Êtes-vous sûr de vouloir supprimer cet utilisateur ?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Oui',
+        cancelButtonText: 'Non'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.confirmDeleteUser();
+        }
+      });
+    } else {
+      const selectedUsers = this.filteredUsers.filter(user => user.selected);
+      if (selectedUsers.length === 0) {
+        return;
+      }
+
+      Swal.fire({
+        title: 'Confirmer la suppression',
+        text: `Êtes-vous sûr de vouloir supprimer ${selectedUsers.length} utilisateur(s) sélectionné(s) ?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Oui',
+        cancelButtonText: 'Non'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.confirmDeleteUsers(selectedUsers);
+        }
+      });
+    }
   }
 
-  blockSelectedUsers() {
-    const selectedUsers = this.filteredUsers.filter(user => user.selected);
-    console.log('Users blocked successfully', selectedUsers);
-    this.ngOnInit(); // Rafraîchir la liste des utilisateurs
+  confirmDeleteUser() {
+    if (this.userToDelete && this.userToDelete._id) {
+      this.utilisateurService.supprimerUtilisateur(this.userToDelete._id).subscribe(
+        () => {
+          this.loadUsers();
+          Swal.fire('Supprimé!', 'L\'utilisateur a été supprimé.', 'success');
+        },
+        (error) => {
+          Swal.fire('Erreur!', 'Une erreur est survenue lors de la suppression.', 'error');
+        }
+      );
+    }
   }
 
-  viewUser(user: User) {
+  confirmDeleteUsers(users: Utilisateur[]) {
+    const ids = users.map(user => user._id);
+    this.utilisateurService.supprimerUtilisateurs(ids).subscribe(
+      () => {
+        this.loadUsers();
+        Swal.fire('Supprimé!', 'Les utilisateurs ont été supprimés.', 'success');
+      },
+      (error) => {
+        Swal.fire('Erreur!', 'Une erreur est survenue lors de la suppression.', 'error');
+      }
+    );
+  }
+
+  openBlockConfirmationModal(user?: Utilisateur) {
+    this.userToBlock = user || null;
+    if (!this.userToBlock || !this.userToBlock._id) {
+      return;
+    }
+
+    const action = this.userToBlock.actif ? 'bloqué' : 'débloqué';
+    const message = this.userToBlock.actif
+      ? 'Êtes-vous sûr de vouloir débloquer cet utilisateur ?'
+      : 'Êtes-vous sûr de vouloir bloquer cet utilisateur ?';
+
+    Swal.fire({
+      title: `Confirmer le ${action}`,
+      text: message,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Oui',
+      cancelButtonText: 'Non'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.confirmBlockUser();
+      }
+    });
+  }
+
+  confirmBlockUser() {
+    if (this.userToBlock && this.userToBlock._id) {
+      this.utilisateurService.toggleActivationUtilisateur(this.userToBlock._id).subscribe(
+        () => {
+          this.loadUsers();
+          const action = this.userToBlock && this.userToBlock.actif ? 'bloqué' : 'débloqué';
+          Swal.fire('Succès!', `L'utilisateur a été ${action}.`, 'success');
+        },
+        (error) => {
+          Swal.fire('Erreur!', 'Une erreur est survenue lors du blocage.', 'error');
+        }
+      );
+    }
+  }
+
+  viewUser(user: Utilisateur) {
     this.selectedUser = user;
+    this.openDetailsModal();
   }
 
-  editUser(user: User) {
+  editUser(user: Utilisateur) {
     this.selectedUser = user;
+    this.openEditModal();
   }
 
-  deleteUser(user: User) {
-    console.log('User deleted successfully', user);
-    this.ngOnInit(); // Rafraîchir la liste des utilisateurs
+  openDetailsModal() {
+    const modal = document.getElementById('detailsModal');
+    if (modal) {
+      new bootstrap.Modal(modal).show();
+    }
   }
 
-  blockUser(user: User) {
-    console.log('User blocked successfully', user);
-    this.ngOnInit(); // Rafraîchir la liste des utilisateurs
+  openEditModal() {
+    const modal = document.getElementById('editModal');
+    if (modal) {
+      new bootstrap.Modal(modal).show();
+    }
   }
 
-  assignRFID(user: User) {
+  assignRFID(user: Utilisateur) {
     this.selectedUser = user;
     this.openAssignRFIDModal();
   }
@@ -92,24 +204,30 @@ export class UserListComponent implements OnInit {
   openRegistrationModal() {
     const modal = document.getElementById('registrationModal');
     if (modal) {
-      const bootstrapModal = new bootstrap.Modal(modal);
-      bootstrapModal.show();
+      new bootstrap.Modal(modal).show();
     }
   }
 
   closeRegistrationModal() {
     const modal = document.getElementById('registrationModal');
     if (modal) {
-      const bootstrapModal = bootstrap.Modal.getInstance(modal);
-      bootstrapModal.hide();
+      bootstrap.Modal.getInstance(modal)?.hide();
     }
   }
 
   closeDetailsModal() {
+    const modal = document.getElementById('detailsModal');
+    if (modal) {
+      bootstrap.Modal.getInstance(modal)?.hide();
+    }
     this.selectedUser = null;
   }
 
   closeEditModal() {
+    const modal = document.getElementById('editModal');
+    if (modal) {
+      bootstrap.Modal.getInstance(modal)?.hide();
+    }
     this.selectedUser = null;
   }
 
@@ -119,42 +237,29 @@ export class UserListComponent implements OnInit {
 
   filterUsers() {
     const query = this.searchQuery.toLowerCase();
-    this.filteredUsers = this.users.filter(user =>
-      user.firstName.toLowerCase().includes(query) ||
-      user.lastName.toLowerCase().includes(query) ||
+    let filtered = this.users.filter(user =>
+      user.prenom.toLowerCase().includes(query) ||
+      user.nom.toLowerCase().includes(query) ||
       user.email.toLowerCase().includes(query) ||
       user.matricule.toLowerCase().includes(query)
     );
+
+    // Pagination logic
+    this.filteredUsers = filtered.slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage);
   }
 
   importCSV(event: any) {
     const file = event.target.files[0];
     if (file) {
-      Papa.parse(file, {
-        header: true,
-        complete: (results: Papa.ParseResult<any>) => {
-          const validUsers = results.data.filter((row: any) => this.validateCSVRow(row));
-          this.users = this.users.concat(validUsers.map((row: any) => ({
-            id: (this.users.length + 1).toString(),
-            matricule: row.matricule,
-            firstName: row.firstName,
-            lastName: row.lastName,
-            email: row.email,
-            address: row.address,
-            role: row.role,
-            status: 'active',
-            selected: false
-          })));
-          this.filteredUsers = this.users; // Mettre à jour la liste filtrée
+      this.utilisateurService.importerUtilisateursCSV(file).subscribe(
+        () => {
+          this.loadUsers();
+        },
+        (error) => {
+          console.error('Error importing CSV', error);
         }
-      });
+      );
     }
-  }
-
-  validateCSVRow(row: any): boolean {
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phonePattern = /^\+221\d{9}$/;
-    return row.firstName && row.lastName && emailPattern.test(row.email) && row.address && row.role && phonePattern.test(row.phone);
   }
 
   triggerFileInput() {
@@ -165,6 +270,35 @@ export class UserListComponent implements OnInit {
     const modal = document.getElementById('assignRFIDModal');
     if (modal) {
       modal.style.display = 'block';
+    }
+  }
+
+  // Pagination methods
+  nextPage() {
+    if ((this.currentPage * this.itemsPerPage) < this.users.length) {
+      this.currentPage++;
+      this.filterUsers();
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.filterUsers();
+    }
+  }
+
+  updateUser(updatedUser: Utilisateur) {
+    if (this.selectedUser && this.selectedUser._id) {
+      this.utilisateurService.modifierUtilisateur(this.selectedUser._id, updatedUser).subscribe(
+        () => {
+          this.loadUsers();
+          Swal.fire('Mis à jour!', 'Les informations de l\'utilisateur ont été mises à jour.', 'success');
+        },
+        (error) => {
+          Swal.fire('Erreur!', 'Une erreur est survenue lors de la mise à jour.', 'error');
+        }
+      );
     }
   }
 }

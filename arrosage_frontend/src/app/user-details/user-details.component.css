@@ -1,0 +1,66 @@
+/* Style pour le modal */
+.modal-content {
+    background-color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 400px;
+  }
+  
+  /* Style pour l'en-tête */
+  .modal-header {
+    background-color: #50A24C;
+    color: #ffffff;
+    padding: 15px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: bold;
+  }
+  
+  /* Style pour le corps du modal */
+  .modal-body {
+    padding: 20px;
+  }
+  
+  /* Style pour les informations de l'utilisateur */
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .user-info-item {
+    background-color: #e8f8e8;
+    border-radius: 4px;
+    padding: 10px;
+    margin: 5px 0;
+    width: 100%;
+    text-align: center;
+    font-size: 16px;
+  }
+  
+  .user-info-item span {
+    font-weight: bold;
+  }
+  
+  /* Style pour le bouton de fermeture */
+  .close-button {
+    background-color: #50A24C;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 20px;
+  }
+  
+  .close-button:hover {
+    background-color: #418239;
+  }
+  

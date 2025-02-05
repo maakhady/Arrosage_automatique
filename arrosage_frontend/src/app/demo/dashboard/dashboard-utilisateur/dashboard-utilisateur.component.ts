@@ -1,15 +1,21 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { HeaderComponent } from '../../../components/header/header.component';
+import { faUser } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @Component({
   selector: 'app-dashboard-utilisateur',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule, HeaderComponent, FontAwesomeModule],
   templateUrl: './dashboard-utilisateur.component.html',
   styleUrls: ['./dashboard-utilisateur.component.css']
 })
 export class DashboardUtilisateurComponent {
+
   reservoirVolume = 50;
+  faUsers = faUser;
 
   // Ajout de la liste des arrosages
   arrosages = [

@@ -1,14 +1,29 @@
-<!-- Modal pour les détails de l'utilisateur -->
-<div class="modal" *ngIf="user" id="detailsModal">
-    <div class="modal-content">
-      <span class="close" (click)="closeModal()">&times;</span>
-      <h2>Détails de l'utilisateur</h2>
-      <p><strong>Prénom:</strong> {{ user.firstName }}</p>
-      <p><strong>Nom:</strong> {{ user.lastName }}</p>
-      <p><strong>Email:</strong> {{ user.email }}</p>
-      <p><strong>Adresse:</strong> {{ user.address }}</p>
-      <p><strong>Rôle:</strong> {{ user.role }}</p>
-      <p><strong>Téléphone:</strong> {{ user.phone }}</p>
-    </div>
+  <div class="modal-header">
+    Détails de l'utilisateur
   </div>
-  
+  <div class="modal-body">
+    <div class="user-info">
+      <div class="user-info-item">
+        <span>Prénom et Nom:</span> {{ user?.prenom }} {{ user?.nom }}
+      </div>
+      <div class="user-info-item">
+        <span>Email:</span> {{ user?.email }}
+      </div>
+      <div class="user-info-item">
+        <span>Matricule:</span> {{ user?.matricule }}
+      </div>
+      <div class="user-info-item">
+        <span>Rôle:</span> {{ user?.role }}
+      </div>
+      <div class="user-info-item">
+        <span>Statut:</span> {{ user?.actif ? 'Actif' : 'Inactif' }}
+      </div>
+      <div class="user-info-item">
+        <span>Date de création:</span> {{ user?.date_creation | date }}
+      </div>
+      <div class="user-info-item">
+        <span>Date de modification:</span> {{ user?.date_modification | date }}
+      </div>
+    </div>
+    <button class="close-button" (click)="closeModal()">Fermer</button>
+  </div>

@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faUsers, faClock, faPlusCircle, faHistory } from '@fortawesome/free-solid-svg-icons';
 import { Router } from '@angular/router'; // Importer Router
 
@@ -83,7 +84,7 @@ export class MenuComponent {
   }
 
   onManageUsers() {
-    this.router.navigate(['/gestion-utilisateurs']); // Redirection vers la route souhaitée
+    this.router.navigate(['/users']); // Redirection vers la route souhaitée
   }
 
   onSchedule() {

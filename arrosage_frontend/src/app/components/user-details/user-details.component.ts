@@ -5,8 +5,8 @@ import { ActivatedRoute } from '@angular/router';
 import { UtilisateurService } from '../../services/user.service';
 import { HeaderComponent } from '../header/header.component';
 import { Utilisateur, Role } from '../../models/utilisateur.model'; // Chemin d'accès au modèle
-import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { CommonModule } from '@angular/common';
 
 

@@ -1,6 +1,7 @@
 import { Component, Input, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { UtilisateurService, Utilisateur } from '../services/utilisateur.service';
 
 @Component({
   selector: 'app-assign-rfid',
@@ -10,40 +11,29 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./assign-rfid.component.css']
 })
 export class AssignRfidComponent {
-  @Input() user: any;
+  @Input() user: Utilisateur | null = null;
   @Output() close = new EventEmitter<void>();
   rfid: string = '';
-  selectedUser: any;
 
-  ngOnInit() {
-    this.selectedUser = this.user;
-  }
+  constructor(private utilisateurService: UtilisateurService) {}
 
   onSubmit() {
-    console.log('RFID assigned successfully', this.rfid);
-    this.closeModal();
-    this.openSuccessModal();
+    if (this.user && this.user._id && this.rfid) {
+      this.utilisateurService.assignerCarteRFID(this.user._id, this.rfid).subscribe(
+        () => {
+          console.log('Carte RFID assignée avec succès');
+          this.closeModal();
+        },
+        (error) => {
+          console.error('Erreur lors de l\'assignation de la carte RFID', error);
+        }
+      );
+    } else {
+      console.error('ID de l\'utilisateur ou RFID non défini');
+    }
   }
 
   closeModal() {
-    const modal = document.getElementById('assignRFIDModal');
-    if (modal) {
-      modal.style.display = 'none';
-    }
     this.close.emit();
-  }
-
-  openSuccessModal() {
-    const successModal = document.getElementById('successModal');
-    if (successModal) {
-      successModal.style.display = 'block';
-    }
-  }
-
-  closeSuccessModal() {
-    const successModal = document.getElementById('successModal');
-    if (successModal) {
-      successModal.style.display = 'none';
-    }
   }
 }
