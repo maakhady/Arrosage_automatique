@@ -78,6 +78,22 @@ body {
   .add-button {
     background-color: #007bff;
   }
+
+  .custom-csv-btn {
+    background-color: #50A24C; /* Couleur de fond */
+    color: white; /* Couleur du texte */
+    border: none; /* Supprimer la bordure */
+    padding: 10px 20px; /* Espacement interne */
+    border-radius: 5px; /* Coins arrondis */
+    cursor: pointer; /* Curseur de la main */
+    font-size: 16px; /* Taille de la police */
+    transition: background-color 0.3s ease; /* Effet de transition */
+  }
+  
+  .custom-csv-btn:hover {
+    background-color: #408A3E; /* Couleur de fond au survol */
+  }
+  
   
   .add-button:hover {
     background-color: #0056b3;
@@ -134,7 +150,7 @@ body {
   }
   
   button:hover {
-    color: #0056b3;
+    color: #00b39b;
   }
   
   .assign-button {
@@ -147,12 +163,12 @@ body {
   }
   
   .assign-button:hover {
-    background-color: #408239;
+    background-color: #50A24C;
   }
   
   /* Style pour le statut actif */
 .status-active {
-  background-color: green;
+  background-color: #50A24C;
   color: white;
   padding: 5px 10px;
   border-radius: 5px;
@@ -170,7 +186,7 @@ body {
 
 /* Style pour le rôle utilisateur */
 .role-user {
-  background-color: rgb(78, 78, 241);
+  background-color: #007bff;
   color: white;
   padding: 5px 10px;
   border-radius: 5px;
@@ -180,7 +196,7 @@ body {
 
 /* Style pour le rôle super-admin */
 .role-super-admin {
-  background-color: green;
+  background-color: #50A24C;
   color: white;
   padding: 5px 10px;
   border-radius: 5px;
@@ -212,4 +228,14 @@ body {
   margin: 0 10px;
   font-size: 1.2em;
 }
+
+.delete-button:disabled {
+  background-color: #cccccc; /* Couleur de fond grisée */
+  color: #666666; /* Couleur du texte grisée */
+  cursor: not-allowed; /* Curseur non autorisé */
+  opacity: 0.7; /* Opacité réduite */
+}
+
+
+
 

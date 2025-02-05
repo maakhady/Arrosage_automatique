@@ -11,6 +11,8 @@ import Swal from 'sweetalert2';
 import * as Papa from 'papaparse';
 import { HeaderComponent } from '../components/header/header.component';
 declare var bootstrap: any;
+declare var $: any; // Pour utiliser jQuery avec Bootstrap
+
 
 @Component({
   selector: 'app-user-list',
@@ -32,12 +34,19 @@ export class UserListComponent implements OnInit {
   currentPage: number = 1;
   itemsPerPage: number = 8;
 
+  successMessage: string | null = null;
+  error: string | null = null;
+  
+
   @ViewChild('fileInput') fileInput!: ElementRef;
 
   constructor(private utilisateurService: UtilisateurService, private authService: AuthService) {}
 
   ngOnInit() {
     this.loadUsers();
+    $(function () {
+      $('[data-toggle="tooltip"]').tooltip();
+    });
   }
 
   loadUsers() {
@@ -59,6 +68,10 @@ export class UserListComponent implements OnInit {
     );
   }
 
+    onUserAdded() {
+    this.loadUsers(); // Recharge la liste des utilisateurs
+  }
+
   selectAllUsers(event: any) {
     const checked = event.target.checked;
     this.filteredUsers.forEach(user => user.selected = checked);
@@ -69,8 +82,23 @@ export class UserListComponent implements OnInit {
     this.anySelected = this.filteredUsers.some(user => user.selected);
   }
 
+  onUserCheckboxChange(user: Utilisateur) {
+    this.updateButtonState();
+  }
+
   openDeleteConfirmationModal(user?: Utilisateur) {
     if (user) {
+      if (user.role === 'super-admin') {
+        Swal.fire({
+          icon: 'error',
+          title: 'Impossible de supprimer',
+          text: 'Impossible de supprimer un super-admin.',
+          timer: 2000, // Durée de 2 secondes
+          timerProgressBar: true,
+          showConfirmButton: false
+        });
+        return;
+      }
       this.userToDelete = user;
       Swal.fire({
         title: 'Confirmer la suppression',
@@ -89,7 +117,20 @@ export class UserListComponent implements OnInit {
       if (selectedUsers.length === 0) {
         return;
       }
-
+  
+      const hasSuperAdmin = selectedUsers.some(user => user.role === 'super-admin');
+      if (hasSuperAdmin) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Supprimer',
+          text: 'Impossible de supprimer un super-admin.',
+          timer: 3000, // Durée de 2 secondes
+          timerProgressBar: true,
+          showConfirmButton: false
+        });
+        return;
+      }
+  
       Swal.fire({
         title: 'Confirmer la suppression',
         text: `Êtes-vous sûr de vouloir supprimer ${selectedUsers.length} utilisateur(s) sélectionné(s) ?`,
@@ -104,30 +145,60 @@ export class UserListComponent implements OnInit {
       });
     }
   }
+  
 
-  confirmDeleteUser() {
+   confirmDeleteUser() {
     if (this.userToDelete && this.userToDelete._id) {
       this.utilisateurService.supprimerUtilisateur(this.userToDelete._id).subscribe(
         () => {
           this.loadUsers();
-          Swal.fire('Supprimé!', 'L\'utilisateur a été supprimé.', 'success');
+          Swal.fire({
+            icon: 'success',
+            title: 'Supprimé!',
+            text: 'L\'utilisateur a été supprimé.',
+            timer: 2000, // Durée de 2 secondes
+            timerProgressBar: true,
+            showConfirmButton: false
+          });
         },
         (error) => {
-          Swal.fire('Erreur!', 'Une erreur est survenue lors de la suppression.', 'error');
+          Swal.fire({
+            icon: 'error',
+            title: 'Erreur!',
+            text: 'Une erreur est survenue lors de la suppression.',
+            timer: 2000, // Durée de 2 secondes
+            timerProgressBar: true,
+            showConfirmButton: false
+          });
         }
       );
     }
   }
+
 
   confirmDeleteUsers(users: Utilisateur[]) {
     const ids = users.map(user => user._id);
     this.utilisateurService.supprimerUtilisateurs(ids).subscribe(
       () => {
         this.loadUsers();
-        Swal.fire('Supprimé!', 'Les utilisateurs ont été supprimés.', 'success');
+        Swal.fire({
+          icon: 'success',
+          title: 'Supprimé!',
+          text: 'Les utilisateurs ont été supprimés.',
+          timer: 2000, // Durée de 2 secondes
+          timerProgressBar: true,
+          showConfirmButton: false
+        });
       },
       (error) => {
-        Swal.fire('Erreur!', 'Une erreur est survenue lors de la suppression.', 'error');
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur!',
+          text: 'Une erreur est survenue lors de la suppression.',
+          timer: 2000, // Durée de 2 secondes
+          timerProgressBar: true,
+          showConfirmButton: false
+        });
       }
     );
   }
@@ -156,17 +227,30 @@ export class UserListComponent implements OnInit {
       }
     });
   }
-
   confirmBlockUser() {
     if (this.userToBlock && this.userToBlock._id) {
       this.utilisateurService.toggleActivationUtilisateur(this.userToBlock._id).subscribe(
         () => {
           this.loadUsers();
           const action = this.userToBlock && this.userToBlock.actif ? 'bloqué' : 'débloqué';
-          Swal.fire('Succès!', `L'utilisateur a été ${action}.`, 'success');
+          Swal.fire({
+            icon: 'success',
+            title: 'Succès!',
+            text: `L'utilisateur a été ${action}.`,
+            timer: 2000, // Durée de 2 secondes
+            timerProgressBar: true,
+            showConfirmButton: false
+          });
         },
         (error) => {
-          Swal.fire('Erreur!', 'Une erreur est survenue lors du blocage.', 'error');
+          Swal.fire({
+            icon: 'error',
+            title: 'Erreur!',
+            text: 'Une erreur est survenue lors du blocage.',
+            timer: 2000, // Durée de 2 secondes
+            timerProgressBar: true,
+            showConfirmButton: false
+          });
         }
       );
     }
@@ -248,7 +332,39 @@ export class UserListComponent implements OnInit {
     this.filteredUsers = filtered.slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage);
   }
 
-  importCSV(event: any) {
+  onFileSelected(event: any) {
+    const file: File = event.target.files[0];
+    if (file) {
+      this.utilisateurService.importerUtilisateursCSV(file).subscribe(
+        response => {
+          this.successMessage = 'Utilisateurs importés avec succès';
+          Swal.fire({
+            icon: 'success',
+            title: 'Succès',
+            text: 'Utilisateurs importés avec succès.',
+            timer: 2000, // Durée de 2 secondes
+            timerProgressBar: true,
+            showConfirmButton: false
+          });
+          this.loadUsers();
+        },
+        error => {
+          this.error = 'Erreur lors de l\'importation des utilisateurs';
+          Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: 'Erreur lors de l\'importation des utilisateurs.',
+            timer: 2000, // Durée de 2 secondes
+            timerProgressBar: true,
+            showConfirmButton: false
+          });
+          console.error(error);
+        }
+      );
+    }
+  }
+
+  /*importCSV(event: any) {
     const file = event.target.files[0];
     if (file) {
       this.utilisateurService.importerUtilisateursCSV(file).subscribe(
@@ -260,7 +376,7 @@ export class UserListComponent implements OnInit {
         }
       );
     }
-  }
+  }*/
 
   triggerFileInput() {
     this.fileInput.nativeElement.click();
@@ -293,12 +409,11 @@ export class UserListComponent implements OnInit {
       this.utilisateurService.modifierUtilisateur(this.selectedUser._id, updatedUser).subscribe(
         () => {
           this.loadUsers();
-          Swal.fire('Mis à jour!', 'Les informations de l\'utilisateur ont été mises à jour.', 'success');
         },
         (error) => {
           Swal.fire('Erreur!', 'Une erreur est survenue lors de la mise à jour.', 'error');
         }
       );
     }
-  }
+  }  
 }

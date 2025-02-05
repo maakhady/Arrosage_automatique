@@ -2,6 +2,7 @@ import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UtilisateurService, Role } from '../services/utilisateur.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-user-registration',
@@ -16,54 +17,67 @@ export class UserRegistrationComponent {
     nom: '',
     email: '',
     role: 'utilisateur' as Role,
-    secretCode: '',
-    confirmSecretCode: '',
-    password: '',
-    confirmPassword: ''
   };
 
   prenomError = false;
   nomError = false;
   emailError = false;
-  secretCodeError = false;
-  secretCodeMismatch = false;
-  passwordError = false;
-  passwordMismatch = false;
 
   @Output() close = new EventEmitter<void>();
+  @Output() userAdded = new EventEmitter<void>(); // Nouvel événement pour notifier l'ajout d'un utilisateur
 
   constructor(private utilisateurService: UtilisateurService) {}
 
   onSubmit() {
-    if (this.user.secretCode !== this.user.confirmSecretCode) {
-      this.secretCodeMismatch = true;
-      return;
-    }
-
-    if (this.user.password !== this.user.confirmPassword) {
-      this.passwordMismatch = true;
-      return;
-    }
-
     const userToRegister = {
       prenom: this.user.prenom,
       nom: this.user.nom,
       email: this.user.email,
       role: this.user.role,
-      code: this.user.secretCode,
-      password: this.user.password
     };
-
-    console.log('User to register:', userToRegister); // Ajoutez ce log
 
     this.utilisateurService.creerUtilisateur(userToRegister).subscribe(
       response => {
         console.log('Utilisateur enregistré avec succès', response);
+        this.userAdded.emit(); // Émettre l'événement pour notifier l'ajout
+
+        // Réinitialiser le formulaire
+        this.user = {
+          prenom: '',
+          nom: '',
+          email: '',
+          role: 'utilisateur' as Role,
+        };
+
+        // Afficher le modal de succès
+        Swal.fire({
+          icon: 'success',
+          title: 'Succès',
+          text: 'Utilisateur enregistré avec succès.',
+          timer: 2000, // Durée de 2 secondes
+          timerProgressBar: true,
+          showConfirmButton: false
+        });
+
         this.closeModal();
       },
       error => {
         console.error('Erreur lors de l\'enregistrement', error);
-        // Gérez l'affichage des erreurs côté utilisateur
+        let message = 'Une erreur est survenue lors de l\'enregistrement.';
+
+        if (error.status === 400 && error.error.message === 'Un utilisateur existe déjà avec ces informations') {
+          message = 'Un utilisateur existe déjà avec ces informations.';
+        }
+
+        // Afficher le modal d'erreur
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur',
+          text: message,
+          timer: 2000, // Durée de 2 secondes
+          timerProgressBar: true,
+          showConfirmButton: false
+        });
       }
     );
   }
@@ -79,22 +93,6 @@ export class UserRegistrationComponent {
   validateEmail() {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     this.emailError = !emailPattern.test(this.user.email);
-  }
-
-  validateSecretCode() {
-    const secretCodePattern = /^\d{4}$/;
-    this.secretCodeError = !secretCodePattern.test(this.user.secretCode);
-    this.secretCodeMismatch = this.user.secretCode !== this.user.confirmSecretCode;
-  }
-
-  validatePassword() {
-    // Validation plus stricte
-    const hasMinLength = this.user.password.length >= 6;
-    const hasNumber = /\d/.test(this.user.password);
-    const hasSpecialChar = /[!@#$%^&*]/.test(this.user.password);
-    
-    this.passwordError = !hasMinLength || !hasNumber || !hasSpecialChar;
-    this.passwordMismatch = this.user.password !== this.user.confirmPassword;
   }
 
   closeModal() {

@@ -7,16 +7,32 @@
   </div>
   <div class="controls">
     <div class="actions">
-      <button (click)="openDeleteConfirmationModal()" class="delete-button" [disabled]="!anySelected" aria-label="Supprimer les utilisateurs sélectionnés">
-        <i class="fas fa-trash"></i> Supprimer
-      </button>
+      <button
+  (click)="openDeleteConfirmationModal()"
+  class="delete-button"
+  [disabled]="!anySelected"
+  aria-label="Supprimer les utilisateurs sélectionnés"
+>
+  <i class="fas fa-trash"></i> Supprimer
+</button>
+
+
+
       <button (click)="openRegistrationModal()" class="add-button" aria-label="Ajouter un utilisateur">
         <i class="fas fa-user-plus"></i> Ajouter Utilisateur
       </button>
-      <button class="import-button" (click)="triggerFileInput()" aria-label="Importer un fichier CSV">
-        <i class="fas fa-file-csv"></i> Importer CSV
+      <button class="csv-btn custom-csv-btn" (click)="fileInput.click()">
+        <i class="fas fa-file-csv"></i> Ajouter par CSV
       </button>
-      <input #fileInput type="file" (change)="importCSV($event)" accept=".csv" style="display: none;">
+      <input
+        type="file"
+        accept=".csv"
+        (change)="onFileSelected($event)"
+        #fileInput
+        style="display: none;"
+      />
+      
+      
     </div>
     <div class="search-bar">
       <input type="text" [(ngModel)]="searchQuery" (input)="filterUsers()" placeholder="Rechercher par prénom et nom, email ou matricule" aria-label="Rechercher des utilisateurs">
@@ -38,7 +54,14 @@
     </thead>
     <tbody>
       <tr *ngFor="let user of filteredUsers">
-        <td><input type="checkbox" [(ngModel)]="user.selected" (change)="updateButtonState()"></td>
+        <td>
+          <input
+  type="checkbox"
+  [(ngModel)]="user.selected"
+  (change)="onUserCheckboxChange(user)"
+/>
+
+        </td>
         <td>{{ user.matricule }}</td>
         <td>{{ user.prenom }} {{ user.nom }}</td>
         <td>{{ user.email }}</td>
@@ -53,20 +76,51 @@
           </span>
         </td>
         <td>
-          <button (click)="viewUser(user)" aria-label="Voir les détails de l'utilisateur">
+          <button
+            (click)="viewUser(user)"
+            aria-label="Voir les détails de l'utilisateur"
+            title="Voir les détails de l'utilisateur"
+            class="btn btn-secondary tooltip-button"
+            data-toggle="tooltip"
+            data-placement="top"
+          >
             <i class="fas fa-eye"></i>
           </button>
-          
-          <button (click)="editUser(user)" aria-label="Modifier l'utilisateur">
+        
+          <button
+            (click)="editUser(user)"
+            aria-label="Modifier l'utilisateur"
+            title="Modifier l'utilisateur"
+            class="btn btn-secondary tooltip-button"
+            data-toggle="tooltip"
+            data-placement="top"
+          >
             <i class="fas fa-edit"></i>
           </button>
-          <button (click)="openDeleteConfirmationModal(user)" aria-label="Supprimer l'utilisateur">
+        
+          <button
+            (click)="openDeleteConfirmationModal(user)"
+            aria-label="Supprimer l'utilisateur"
+            title="Supprimer l'utilisateur"
+            class="btn btn-secondary tooltip-button"
+            data-toggle="tooltip"
+            data-placement="top"
+          >
             <i class="fas fa-trash"></i>
           </button>
-          <button (click)="openBlockConfirmationModal(user)" aria-label="Bloquer l'utilisateur">
+        
+          <button
+            (click)="openBlockConfirmationModal(user)"
+            aria-label="Bloquer l'utilisateur"
+            [title]="user.actif ? 'Débloquer l\'utilisateur' : 'Bloquer l\'utilisateur'"
+            class="btn btn-secondary tooltip-button"
+            data-toggle="tooltip"
+            data-placement="top"
+          >
             <i [ngClass]="user.actif ? 'fas fa-lock-open' : 'fas fa-lock'"></i>
           </button>
         </td>
+        
         <td>
           <button (click)="assignRFID(user)" class="assign-button" aria-label="Assigner une carte RFID">
             Assigner
@@ -74,6 +128,7 @@
         </td>
       </tr>
     </tbody>
+    
   </table>
 
   <!-- Contrôles de pagination -->
@@ -88,20 +143,24 @@
   
   
 
-  <!-- Modal Bootstrap pour l'inscription -->
-  <div class="modal fade" id="registrationModal" tabindex="-1" aria-labelledby="registrationModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="registrationModalLabel">Inscription</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <app-user-registration (close)="closeRegistrationModal()"></app-user-registration>
-        </div>
+<!-- Modal Bootstrap pour l'inscription -->
+<div class="modal fade" id="registrationModal" tabindex="-1" aria-labelledby="registrationModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="registrationModalLabel">Inscription</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <app-user-registration
+          (close)="closeRegistrationModal()"
+          (userAdded)="onUserAdded()"> <!-- Écouter l'événement userAdded -->
+        </app-user-registration>
       </div>
     </div>
   </div>
+</div>
+
 
 <!-- Modal Détails Utilisateur -->
 <div class="modal fade" id="detailsModal" tabindex="-1">

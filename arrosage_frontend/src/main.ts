@@ -9,7 +9,7 @@ import { routes } from './app/app.routes';
 
 // import { importProvidersFrom } from '@angular/core';
 // import { provideRouter } from '@angular/router';
-import { DashboardAdminComponent } from './app/demo/dashboard/dashboard-admin/dashboard-admin.component';
+import { DashboardAdminComponent, } from './app/demo/dashboard/dashboard-admin/dashboard-admin.component';
 
 bootstrapApplication(AppComponent, {
   providers: [
