@@ -1,0 +1,91 @@
+<app-header></app-header><br><br>
+
+<div class="historique-container">
+  <!-- En-tête avec bouton retour -->
+  <div class="header">
+    <button class="back-button" (click)="backToDashboard()">
+      <i class="fas fa-arrow-left"></i>
+      Retour au tableau de bord
+    </button>
+    <h2>Historique des Mesures</h2>
+  </div>
+
+  <!-- Contrôles de période -->
+  <div class="controls-section">
+    <div class="period-selector">
+      <button [class.active]="periodeSelectionnee === 'semaine'" (click)="changePeriode('semaine')">
+        <i class="fas fa-calendar-week"></i>
+        Vue Semaine
+      </button>
+      <button [class.active]="periodeSelectionnee === 'mois'" (click)="changePeriode('mois')">
+        <i class="fas fa-calendar-alt"></i>
+        Vue Mois
+      </button>
+    </div>
+  </div>
+
+  <!-- Message d'erreur -->
+  <div *ngIf="error" class="error-message">
+    <i class="fas fa-exclamation-triangle"></i>
+    {{ error }}
+    <button class="retry-button" (click)="loadStatistiques()">
+      <i class="fas fa-redo"></i> Réessayer
+    </button>
+  </div>
+
+  <!-- Indicateur de chargement -->
+  <div *ngIf="loading" class="loading-overlay">
+    <div class="spinner"></div>
+    <span>Chargement des données...</span>
+  </div>
+
+  <!-- Carte principale avec graphique - Notez la suppression du *ngIf -->
+  <div class="main-chart-card" [class.hidden]="loading || error">
+    <div class="chart-wrapper">
+      <canvas #dualAxisChart></canvas>
+    </div>
+  </div>
+
+  <!-- Cartes de statistiques -->
+  <div class="stats-grid" [class.hidden]="loading || error || !statistiques?.totaux">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-tint"></i>
+      </div>
+      <div class="stat-info">
+        <h3>Total Arrosages</h3>
+        <p>{{ statistiques?.totaux?.totalArrosages || 0 }}</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-fill-drip"></i>
+      </div>
+      <div class="stat-info">
+        <h3>Volume Total</h3>
+        <p>{{ statistiques?.totaux?.totalEau || 0 }} L</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-water"></i>
+      </div>
+      <div class="stat-info">
+        <h3>Moyenne Humidité</h3>
+        <p>{{ (statistiques?.totaux?.moyenneHumidite || 0).toFixed(1) }}%</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-sun"></i>
+      </div>
+      <div class="stat-info">
+        <h3>Moyenne Luminosité</h3>
+        <p>{{ (statistiques?.totaux?.moyenneLuminosite || 0).toFixed(0) }} lux</p>
+      </div>
+    </div>
+  </div>
+</div>

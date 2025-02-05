@@ -10,7 +10,7 @@ import { Router } from '@angular/router';
 
 
 @Component({
-  selector: 'app-dashboard-utilisateur',
+  selector: 'app-dashboard-simple',
   standalone: true,
   imports: [
     CommonModule,
@@ -20,10 +20,10 @@ import { Router } from '@angular/router';
     HttpClientModule
   ],
   providers: [AuthService],
-  templateUrl: './dashboard-utilisateur.component.html',
-  styleUrls: ['./dashboard-utilisateur.component.css']
+  templateUrl: './dashboard-simple.component.html',
+  styleUrls: ['./dashboard-simple.component.css']
 })
-export class DashboardUtilisateurComponent implements OnInit {
+export class DashboardSimpleComponent implements OnInit {
   private platformId = inject(PLATFORM_ID);
   reservoirVolume = 50;
   isWatering = false;
@@ -55,6 +55,7 @@ export class DashboardUtilisateurComponent implements OnInit {
 
   constructor(private authService: AuthService,
     private router: Router
+
   ) {}
 
  // Remplacer isAuthenticated par isLoggedIn$
@@ -162,6 +163,7 @@ export class DashboardUtilisateurComponent implements OnInit {
   navigateToHistorique(): void {
     this.router.navigate(['/demo/dashboard/historique']);
   }
+
   navigateToPlante(): void {
     this.router.navigate(['/components/gestion-plantes']);
   }

@@ -1,3 +1,4 @@
+<p>dashboard-simple works!</p>
 <app-header></app-header>
 <div class="dashboard">
     <!-- Main Content -->
@@ -41,22 +42,20 @@
         <div class="left-section">
             <!-- Options -->
             <div class="options">
-                <button class="btn1"><i class="fa-solid fa-user"></i>
-                        <span>Gestion des utilisateurs</span></button>
-                <button class="btn2" (click)="openModal()"><i class="fas fa-clock"></i>    <span>Programmer un arrosage</span> </button>
-                <button class="btn3"(click)="navigateToPlante()"><i class="fas fa-plus-circle"></i>   <span>Gestion des plantes</span></button>
-                <button class="btn4" (click)="navigateToHistorique()">
-                  <i class="fas fa-history"></i>
-                  <span>Voir Historique</span>
-                </button>
-            </div>
+              <button class="btn2" (click)="openModal()"><i class="fas fa-clock"></i>    <span>Programmer un arrosage</span> </button>
+              <button class="btn3" (click)="navigateToPlante()"><i class="fas fa-plus-circle"></i>   <span>Gestion des plantes</span></button>
+              <button class="btn4" (click)="navigateToHistorique()">
+                <i class="fas fa-history"></i>
+                <span>Voir Historique</span>
+              </button>
+        </div>
 
 
         </div>
 
         <!-- Historique des Arrosages -->
         <div class="zones-container">
-            <h3><i class="fa-solid fa-list"></i>  Programme des Arrosages</h3><br>
+            <h3><i class="fa-solid fa-list"></i> Programme des Arrosages</h3><br>
 
             <!-- Table d'historique -->
             <table class="history-table">

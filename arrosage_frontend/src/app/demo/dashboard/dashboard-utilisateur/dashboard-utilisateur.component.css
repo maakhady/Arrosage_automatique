@@ -29,8 +29,7 @@ body {
     padding: 4rem;
     text-align: center;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    /* border-right: #4caf50 solid 3px;
-    border-bottom: #4caf50 solid 2px; */
+
 }
 
 .card h3 {
@@ -102,7 +101,7 @@ body {
 
 .options button {
     padding: 1.5rem;
-    color: white;
+    color: #FFFFFF;
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -115,25 +114,32 @@ body {
 }
 
 .btn1 {
-    background-color: #4EB49C;
-    background-color: #38628e; /* Vert légèrement plus foncé au survol */
+    /* background-color: #4EB49C; */
+    background-color:  #607D8B;/* Vert légèrement plus foncé au survol */
+    font-size: 20px;
 }
 
-.btn5 {
+/* .btn5 {
   background-color: #4EB49C;
-}
+} */
 .btn2 {
-    background-color: #45a049;
+    /* background-color: #4CAF50; */
+    background-color: #4EB49C;
+
+    font-size: 20px;
 }
 
 .btn3 {
-    background-color: #2975D8;
-    background-color: #2992d8; /* Bleu doux pour les actions neutres */
+    background-color: #2975d8c0;
+    font-size: 20px;
 }
 
 .btn4 {
-    background-color: #FF7043;
+    background-color: #016ba8;
+    font-size: 20px;
 }
+
+
 
 .action-button {
     background: none;
@@ -172,8 +178,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* border-right: #4CAF50 solid 5px;
-    border-bottom: #4CAF50 solid 7px; */
+
 }
 
 .reservoir-title {
@@ -331,11 +336,8 @@ body {
     border-radius: 25px;
     padding: 5.5rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border-right: #4CAF50 solid 5px;
-    border-bottom: #4CAF50 solid 7px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Ombre subtile */
-    /* border-right: #4CAF50 solid 5px;
-    border-bottom: #4CAF50 solid 7px; */
+
 }
 
 /* Boutons de filtre */

@@ -1,50 +1,59 @@
-import { Component, OnInit } from '@angular/core';
-import { HttpClientModule } from '@angular/common/http';
+import { Component, OnInit, PLATFORM_ID, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { AuthService, AuthResponse } from './../../services/auth.service';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { AuthService } from './../../services/auth.service';
+import { HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-auth',
   templateUrl: './auth.component.html',
   styleUrls: ['./auth.component.css'],
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, HttpClientModule]
+  imports: [CommonModule, ReactiveFormsModule, HttpClientModule],
 })
 export class AuthComponent implements OnInit {
+  private platformId = inject(PLATFORM_ID);
   authForm: FormGroup;
-  isLogin = true;
-  showPassword = false;
   isLoading = false;
   attempts = 0;
   showPopup = false;
   remainingAttempts = 3;
   errorMessage: string | null = null;
-  showRfidMessage = false; // Nouvelle variable pour contrôler l'affichage du message RFID
+  showRfidMessage = false;
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private authService: AuthService
   ) {
+    // Initialisation du formulaire avec validation
     this.authForm = this.fb.group({
       digit1: ['', [Validators.required, Validators.pattern(/^[0-9]$/)]],
       digit2: ['', [Validators.required, Validators.pattern(/^[0-9]$/)]],
       digit3: ['', [Validators.required, Validators.pattern(/^[0-9]$/)]],
       digit4: ['', [Validators.required, Validators.pattern(/^[0-9]$/)]]
     });
+
+    // Vérifier si déjà connecté
+    this.authService.isLoggedIn$.subscribe(isLoggedIn => {
+      if (isLoggedIn) {
+        this.redirectBasedOnRole();
+      }
+    });
   }
 
   ngOnInit(): void {
-    this.focusInput('digit1');
+    if (isPlatformBrowser(this.platformId)) {
+      this.focusInput('digit1');
+    }
   }
 
   onInputChange(event: Event, digit: string, inputElement: HTMLInputElement): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
     const input = event.target as HTMLInputElement;
     const value = input.value;
-
-    // Afficher le message RFID lorsque l'utilisateur commence à saisir
     this.showRfidMessage = true;
 
     if (value.length === 1) {
@@ -64,11 +73,12 @@ export class AuthComponent implements OnInit {
   }
 
   filterInput(event: KeyboardEvent, digit: string, inputElement: HTMLInputElement): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
     if (!/^[0-9]$/.test(event.key) && event.key !== 'Backspace') {
       event.preventDefault();
     }
 
-    // Gérer la suppression
     if (event.key === 'Backspace') {
       const prevDigit = parseInt(digit.charAt(digit.length - 1)) - 1;
       if (prevDigit > 0) {
@@ -83,50 +93,47 @@ export class AuthComponent implements OnInit {
     }
   }
 
-  showTemporaryValue(inputElement: HTMLInputElement): void {
-    const value = inputElement.value;
-    inputElement.type = 'text';
-    setTimeout(() => {
-      inputElement.type = 'password';
-    }, 1000);
-  }
-
-  focusInput(digit: string): void {
-    const inputElement = document.querySelector(`[formControlName="${digit}"]`) as HTMLInputElement;
-    if (inputElement) {
-      inputElement.focus();
-    }
-  }
-
   onSubmit(): void {
     if (this.authForm.invalid) {
-      console.error('Formulaire invalide');
       this.focusInput('digit1');
       return;
     }
 
-    const secretCode = `${this.authForm.get('digit1')?.value}${this.authForm.get('digit2')?.value}${this.authForm.get('digit3')?.value}${this.authForm.get('digit4')?.value}`;
-    console.log('Code secret soumis :', secretCode);
+    const code = Object.keys(this.authForm.controls)
+      .map(key => this.authForm.get(key)?.value)
+      .join('');
 
     this.isLoading = true;
-    this.authService.loginAvecCode(secretCode).subscribe({
-      next: (response: AuthResponse) => {
-        console.log('Réponse dans le composant :', response);
+    this.authService.loginWithCode(code).subscribe({
+      next: (response) => {
         if (response.success) {
-          this.router.navigate(['/../demo/dashboard/dashboard-utilisateur']);
+          this.redirectBasedOnRole();
         } else {
           this.handleFailedLogin();
         }
       },
-      error: (error: any) => {
+      error: (error) => {
         console.error('Erreur de connexion:', error);
         this.handleFailedLogin();
       },
       complete: () => {
         this.isLoading = false;
-        console.log('Requête terminée');
       }
     });
+  }
+
+  private redirectBasedOnRole(): void {
+    const userRole = this.authService.getCurrentUser()?.role;
+    switch (userRole) {
+      case 'super-admin':
+        this.router.navigate(['/demo/dashboard/dashboard-utilisateur']);
+        break;
+      case 'utilisateur':
+        this.router.navigate(['/demo/dashboard/dashboard-simple']);
+        break;
+      default:
+        this.router.navigate(['/']);
+    }
   }
 
   private handleFailedLogin(): void {
@@ -138,31 +145,44 @@ export class AuthComponent implements OnInit {
     }
 
     this.authForm.reset();
-    this.errorMessage = 'Code secret incorrect. Veuillez réessayer.';
-    setTimeout(() => {
-      this.errorMessage = null;
-    }, 3000);
+    this.errorMessage = `Code incorrect. ${this.remainingAttempts} tentative${this.remainingAttempts > 1 ? 's' : ''} restante${this.remainingAttempts > 1 ? 's' : ''}.`;
 
-    this.focusInput('digit1');
-    this.showRfidMessage = false; // Réinitialiser l'affichage du message RFID
+    if (isPlatformBrowser(this.platformId)) {
+      setTimeout(() => {
+        this.errorMessage = null;
+      }, 3000);
+      this.focusInput('digit1');
+    }
+
+    this.showRfidMessage = false;
+  }
+
+  focusInput(digit: string): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    setTimeout(() => {
+      const inputElement = document.querySelector(`[formControlName="${digit}"]`) as HTMLInputElement;
+      if (inputElement) {
+        inputElement.focus();
+      }
+    });
   }
 
   closePopup(): void {
     this.showPopup = false;
-  }
-
-  toggleMode(event: Event): void {
-    event.preventDefault();
-    this.isLogin = !this.isLogin;
+    this.attempts = 0;
+    this.remainingAttempts = 3;
     this.authForm.reset();
+    this.focusInput('digit1');
   }
 
-  togglePasswordVisibility(): void {
-    this.showPassword = !this.showPassword;
-  }
+  showTemporaryValue(inputElement: HTMLInputElement): void {
+    if (!isPlatformBrowser(this.platformId)) return;
 
-  toggleAuthMode(): void {
-    this.isLogin = !this.isLogin;
-    this.authForm.reset();
+    const originalType = inputElement.type;
+    inputElement.type = 'text';
+    setTimeout(() => {
+      inputElement.type = originalType;
+    }, 1000);
   }
 }

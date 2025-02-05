@@ -4,19 +4,19 @@
       <ul>
         <li (click)="toggleMenu($event)">
           <a href="javascript:void(0)">
-            <fa-icon [icon]="faUser"></fa-icon> <!-- Icône d'utilisateur -->
+            <fa-icon [icon]="faUser"></fa-icon>
           </a>
           <div class="dropdown" *ngIf="menuVisible">
             <ul class="dropdown-links">
               <li>
-                <a [routerLink]="['/user-profile']">
-                  <fa-icon [icon]="faUserCircle"></fa-icon> <!-- Icône de profil -->
+                <a (click)="navigateToProfile()">
+                  <fa-icon [icon]="faUserCircle"></fa-icon>
                   <span>Voir le profil</span>
                 </a>
               </li>
               <li>
-                <a href="#logout" (click)="onLogout()">
-                  <fa-icon [icon]="faSignOutAlt"></fa-icon> <!-- Icône de déconnexion -->
+                <a href="" (click)="onLogoutAll()">
+                  <fa-icon [icon]="faSignOutAlt"></fa-icon>
                   <span>Déconnexion</span>
                 </a>
               </li>

@@ -1,195 +1,212 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { Injectable, PLATFORM_ID, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { tap, catchError } from 'rxjs/operators';
 
-export interface User {
-  _id: any;
+// Interfaces
+interface User {
   id: string;
   matricule: string;
   nom: string;
   prenom: string;
-  email?: string;
   role: string;
-  date_creation: Date;
+  email?: string;
 }
 
-export interface AuthResponse {
+interface AuthResponse {
   success: boolean;
   message: string;
-  token?: string;
-  utilisateur?: User;
+  token: string;
+  utilisateur: User;
 }
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = `http://localhost:3000/api/auth`;
+  private platformId = inject(PLATFORM_ID);
+  private apiUrl = 'http://localhost:3000/api/auth';
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   private tokenSubject = new BehaviorSubject<string | null>(null);
+  private loggedInSubject = new BehaviorSubject<boolean>(false);
 
   currentUser$ = this.currentUserSubject.asObservable();
   token$ = this.tokenSubject.asObservable();
+  isLoggedIn$ = this.loggedInSubject.asObservable();
 
   constructor(private http: HttpClient) {
-    // Récupérer le token et l'utilisateur du localStorage au démarrage
-    const storedToken = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-
-    if (storedToken) {
-      this.tokenSubject.next(storedToken);
-      console.log('Token récupéré depuis le localStorage :', storedToken);
-    }
-    if (storedUser) {
-      this.currentUserSubject.next(JSON.parse(storedUser));
-      console.log('Utilisateur récupéré depuis le localStorage :', JSON.parse(storedUser));
+    if (isPlatformBrowser(this.platformId)) {
+      this.loadAuthState();
     }
   }
 
-  private updateAuthState(response: AuthResponse): void {
-    if (response.token) {
-      localStorage.setItem('token', response.token);
-      this.tokenSubject.next(response.token);
-      console.log('Token généré et stocké :', response.token);
-    }
-    if (response.utilisateur) {
-      localStorage.setItem('user', JSON.stringify(response.utilisateur));
-      this.currentUserSubject.next(response.utilisateur);
-      console.log('Utilisateur stocké :', response.utilisateur);
-    }
-  }
-
-  loginAvecCode(code: string): Observable<AuthResponse> {
-    console.log('Tentative de connexion avec code :', code);
-    return this.http.post<AuthResponse>(`${this.apiUrl}/login/code`, { code }).pipe(
-      tap(
-        (response) => {
-          if (response.success) {
-            this.updateAuthState(response);
-            console.log('Connexion réussie avec code :', response);
-          } else {
-            console.error('Échec de la connexion avec code :', response.message);
-          }
-        },
-        (error) => {
-          console.error('Erreur lors de la connexion :', error);
-        }
-      )
-    );
-  }
-
-  loginAvecRFID(cardId: string): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/login/rfid`, { cardId }).pipe(
-      tap((response) => {
+  // Routes publiques
+  loginWithCode(code: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/login/code`, { code })
+      .pipe(tap(response => {
         if (response.success) {
-          this.updateAuthState(response);
-          console.log('Connexion réussie avec RFID :', response);
-        } else {
-          console.error('Échec de la connexion avec RFID :', response.message);
+          this.handleAuthSuccess(response);
         }
-      })
-    );
+      }));
   }
 
-  loginAvecEmail(email: string, password: string): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/login/email`, { email, password }).pipe(
-      tap((response) => {
+  loginWithRFID(cardId: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/login/rfid`, { cardId })
+      .pipe(tap(response => {
         if (response.success) {
-          this.updateAuthState(response);
-          console.log('Connexion réussie avec email :', response);
-        } else {
-          console.error('Échec de la connexion avec email :', response.message);
+          this.handleAuthSuccess(response);
         }
-      })
-    );
+      }));
   }
 
-  verifierRFID(cardId: string): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/verifier-rfid`, { cardId }).pipe(
-      tap((response) => {
-        console.log('Réponse de vérification RFID :', response);
-      })
-    );
-  }
-
-  verifierAuth(): Observable<AuthResponse> {
-    return this.http.get<AuthResponse>(`${this.apiUrl}/verify`).pipe(
-      tap((response) => {
-        if (!response.success) {
-          console.log('Utilisateur non authentifié, déconnexion automatique');
-          this.clearAuthState();
-        }
-      })
-    );
-  }
-
-  logout(): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/logout`, {}).pipe(
-      tap((response) => {
+  loginWithEmail(email: string, password: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/login/email`, { email, password })
+      .pipe(tap(response => {
         if (response.success) {
-          this.clearAuthState();
-          console.log('Déconnexion réussie :', response);
-        } else {
-          console.error('Échec de la déconnexion :', response.message);
+          this.handleAuthSuccess(response);
         }
+      }));
+  }
+
+  // Routes protégées
+  verifierAuth(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/verifier`, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  verifierRFID(cardId: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/verifier-rfid`,
+      { cardId },
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  logout(): Observable<any> {
+    const headers = this.getAuthHeaders();
+
+    return this.http.post(`${this.apiUrl}/logout`, {}, { headers }).pipe(
+      tap(() => this.clearAuthState()),
+      catchError((error) => {
+        console.error('Erreur lors de la déconnexion:', error);
+
+        // Handle specific error cases
+        if (error.status === 0) {
+          console.error('Network error: The backend server is unreachable.');
+        } else {
+          console.error('Server error:', error.message);
+        }
+
+        // On nettoie quand même l'état local
+        this.clearAuthState();
+
+        // On retourne un succès même en cas d'erreur serveur
+        return of({ success: true, message: 'Déconnexion locale effectuée' });
       })
     );
   }
 
-  logoutAll(): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/logout-all`, {}).pipe(
-      tap((response) => {
-        if (response.success) {
-          this.clearAuthState();
-          console.log('Déconnexion de tous les appareils réussie :', response);
-        } else {
-          console.error('Échec de la déconnexion de tous les appareils :', response.message);
-        }
+  // Service
+  logoutAll(): Observable<any> {
+    const headers = this.getAuthHeaders();
+    return this.http.post(`${this.apiUrl}/logout-all`, {}, {
+      headers,
+      withCredentials: true // Ajoutez ceci si vous utilisez des cookies
+    }).pipe(
+      tap(() => this.clearAuthState()),
+      catchError(error => {
+        //  console.error('Erreur lors de la déconnexion totale:', error);
+        this.clearAuthState();
+        throw error; // Propagez l'erreur au lieu de retourner un succès
       })
     );
   }
 
-  private clearAuthState(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    this.tokenSubject.next(null);
-    this.currentUserSubject.next(null);
-    console.log('État d\'authentification effacé');
-  }
-
-  verifierToken(): boolean {
-    const token = this.tokenSubject.value;
-    if (!token) {
-      return false;
-    }
-
-    const tokenPayload = JSON.parse(atob(token.split('.')[1]));
-    const expirationDate = new Date(tokenPayload.exp * 1000);
-    const now = new Date();
-
-    if (expirationDate < now) {
-      console.log('Token expiré, déconnexion automatique');
-      this.clearAuthState();
-      return false;
-    }
-
-    return true;
-  }
-
-  // Getters utiles
-  get currentUser(): User | null {
+  // Méthodes utilitaires publiques
+  getCurrentUser(): User | null {
     return this.currentUserSubject.value;
   }
 
-  get token(): string | null {
+  getToken(): string | null {
     return this.tokenSubject.value;
   }
 
-  get isAuthenticated(): boolean {
-    return !!this.tokenSubject.value;
+  isSuperAdmin(): boolean {
+    return this.getCurrentUser()?.role === 'super-admin';
   }
 
-  get userRole(): string | null {
-    return this.currentUserSubject.value?.role || null;
+  // Méthodes privées de gestion du stockage
+  private getStorageItem(key: string): string | null {
+    if (isPlatformBrowser(this.platformId)) {
+      try {
+        return localStorage.getItem(key);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  private setStorageItem(key: string, value: string): void {
+    if (isPlatformBrowser(this.platformId)) {
+      try {
+        localStorage.setItem(key, value);
+      } catch {
+        console.error('Erreur lors de l\'accès au localStorage');
+      }
+    }
+  }
+
+  private removeStorageItem(key: string): void {
+    if (isPlatformBrowser(this.platformId)) {
+      try {
+        localStorage.removeItem(key);
+      } catch {
+        console.error('Erreur lors de l\'accès au localStorage');
+      }
+    }
+  }
+
+  // Méthodes privées de gestion de l'état
+  private loadAuthState(): void {
+    const token = this.getStorageItem('token');
+    const userStr = this.getStorageItem('user');
+
+    if (token && userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        this.tokenSubject.next(token);
+        this.currentUserSubject.next(user);
+        this.loggedInSubject.next(true);
+      } catch {
+        this.clearAuthState();
+      }
+    }
+  }
+
+  private handleAuthSuccess(response: AuthResponse): void {
+    this.setStorageItem('token', response.token);
+    this.setStorageItem('user', JSON.stringify(response.utilisateur));
+
+    this.tokenSubject.next(response.token);
+    this.currentUserSubject.next(response.utilisateur);
+    this.loggedInSubject.next(true);
+  }
+
+  private clearAuthState(): void {
+    this.removeStorageItem('token');
+    this.removeStorageItem('user');
+
+    this.tokenSubject.next(null);
+    this.currentUserSubject.next(null);
+    this.loggedInSubject.next(false);
+  }
+
+  private getAuthHeaders(): HttpHeaders {
+    const token = this.getToken();
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
   }
 }

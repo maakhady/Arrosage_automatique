@@ -31,7 +31,7 @@ export class UtilisateurService {
 
   // Méthode pour obtenir les en-têtes avec le token
   private getHeaders(): HttpHeaders {
-    const token = this.authService.token; // Récupérez le token depuis le service d'authentification
+    const token = this.authService.getToken();  // Récupérez le token depuis le service d'authentification
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
