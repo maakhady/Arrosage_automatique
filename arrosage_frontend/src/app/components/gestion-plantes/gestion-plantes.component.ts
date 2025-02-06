@@ -33,6 +33,12 @@ export class GestionPlantesComponent implements OnInit {
   successMessage: string = '';
   successTimeout: any;
 
+  itemsPerPage = 5;
+  currentPage = 1;
+  totalPages = 1;
+  paginatedPlantes: Plante[] = [];
+
+
   constructor(private planteService: PlanteService) {}
 
   ngOnInit(): void {
@@ -51,6 +57,7 @@ export class GestionPlantesComponent implements OnInit {
       }
     });
   }
+
 
   private getEmptyPlante(): Plante {
     return {
@@ -198,6 +205,35 @@ export class GestionPlantesComponent implements OnInit {
       plante.nom.toLowerCase().includes(query) ||
       plante.categorie.toLowerCase().includes(query)
     );
+    this.totalPages = Math.ceil(this.filteredPlantes.length / this.itemsPerPage);
+    this.updatePaginatedPlantes();
+  }
+
+  private updatePaginatedPlantes() {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.paginatedPlantes = this.filteredPlantes.slice(startIndex, endIndex);
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updatePaginatedPlantes();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePaginatedPlantes();
+    }
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePaginatedPlantes();
+    }
   }
 
   selectAllPlantes(event: any) {
@@ -235,7 +271,7 @@ export class GestionPlantesComponent implements OnInit {
     this.planteForm.resetForm();
   }
 
-  
+
   backToDashboard(): void {
     window.history.back();
   }

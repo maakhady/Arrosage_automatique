@@ -6,11 +6,11 @@
     <h1>Gestion des Utilisateurs</h1>
   </div>
   <div class="controls">
-    <button class="back-button" (click)="backToDashboard()">
-      <i class="fas fa-arrow-left"></i>
-      Retour
-    </button>
     <div class="actions">
+      <button class="back-button" (click)="backToDashboard()">
+        <i class="fas fa-arrow-left"></i>
+        Retour
+      </button>
       <button
           (click)="openDeleteConfirmationModal()"
           class="delete-button"
@@ -18,7 +18,7 @@
           aria-label="Supprimer les utilisateurs sélectionnés" >
           <i class="fas fa-trash"></i> Suppression Multiples
     </button>
-    
+
       <button (click)="openRegistrationModal()" class="add-button" aria-label="Ajouter un utilisateur">
         <i class="fas fa-user-plus"></i> Ajouter Utilisateur
       </button>
@@ -131,13 +131,32 @@
     </tbody>
 
   </table>
+<!-- Contrôles de pagination -->
+<div class="pagination-controls" *ngIf="users.length > itemsPerPage">
+  <button
+    class="pagination-button"
+    [disabled]="currentPage === 1"
+    (click)="prevPage()">
+    <i class="fas fa-chevron-left"></i>
+  </button>
 
-  <!-- Contrôles de pagination -->
-  <div class="pagination-controls">
-    <button (click)="prevPage()" [disabled]="currentPage === 1">Précédent</button>
-    <span>Page {{ currentPage }}</span>
-    <button (click)="nextPage()" [disabled]="(currentPage * itemsPerPage) >= users.length">Suivant</button>
-  </div>
+  <span class="page-numbers">
+    <button
+      *ngFor="let page of [].constructor(Math.ceil(users.length / itemsPerPage)); let i = index"
+      class="page-number"
+      [class.active]="currentPage === i + 1"
+      (click)="goToPage(i + 1)">
+      {{ i + 1 }}
+    </button>
+  </span>
+
+  <button
+    class="pagination-button"
+    [disabled]="currentPage >= Math.ceil(users.length / itemsPerPage)"
+    (click)="nextPage()">
+    <i class="fas fa-chevron-right"></i>
+  </button>
+</div>
 </div>
 
 

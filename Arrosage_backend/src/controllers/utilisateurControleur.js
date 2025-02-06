@@ -1,5 +1,7 @@
 const Utilisateur = require('../models/Utilisateur');
 const Papa = require('papaparse');
+const EmailService = require('../services/emailService');
+
 
 // Créer un nouvel utilisateur (super-admin uniquement)
 const creerUtilisateur = async (req, res) => {
@@ -85,10 +87,10 @@ const creerUtilisateur = async (req, res) => {
 
         console.log('4. Création de l\'utilisateur...');
         const nouvelUtilisateur = new Utilisateur({
-            matricule,  // Ajout de la matricule générée
+            matricule,
             prenom,
             nom,
-            code: generatedCode,  // Ajout du code généré
+            code: generatedCode,
             email,
             password,
             role: role || 'utilisateur'
@@ -98,12 +100,31 @@ const creerUtilisateur = async (req, res) => {
         await nouvelUtilisateur.save();
         console.log('6. Sauvegarde réussie');
 
+        // Envoi de l'email avec les informations de connexion
+        if (email) {
+            console.log('7. Tentative d\'envoi de l\'email...');
+            try {
+                await EmailService.sendUserCredentials({
+                    prenom: nouvelUtilisateur.prenom,
+                    nom: nouvelUtilisateur.nom,
+                    matricule: nouvelUtilisateur.matricule,
+                    email: nouvelUtilisateur.email,
+                    code: generatedCode,
+                    role: nouvelUtilisateur.role
+                });
+                console.log('8. Email envoyé avec succès');
+            } catch (emailError) {
+                console.error('Erreur lors de l\'envoi de l\'email:', emailError);
+                // On continue l'exécution même si l'email échoue
+            }
+        }
+
         const utilisateurResponse = nouvelUtilisateur.toObject();
         delete utilisateurResponse.password;
 
         res.status(201).json({
             success: true,
-            message: 'Utilisateur créé avec succès',
+            message: email ? 'Utilisateur créé avec succès et email envoyé' : 'Utilisateur créé avec succès',
             utilisateur: utilisateurResponse
         });
     } catch (error) {
@@ -129,10 +150,16 @@ const creerUtilisateur = async (req, res) => {
 };
 
 
+
 // Récupérer tous les utilisateurs (super-admin uniquement)
 const getTousUtilisateurs = async (req, res) => {
     try {
-        const utilisateurs = await Utilisateur.find()
+        // Récupérer l'ID de l'utilisateur connecté depuis le token
+        const utilisateurConnecteId = req.user._id;
+
+        const utilisateurs = await Utilisateur.find({
+            _id: { $ne: utilisateurConnecteId } // Exclure l'utilisateur connecté
+        })
             .select('-code -cardId')
             .sort({ date_creation: -1 });
 
@@ -404,7 +431,6 @@ const importerUtilisateursCSV = async (req, res) => {
 
         const fileContent = req.files.file.data.toString('utf8');
 
-        // Parser le CSV
         const result = Papa.parse(fileContent, {
             header: true,
             skipEmptyLines: true,
@@ -421,6 +447,7 @@ const importerUtilisateursCSV = async (req, res) => {
 
         const utilisateursImportes = [];
         const erreurs = [];
+        const emailsSendings = [];
 
         // Fonction pour générer la matricule
         const generateMatricule = async () => {
@@ -428,6 +455,7 @@ const importerUtilisateursCSV = async (req, res) => {
             let matricule;
             let tentatives = 0;
             const maxTentatives = 50;
+            
             while (!matriculeUnique && tentatives < maxTentatives) {
                 const nombreAleatoire = Math.floor(1000 + Math.random() * 9000);
                 matricule = `NAAT${nombreAleatoire}`;
@@ -452,6 +480,7 @@ const importerUtilisateursCSV = async (req, res) => {
             let code;
             let tentatives = 0;
             const maxTentatives = 50;
+            
             while (!codeUnique && tentatives < maxTentatives) {
                 code = Math.floor(1000 + Math.random() * 9000).toString();
 
@@ -472,53 +501,83 @@ const importerUtilisateursCSV = async (req, res) => {
         // Traiter chaque ligne du CSV
         for (const [index, row] of result.data.entries()) {
             try {
+                console.log(`Traitement ligne ${index + 2}...`);
+                
                 // Vérifier les champs obligatoires
                 if (!row.nom || !row.prenom) {
                     erreurs.push(`Ligne ${index + 2}: Nom et prénom requis`);
                     continue;
                 }
 
-                // Vérifier qu'au moins une méthode d'authentification est fournie
-                if (!row.code && !(row.email && row.password)) {
-                    erreurs.push(`Ligne ${index + 2}: Au moins une méthode d'authentification requise (code ou email/password)`);
+                // Vérifier qu'au moins une méthode d'authentification est fournie (code ou email)
+                if (!row.code && !row.email) {
+                    erreurs.push(`Ligne ${index + 2}: Au moins une méthode d'authentification requise (code ou email)`);
                     continue;
                 }
 
                 // Vérifier le format du code si fourni
-                if (row.code) {
-                    if (!/^\d{4}$/.test(row.code.toString())) {
-                        erreurs.push(`Ligne ${index + 2}: Le code doit être composé de 4 chiffres`);
-                        continue;
-                    }
+                if (row.code && !/^\d{4}$/.test(row.code.toString())) {
+                    erreurs.push(`Ligne ${index + 2}: Le code doit être composé de 4 chiffres`);
+                    continue;
                 }
 
                 // Générer une matricule unique
                 const matricule = await generateMatricule();
+                console.log(`Matricule générée: ${matricule}`);
 
-                // Générer un code unique si non fourni
+                // Générer ou utiliser le code fourni
                 const code = row.code ? row.code.toString() : await generateCode();
+                console.log(`Code: ${code}`);
 
                 // Créer l'utilisateur
                 const nouvelUtilisateur = new Utilisateur({
-                    matricule, // Ajout de la matricule générée
+                    matricule,
                     nom: row.nom,
                     prenom: row.prenom,
                     email: row.email || undefined,
                     password: row.password || undefined,
-                    code, // Ajout du code généré ou fourni
+                    code,
                     role: row.role || 'utilisateur'
                 });
 
                 await nouvelUtilisateur.save();
-                utilisateursImportes.push({
-                    nom: nouvelUtilisateur.nom,
-                    prenom: nouvelUtilisateur.prenom,
-                    matricule: nouvelUtilisateur.matricule,
-                    code: nouvelUtilisateur.code // Ajout du code dans la réponse
-                });
+                console.log(`Utilisateur sauvegardé: ${nouvelUtilisateur.matricule}`);
+
+                // Envoi de l'email si une adresse email est fournie
+                if (row.email) {
+                    try {
+                        await EmailService.sendUserCredentials({
+                            prenom: nouvelUtilisateur.prenom,
+                            nom: nouvelUtilisateur.nom,
+                            matricule: nouvelUtilisateur.matricule,
+                            email: nouvelUtilisateur.email,
+                            code: code,
+                            role: nouvelUtilisateur.role
+                        });
+                        emailsSendings.push({
+                            ligne: index + 2,
+                            status: 'success',
+                            email: row.email
+                        });
+                        console.log(`Email envoyé à ${row.email}`);
+                    } catch (emailError) {
+                        emailsSendings.push({
+                            ligne: index + 2,
+                            status: 'error',
+                            email: row.email,
+                            error: emailError.message
+                        });
+                        console.error(`Erreur envoi email ligne ${index + 2}:`, emailError);
+                    }
+                }
+
+                const utilisateurResponse = nouvelUtilisateur.toObject();
+                delete utilisateurResponse.password;
+                utilisateursImportes.push(utilisateurResponse);
 
             } catch (error) {
                 erreurs.push(`Ligne ${index + 2}: ${error.message}`);
+                console.error(`Erreur traitement ligne ${index + 2}:`, error);
             }
         }
 
@@ -528,17 +587,20 @@ const importerUtilisateursCSV = async (req, res) => {
             resultats: {
                 total: result.data.length,
                 importes: utilisateursImportes.length,
-                erreurs: erreurs.length
+                erreurs: erreurs.length,
+                emailsEnvoyes: emailsSendings.filter(e => e.status === 'success').length
             },
             utilisateursImportes,
-            erreurs
+            erreurs,
+            emailsSendings
         });
 
     } catch (error) {
         console.error('Erreur importation CSV:', error);
         res.status(500).json({
             success: false,
-            message: 'Erreur lors de l\'importation du fichier CSV'
+            message: 'Erreur lors de l\'importation du fichier CSV',
+            error: error.message
         });
     }
 };
