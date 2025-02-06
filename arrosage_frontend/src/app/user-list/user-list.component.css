@@ -76,7 +76,7 @@ body {
   }
 
   .add-button {
-    background-color: #457cbb;
+    background-color: #007bff;
   }
 
   .custom-csv-btn {
@@ -93,6 +93,24 @@ body {
   .custom-csv-btn:hover {
     background-color: #408A3E; /* Couleur de fond au survol */
   }
+
+  .back-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background-color: #4175a6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .back-button:hover {
+    background-color: #45a049;
+  }
+
 
 
   .add-button:hover {

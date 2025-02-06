@@ -6,18 +6,19 @@
     <h1>Gestion des Utilisateurs</h1>
   </div>
   <div class="controls">
+    <button class="back-button" (click)="backToDashboard()">
+      <i class="fas fa-arrow-left"></i>
+      Retour
+    </button>
     <div class="actions">
       <button
-  (click)="openDeleteConfirmationModal()"
-  class="delete-button"
-  [disabled]="!anySelected"
-  aria-label="Supprimer les utilisateurs sélectionnés"
->
-  <i class="fas fa-trash"></i> Suppression Multiples
-</button>
-
-
-
+          (click)="openDeleteConfirmationModal()"
+          class="delete-button"
+          [disabled]="!anySelected"
+          aria-label="Supprimer les utilisateurs sélectionnés" >
+          <i class="fas fa-trash"></i> Suppression Multiples
+    </button>
+    
       <button (click)="openRegistrationModal()" class="add-button" aria-label="Ajouter un utilisateur">
         <i class="fas fa-user-plus"></i> Ajouter Utilisateur
       </button>

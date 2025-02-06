@@ -416,4 +416,7 @@ export class UserListComponent implements OnInit {
       );
     }
   }
+  backToDashboard(): void {
+    window.history.back();
+  }
 }
