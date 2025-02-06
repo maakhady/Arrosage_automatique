@@ -33,34 +33,62 @@
     {{ successMessage }}
   </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th><input type="checkbox" (change)="selectAllPlantes($event)"></th>
-        <th>Nom</th>
-        <th>Catégorie</th>
-        <th>Humidité du Sol</th>
-        <th>Volume d'Eau</th>
-        <th>Luminosité</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let plante of filteredPlantes">
-        <td><input type="checkbox" [(ngModel)]="plante.selected" (change)="updateButtonState()"></td>
-        <td>{{ plante.nom }}</td>
-        <td>{{ plante.categorie }}</td>
-        <td>{{ plante.humiditeSol }}%</td>
-        <td>{{ plante.volumeEau }} ml</td>
-        <td>{{ plante.luminosite }} lux</td>
-        <td>
-          <button (click)="viewPlante(plante)"><i class="fas fa-eye"></i></button>
-          <button (click)="editPlante(plante)"><i class="fas fa-edit"></i></button>
-          <button (click)="confirmDeletePlante(plante)"><i class="fas fa-trash"></i></button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <!-- Modifier la boucle *ngFor dans le tableau pour utiliser paginatedPlantes -->
+<table>
+  <thead>
+    <tr>
+      <th><input type="checkbox" (change)="selectAllPlantes($event)"></th>
+      <th>Nom</th>
+      <th>Catégorie</th>
+      <th>Humidité du Sol</th>
+      <th>Volume d'Eau</th>
+      <th>Luminosité</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let plante of paginatedPlantes">
+      <td><input type="checkbox" [(ngModel)]="plante.selected" (change)="updateButtonState()"></td>
+      <td>{{ plante.nom }}</td>
+      <td>{{ plante.categorie }}</td>
+      <td>{{ plante.humiditeSol }}%</td>
+      <td>{{ plante.volumeEau }} ml</td>
+      <td>{{ plante.luminosite }} lux</td>
+      <td>
+        <button (click)="viewPlante(plante)"><i class="fas fa-eye"></i></button>
+        <button (click)="editPlante(plante)"><i class="fas fa-edit"></i></button>
+        <button (click)="confirmDeletePlante(plante)"><i class="fas fa-trash"></i></button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- Ajouter la pagination après le tableau -->
+<div class="pagination-controls" *ngIf="totalPages > 1">
+  <button 
+    class="pagination-button" 
+    [disabled]="currentPage === 1"
+    (click)="previousPage()">
+    <i class="fas fa-chevron-left"></i>
+  </button>
+  
+  <span class="page-numbers">
+    <button 
+      *ngFor="let page of [].constructor(totalPages); let i = index"
+      class="page-number"
+      [class.active]="currentPage === i + 1"
+      (click)="goToPage(i + 1)">
+      {{ i + 1 }}
+    </button>
+  </span>
+
+  <button 
+    class="pagination-button" 
+    [disabled]="currentPage === totalPages"
+    (click)="nextPage()">
+    <i class="fas fa-chevron-right"></i>
+  </button>
+</div>
 
   <!-- Modal Bootstrap pour l'ajout/modification de plante -->
   <div #planteModal class="modal fade" id="planteModal" tabindex="-1" aria-labelledby="planteModalLabel" aria-hidden="true">

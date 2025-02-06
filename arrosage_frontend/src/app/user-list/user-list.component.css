@@ -222,33 +222,59 @@ body {
   display: inline-block; /* Assure que le span ne prend que la place nécessaire */
 }
 
+/* Styles pour la pagination */
 .pagination-controls {
   display: flex;
   justify-content: center;
   align-items: center;
   margin-top: 20px;
+  gap: 10px;
 }
 
-.pagination-controls button {
-  margin: 0 5px;
-  padding: 5px 10px;
-  border: 1px solid #ccc;
-  background-color: #f9f9f9;
+.pagination-button {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  padding: 8px 12px;
+  border-radius: 4px;
   cursor: pointer;
+  transition: all 0.2s;
 }
 
-.pagination-controls button:disabled {
-  cursor: not-allowed;
+.pagination-button:disabled {
   opacity: 0.5;
+  cursor: not-allowed;
 }
 
-.pagination-controls span {
-  margin: 0 10px;
-  font-size: 1.2em;
+.pagination-button:hover:not(:disabled) {
+  background-color: #e9ecef;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 5px;
+}
+
+.page-number {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.page-number.active {
+  background-color: #50A24C;
+  color: white;
+  border-color: #007bff;
+}
+
+.page-number:hover:not(.active) {
+  background-color: #e9ecef;
 }
 
 .delete-button:disabled {
-  background-color: #cccccc; /* Couleur de fond grisée */
+  background-color: #be5252; /* Couleur de fond grisée */
   color: #666666; /* Couleur du texte grisée */
   cursor: not-allowed; /* Curseur non autorisé */
   opacity: 0.7; /* Opacité réduite */

@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
 import { AuthService } from './auth.service'; // Importez AuthService
 // import { UtilisateurResponse } from '../models/utilisateur.model';
+import { catchError } from 'rxjs/operators';
 
 export type Role = 'super-admin' | 'utilisateur';
 
@@ -19,6 +20,24 @@ export interface Utilisateur {
   date_modification: Date;
 }
 
+export interface ImportResponse {
+  success: boolean;
+  message: string;
+  resultats: {
+    total: number;
+    importes: number;
+    erreurs: number;
+    emailsEnvoyes: number;
+  };
+  utilisateursImportes: Array<any>;
+  erreurs: Array<string>;
+  emailsSendings: Array<{
+    ligne: number;
+    status: string;
+    email: string;
+    error?: string;
+  }>;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -71,10 +90,29 @@ export class UtilisateurService {
   }
 
   // Importer des utilisateurs à partir d'un fichier CSV
-  importerUtilisateursCSV(file: File): Observable<any> {
+  importerUtilisateursCSV(file: File): Observable<ImportResponse> {
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post(`${this.apiUrl}/import-csv`, formData, { headers: this.getHeaders() });
+
+    // Récupérer les headers d'authentification
+    const authHeaders = this.getHeaders();
+
+    // Créer des headers spécifiques pour l'upload de fichier
+    const headers = new HttpHeaders({
+      'Authorization': authHeaders.get('Authorization') || '',
+      // Ne pas définir Content-Type, il sera automatiquement défini avec FormData
+    });
+
+    return this.http.post<ImportResponse>(
+      `${this.apiUrl}/import-csv`,
+      formData,
+      { headers }
+    ).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error('Erreur détaillée:', error);
+        return throwError(() => error);
+      })
+    );
   }
 
   // Activer/désactiver un utilisateur

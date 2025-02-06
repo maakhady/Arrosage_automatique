@@ -384,13 +384,17 @@ const modifierArrosage = async (req, res) => {
 
         // Mise à jour des champs si fournis
         if (type) updates.type = type;
-        if (heureDebut && isHeureValide(heureDebut)) updates.heureDebut = heureDebut;
-        if (heureFin && isHeureValide(heureFin)) updates.heureFin = heureFin;
-        if (volumeEau) updates.volumeEau = Number(volumeEau);
+        if (heureDebut) updates.heureDebut = heureDebut;  // Suppression de la validation isHeureValide
+        if (heureFin) updates.heureFin = heureFin;        // Suppression de la validation isHeureValide
+        if (volumeEau !== undefined) updates.volumeEau = Number(volumeEau);
         if (actif !== undefined) updates.actif = actif;
 
+        // Utilisation du volume d'eau existant si non fourni
+        const volumeEauFinal = volumeEau !== undefined ? 
+            Number(volumeEau) : 
+            arrosageExistant.parametresArrosage?.volumeEau || arrosageExistant.volumeEau;
+
         // Vérification du volume d'eau par rapport à la plante
-        const volumeEauFinal = Number(volumeEau || arrosageExistant.volumeEau);
         if (volumeEauFinal > arrosageExistant.plante.volumeEau) {
             return res.status(400).json({
                 success: false,
@@ -399,22 +403,19 @@ const modifierArrosage = async (req, res) => {
         }
 
         // Gestion des paramètres d'arrosage automatique
-        if (parametresArrosage) {
-            const typeArrosage = type || arrosageExistant.type;
-            if (typeArrosage === 'automatique') {
-                updates.parametresArrosage = {
-                    humiditeSolRequise: parametresArrosage.humiditeSolRequise,
-                    luminositeRequise: parametresArrosage.luminositeRequise,
-                    volumeEau: volumeEauFinal
-                };
+        if (arrosageExistant.type === 'automatique') {
+            updates.parametresArrosage = {
+                humiditeSolRequise: parametresArrosage?.humiditeSolRequise || arrosageExistant.parametresArrosage.humiditeSolRequise,
+                luminositeRequise: parametresArrosage?.luminositeRequise || arrosageExistant.parametresArrosage.luminositeRequise,
+                volumeEau: volumeEauFinal
+            };
 
-                // Vérification de l'humidité minimale
-                if (parametresArrosage.humiditeSolRequise < arrosageExistant.plante.humiditeSol) {
-                    return res.status(400).json({
-                        success: false,
-                        message: 'L\'humidité requise ne peut pas être inférieure à l\'humidité minimale de la plante'
-                    });
-                }
+            // Vérification de l'humidité minimale
+            if (updates.parametresArrosage.humiditeSolRequise < arrosageExistant.plante.humiditeSol) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'L\'humidité requise ne peut pas être inférieure à l\'humidité minimale de la plante'
+                });
             }
         }
 
