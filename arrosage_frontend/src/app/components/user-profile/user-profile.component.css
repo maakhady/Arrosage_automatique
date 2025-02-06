@@ -9,6 +9,23 @@
   font-family: 'Arial', sans-serif;
 }
 
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.back-button:hover {
+  background-color: #45a049;
+}
+
 /* Icône Home */
 .home-icon {
   display: inline-block;

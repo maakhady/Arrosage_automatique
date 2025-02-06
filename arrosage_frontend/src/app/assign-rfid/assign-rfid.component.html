@@ -2,24 +2,12 @@
   <div class="modal-content">
     <span class="close" (click)="closeModal()">&times;</span>
     <h2>Assigner une carte RFID</h2>
-    <img src="assets/images/logo.png" alt="logo" class="logo">
     <form (ngSubmit)="onSubmit()" #assignForm="ngForm">
       <div>
-        <label for="rfid">ID de la carte RFID</label>
-
+        <label for="rfid">ID de la carte RFID</label><br>
         <input type="text" id="rfid" [(ngModel)]="rfid" name="rfid" required placeholder="Scanner la carte...">
       </div>
       <button type="submit" [disabled]="!assignForm.valid">Assigner</button>
     </form>
   </div>
 </div>
-
-<!-- Modal de succès
-<div class="modal" id="successModal">
-  <div class="modal-content">
-    <h2>Assignation Réussie</h2>
-    <p>La carte RFID a été assignée avec succès à {{ selectedUser.firstName }} {{ selectedUser.lastName }}.</p>
-    <button (click)="closeSuccessModal()">OK</button>
-  </div>
-</div> -->
-

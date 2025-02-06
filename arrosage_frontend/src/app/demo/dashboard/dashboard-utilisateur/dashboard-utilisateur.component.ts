@@ -165,4 +165,7 @@ export class DashboardUtilisateurComponent implements OnInit {
   navigateToPlante(): void {
     this.router.navigate(['/components/gestion-plantes']);
   }
+  navigateToUsers(): void {
+    this.router.navigate(['/user-list']);
+  }
 }

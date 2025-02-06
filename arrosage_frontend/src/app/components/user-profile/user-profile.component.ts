@@ -141,7 +141,7 @@ export class UserProfileComponent implements OnInit {
     }, 3000);
   }
 
-  onHomeClick(): void {
-    this.router.navigate(['/demo/dashboard/dashboard-utilisateur']);
+  backToDashboard(): void {
+    window.history.back();
   }
 }

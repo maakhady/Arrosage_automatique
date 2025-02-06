@@ -2,9 +2,10 @@
 
 <div class="user-profile">
   <!-- Icône Home pour rediriger vers le tableau de bord -->
-  <a (click)="onHomeClick()" class="home-icon">
-    <i class="fas fa-home"></i> Accueil
-  </a>
+  <button class="back-button" (click)="backToDashboard()">
+    <i class="fas fa-arrow-left"></i>
+    Retour 
+  </button>
 
   <h2>
     <i class="fas fa-user"></i> Profil de l'utilisateur

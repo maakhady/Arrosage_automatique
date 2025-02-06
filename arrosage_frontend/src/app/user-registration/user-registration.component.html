@@ -1,14 +1,14 @@
 <form (ngSubmit)="onSubmit()" #registrationForm="ngForm">
   <div class="form-group row">
     <div class="col-md-6">
-      <label for="firstName">Prénom</label>
-      <input type="text" id="firstName" [(ngModel)]="user.firstName" name="firstName" class="form-control" required (input)="validateFirstName()" placeholder="Prénom">
-      <span *ngIf="firstNameError" class="text-danger">Le prénom est requis.</span>
+      <label for="prenom">Prénom</label>
+      <input type="text" id="prenom" [(ngModel)]="user.prenom" name="prenom" class="form-control" required (input)="validatePrenom()" placeholder="Prénom">
+      <span *ngIf="prenomError" class="text-danger">Le prénom est requis.</span>
     </div>
     <div class="col-md-6">
-      <label for="lastName">Nom</label>
-      <input type="text" id="lastName" [(ngModel)]="user.lastName" name="lastName" class="form-control" required (input)="validateLastName()" placeholder="Nom">
-      <span *ngIf="lastNameError" class="text-danger">Le nom est requis.</span>
+      <label for="nom">Nom</label>
+      <input type="text" id="nom" [(ngModel)]="user.nom" name="nom" class="form-control" required (input)="validateNom()" placeholder="Nom">
+      <span *ngIf="nomError" class="text-danger">Le nom est requis.</span>
     </div>
   </div>
   <div class="form-group row">
@@ -18,36 +18,12 @@
       <span *ngIf="emailError" class="text-danger">L'email est requis et doit être valide.</span>
     </div>
     <div class="col-md-6">
-      <label for="address">Adresse</label>
-      <input type="text" id="address" [(ngModel)]="user.address" name="address" class="form-control" required (input)="validateAddress()" placeholder="Adresse">
-      <span *ngIf="addressError" class="text-danger">L'adresse est requise.</span>
-    </div>
-  </div>
-  <div class="form-group row">
-    <div class="col-md-6">
       <label for="role">Rôle</label>
       <select id="role" [(ngModel)]="user.role" name="role" class="form-control" required>
-        <option value="admin">Admin</option>
         <option value="utilisateur">Utilisateur</option>
+        <option value="super-admin">Super Admin</option>
       </select>
     </div>
-    <div class="col-md-6">
-      <label for="secretCode">Code Secret</label>
-      <input type="password" id="secretCode" [(ngModel)]="user.secretCode" name="secretCode" class="form-control" required minlength="4" maxlength="4" (input)="validateSecretCode()" placeholder="Code Secret">
-      <span *ngIf="secretCodeError" class="text-danger">Le code secret doit être de 4 chiffres.</span>
-    </div>
   </div>
-  <div class="form-group row">
-    <div class="col-md-6">
-      <label for="confirmSecretCode">Confirmer Code Secret</label>
-      <input type="password" id="confirmSecretCode" [(ngModel)]="user.confirmSecretCode" name="confirmSecretCode" class="form-control" required minlength="4" maxlength="4" (input)="validateSecretCode()" placeholder="Confirmer Code Secret">
-      <span *ngIf="secretCodeMismatch" class="text-danger">Les codes secrets ne correspondent pas.</span>
-    </div>
-    <div class="col-md-6">
-      <label for="phone">Téléphone</label>
-      <input type="text" id="phone" [(ngModel)]="user.phone" name="phone" class="form-control" required (input)="validatePhone()" placeholder="Téléphone">
-      <span *ngIf="phoneError" class="text-danger">Le numéro de téléphone doit contenir exactement 9 chiffres.</span>
-    </div>
-  </div>
-  <button type="submit" class="btn btn-primary" [disabled]="!registrationForm.valid || firstNameError || lastNameError || emailError || addressError || secretCodeError || secretCodeMismatch || phoneError">S'inscrire</button>
+  <button type="submit" class="btn btn-primary" [disabled]="!registrationForm.valid || prenomError || nomError || emailError">S'inscrire</button>
 </form>

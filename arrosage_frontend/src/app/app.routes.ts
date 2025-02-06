@@ -47,6 +47,36 @@ export const routes: Routes = [
     ]
   },
   {
+    path: 'user-list',
+    loadComponent: () => import('./user-list/user-list.component')
+      .then(m => m.UserListComponent),
+    canActivate: [AuthGuard]  // Si vous voulez garder la protection AuthGuard
+  },
+  {
+    path: 'users/edit/:id',
+    loadComponent: () => import('./user-edit/user-edit.component')
+      .then(m => m.UserEditComponent),
+    canActivate: [AuthGuard]
+},
+  {
+    path: 'user-details',
+    loadComponent: () => import('./user-details/user-details.component')
+      .then(m => m.UserDetailsComponent),
+    canActivate: [AuthGuard]  // Si vous voulez garder la protection AuthGuard
+  },
+  {
+    path: 'user-registration',
+    loadComponent: () => import('./user-registration/user-registration.component')
+      .then(m => m.UserRegistrationComponent),
+    canActivate: [AuthGuard]
+},
+  {
+    path: 'users/assign-rfid/:id',
+    loadComponent: () => import('./assign-rfid/assign-rfid.component')
+      .then(m => m.AssignRfidComponent),
+    canActivate: [AuthGuard]
+},
+  {
     path: 'components',
     canActivate: [AuthGuard],
     children: [
@@ -60,6 +90,8 @@ export const routes: Routes = [
         loadComponent: () => import('./components/user-profile/user-profile.component')
           .then(m => m.UserProfileComponent),
       }
+
+
     ]
   },
 

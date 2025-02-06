@@ -15,3 +15,8 @@ export interface Utilisateur {
   date_modification?: Date;
   selected?: boolean;
 }
+
+export interface UtilisateurResponse {
+  success: boolean;
+  utilisateurs: Utilisateur[];
+}

@@ -5,16 +5,17 @@ body {
     margin: 0;
     padding: 0;
   }
-  
+
   .container {
     width: 90%;
     margin: 20px auto;
+    padding-top: 5.5rem;
     background-color: white;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
     overflow: hidden;
   }
-  
+
   .header {
     display: flex;
     justify-content: center;
@@ -24,11 +25,11 @@ body {
     color: white;
     border-bottom: 2px solid #408239;
   }
-  
+
   .header h1 {
     margin: 0;
   }
-  
+
   .controls {
     display: flex;
     justify-content: space-between;
@@ -37,12 +38,12 @@ body {
     background-color: #e9ecef;
     border-bottom: 1px solid #ccc;
   }
-  
+
   .actions {
     display: flex;
     gap: 10px;
   }
-  
+
   .actions button {
     display: flex;
     align-items: center;
@@ -53,89 +54,105 @@ body {
     border-radius: 5px;
     cursor: pointer;
   }
-  
+
   .actions i {
     margin-right: 5px;
   }
-  
+
   .delete-button {
     background-color: #dc3545;
   }
-  
+
   .delete-button:hover {
     background-color: #c82333;
   }
-  
+
   .block-button {
     background-color: #fd7e14;
   }
-  
+
   .block-button:hover {
     background-color: #e06b0f;
   }
-  
+
   .add-button {
-    background-color: #007bff;
+    background-color: #457cbb;
   }
-  
+
+  .custom-csv-btn {
+    background-color: #50A24C; /* Couleur de fond */
+    color: white; /* Couleur du texte */
+    border: none; /* Supprimer la bordure */
+    padding: 10px 20px; /* Espacement interne */
+    border-radius: 5px; /* Coins arrondis */
+    cursor: pointer; /* Curseur de la main */
+    font-size: 16px; /* Taille de la police */
+    transition: background-color 0.3s ease; /* Effet de transition */
+  }
+
+  .custom-csv-btn:hover {
+    background-color: #408A3E; /* Couleur de fond au survol */
+  }
+
+
   .add-button:hover {
     background-color: #0056b3;
   }
-  
+
   .import-button {
     background-color: #28a745;
   }
-  
+
   .import-button:hover {
     background-color: #218838;
   }
-  
+
   .search-bar input {
     width: 300px;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
   }
-  
+
   .csv-import input {
     margin-top: 20px;
   }
-  
+
   table {
     width: 100%;
     margin: 20px auto;
     border-collapse: collapse;
   }
-  
+
   th, td {
     padding: 15px;
     text-align: center;
   }
-  
+
   th {
     background-color: #50A24C;
     color: white;
   }
-  
+
   tr:nth-child(even) {
     background-color: #f9f9f9;
   }
-  
+
   tr:hover {
     background-color: #f1f1f1;
   }
-  
+
   button {
     background: none;
     border: none;
     color: #50A24C;
     cursor: pointer;
   }
-  
+
   button:hover {
-    color: #0056b3;
+    color: #00b39b;
   }
-  
+
   .assign-button {
     background-color: #50A24C;
     color: white;
@@ -144,8 +161,81 @@ body {
     cursor: pointer;
     padding: 5px 10px;
   }
-  
+
   .assign-button:hover {
-    background-color: #408239;
+    background-color: #50A24C;
   }
-  
+
+  /* Style pour le statut actif */
+.status-active {
+  background-color: #50A24C;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+/* Style pour le statut inactif */
+.status-inactive {
+  background-color: red;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+/* Style pour le rôle utilisateur */
+.role-user {
+  background-color: #007bff;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  text-align: center;
+  display: inline-block; /* Assure que le span ne prend que la place nécessaire */
+}
+
+/* Style pour le rôle super-admin */
+.role-super-admin {
+  background-color: #50A24C;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  text-align: center;
+  display: inline-block; /* Assure que le span ne prend que la place nécessaire */
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.pagination-controls button {
+  margin: 0 5px;
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+  cursor: pointer;
+}
+
+.pagination-controls button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.pagination-controls span {
+  margin: 0 10px;
+  font-size: 1.2em;
+}
+
+.delete-button:disabled {
+  background-color: #cccccc; /* Couleur de fond grisée */
+  color: #666666; /* Couleur du texte grisée */
+  cursor: not-allowed; /* Curseur non autorisé */
+  opacity: 0.7; /* Opacité réduite */
+}
+
+
+
+
