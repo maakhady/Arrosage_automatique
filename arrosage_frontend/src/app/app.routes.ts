@@ -10,12 +10,12 @@ import { AssignRfidComponent } from './assign-rfid/assign-rfid.component';
 import { DashboardAdminComponent } from './demo/dashboard/dashboard-admin/dashboard-admin.component';
 import { DashboardUtilisateurComponent } from './demo/dashboard/dashboard-utilisateur/dashboard-utilisateur.component';
 import { GestionPlantesComponent } from './components/gestion-plantes/gestion-plantes.component';
+import { GestionUtilisateursComponent } from './components/gestion-utilisateurs/gestion-utilisateurs.component';
 import { AuthGuard } from './guards/auth.guard';
 import { RoleGuard } from './guards/role.guard';
 
 export const routes: Routes = [
     { path: '', component: AuthComponent },
-    { path: 'unauthorized', component: UnauthorizedComponent },
     { path: 'register', component: UserRegistrationComponent },
     { path: 'users', component: UserListComponent },
     { path: 'users/:id', component: UserDetailsComponent },
@@ -24,6 +24,7 @@ export const routes: Routes = [
     { path: 'dashboard', loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent) },
     { path: 'demo/dashboard/dashboard-admin', component: DashboardAdminComponent },
     { path: 'gestion-plantes', component: GestionPlantesComponent },
+    { path: 'gestion-utilisateurs', component: GestionUtilisateursComponent },
     { path: 'demo/dashboard/dashboard-utilisateur', component: DashboardUtilisateurComponent },
     { path: 'user-profile', component: UserProfileComponent },
     { path: '**', redirectTo: '' } // Redirection pour les routes inconnues

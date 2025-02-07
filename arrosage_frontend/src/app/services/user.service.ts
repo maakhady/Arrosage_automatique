@@ -6,12 +6,12 @@ import { AuthService } from './auth.service';
 export type Role = 'super-admin' | 'utilisateur';
 
 export interface Utilisateur {
-  _id?: string;
+  _id: string;
   matricule: string;
   prenom: string;
   nom: string;
-  email?: string;
-  password?: string;
+  email: string;
+  // password?: string;
   role: Role;
   code?: string;
   cardId?: string;
@@ -32,6 +32,11 @@ export class UtilisateurService {
   // Méthode pour obtenir les en-têtes avec le token
   private getHeaders(): HttpHeaders {
     const token = this.authService.token; // Récupérez le token depuis le service d'authentification
+    
+    if (!token) {
+      console.error('Token manquant');
+    }
+    
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
@@ -58,8 +63,11 @@ export class UtilisateurService {
 
   // Modifier un utilisateur
   modifierUtilisateur(id: string, utilisateur: Partial<Utilisateur>): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}`, utilisateur, { headers: this.getHeaders() });
+    return this.http.put(`${this.apiUrl}/${id}`, utilisateur, { 
+      headers: this.getHeaders() 
+    });
   }
+
 
   // Supprimer un ou plusieurs utilisateurs
   supprimerUtilisateur(ids: string[]): Observable<any> {
@@ -90,5 +98,9 @@ export class UtilisateurService {
   // Activer/Désactiver un utilisateur
   toggleActivationUtilisateur(id: string): Observable<any> {
     return this.http.put(`${this.apiUrl}/${id}/toggle-activation`, {}, { headers: this.getHeaders() });
+  }
+
+  getUtilisateurParEmail(email: string): Observable<Utilisateur> {
+    return this.http.get<Utilisateur>(`${this.apiUrl}/email/${email}`, { headers: this.getHeaders() });
   }
 }

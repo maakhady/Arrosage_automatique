@@ -1,12 +1,12 @@
 export type Role = 'super-admin' | 'utilisateur';
 
 export interface Utilisateur {
-  _id?: string;
+  _id: string;
   matricule: string;
   prenom: string;
   nom: string;
   email?: string;
-  password?: string;
+  // password?: string;
   role: Role;
   code?: string;
   cardId?: string;

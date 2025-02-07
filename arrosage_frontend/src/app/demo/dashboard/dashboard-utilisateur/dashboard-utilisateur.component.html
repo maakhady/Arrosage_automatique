@@ -1,238 +1,268 @@
 <app-header></app-header>
+
 <div class="dashboard">
-    <!-- Navbar et autres éléments -->
+  <div class="main-content">
+    <div class="stats">
+      <div class="card">
+        <i class="fas fa-tint large-icon"></i>
+        <h3>Humidité du Sol</h3>
+        <div class="value">78%</div>
+      </div>
+      <div class="card">
+        <i class="fas fa-sun large-icon"></i>
+        <h3>Luminosité</h3>
+        <div class="value">820 lux</div>
+      </div>
+    </div>
 
-    <!-- Main Content -->
-    <div class="main-content">
-        <!-- Statistiques -->
-        <div class="stats">
-            <!-- Autres cartes -->
-            <div class="card">
-                <i class="fas fa-tint large-icon"></i>
-                <h3>Humidité du Sol</h3>
-                <div class="value">78%</div>
-            </div>
-            <div class="card">
-                <i class="fas fa-sun large-icon"></i>
-                <h3>Luminosité</h3>
-                <div class="value">820 lux</div>
-            </div>
-        <!-- </div> -->
-
-        <!-- Réservoir -->
-         <div class="reservoir">
-          <h2>Volume du Réservoir</h2>
-        <div class="reservoir-content">
-          <div class="reservoir-controls">
-              <button class="arr" (click)="startWatering()">
-                  <i class="fas fa-play"></i> Arroser
-              </button>
-              <button class="aret" (click)="stopWatering()">
-                  <i class="fas fa-stop"></i> Arrêter
-              </button>
-              <div class="volume">{{ reservoirVolume }}%</div>
+    <div class="reservoir">
+      <h2>Volume du Réservoir</h2>
+      <div class="reservoir-content">
+        <div class="reservoir-controls">
+          <button class="arr" (click)="startWatering()">
+            <i class="fas fa-play"></i> Arroser
+          </button>
+          <button class="aret" (click)="stopWatering()">
+            <i class="fas fa-stop"></i> Arrêter
+          </button>
+          <div class="volume">{{ reservoirVolume }}%</div>
+        </div>
+        <div style="position: relative;">
+          <i class="fas fa-fill-drip large-reservoir-icon" [class.bend]="isWatering"></i>
+          <div class="rain-container" [class.active]="isWatering">
+            <div class="raindrop"></div>
+            <div class="raindrop"></div>
+            <div class="raindrop"></div>
+            <div class="raindrop"></div>
+            <div class="raindrop"></div>
+            <div class="raindrop"></div>
+            <div class="raindrop"></div>
+            <div class="raindrop"></div>
           </div>
-          <div style="position: relative;">
-              <i class="fas fa-fill-drip large-reservoir-icon" [class.bend]="isWatering"></i>
-              <div class="rain-container" [class.active]="isWatering">
-                  <div class="raindrop"></div>
-                  <div class="raindrop"></div>
-                  <div class="raindrop"></div>
-                  <div class="raindrop"></div>
-                  <div class="raindrop"></div>
-                  <div class="raindrop"></div>
-                  <div class="raindrop"></div>
-                  <div class="raindrop"></div>
-              </div>
-          </div>
-           <!-- Conteneur du volume -->
-          <!-- <div class="reservoir-volume-container">
-            <div class="reservoir-volume-fill" [class.decrease]="isWatering"></div>
-        </div> -->
+        </div>
       </div>
     </div>
   </div>
 
-    <!-- Section Options + Réservoir + Zones -->
-    <div class="bottom-section">
-        <!-- Partie gauche : Options + Réservoir -->
-        <div class="left-section">
-            <!-- Options -->
-            <div class="options">
-                <button [routerLink]="['/gestion-utilisateurs']" class="btn1">Gestion des utilisateurs</button>
-                <button class="btn2" (click)="openModal()"><i class="fas fa-clock"></i> Programmer un arrosage</button>
-                <button [routerLink]="['/gestion-plantes']" class="btn3"><i class="fas fa-plus-circle"></i> Gestion des plantes</button>
-                <button class="btn4"><i class="fas fa-history"></i> Voir Historique</button>
-            </div>
+  <div class="bottom-section">
+    <div class="left-section">
+      <div class="options">
+        <button [routerLink]="['/gestion-utilisateurs']" class="btn1">Gestion des utilisateurs</button>
+        <button class="btn2" (click)="openModal()"><i class="fas fa-clock"></i> Programmer un arrosage</button>
+        <button [routerLink]="['/gestion-plantes']" class="btn3"><i class="fas fa-plus-circle"></i> Gestion des plantes</button>
+        <button class="btn4"><i class="fas fa-history"></i> Voir Historique</button>
+      </div>
 
-            <!-- Réservoir sous les options --> -->
-            <div class="reservoir">
-                <h2 class="reservoir-title">Volume Réservoir</h2>
-                <div class="reservoir-content">
-                    <div class="reservoir-controls">
-                        <!--  Bouton Arroser -->
-                        <button class="arr" (click)="startWatering()">
-                            <i class="fas fa-play"></i> Arroser
-                        </button>
-                        <!-- Bouton Arrêter -->
-                        <button class="aret" (click)="stopWatering()">
-                            <i class="fas fa-stop"></i> Arrêter
-                        </button>
-                        <div class="volume">{{ reservoirVolume }}%</div>
-                    </div>
-                    <!-- Icône du réservoir avec animation -->
-                    <i class="fas fa-fill-drip large-reservoir-icon" [class.bend]="isWatering"></i>
-                </div>
-            </div>
+      <div class="reservoir">
+        <h2 class="reservoir-title">Volume Réservoir</h2>
+        <div class="reservoir-content">
+          <div class="reservoir-controls">
+            <button class="arr" (click)="startWatering()">
+              <i class="fas fa-play"></i> Arroser
+            </button>
+            <button class="aret" (click)="stopWatering()">
+              <i class="fas fa-stop"></i> Arrêter
+            </button>
+            <div class="volume">{{ reservoirVolume }}%</div>
+          </div>
+          <i class="fas fa-fill-drip large-reservoir-icon" [class.bend]="isWatering"></i>
         </div>
-
-        <!-- Historique des Arrosages -->
-        <div class="zones-container">
-            <h3><i class="fas fa-history"></i> Historique des Arrosages</h3>
-            
-            <!-- Filtres Jour, Semaine, Mois -->
-            <div class="filters">
-                <button class="btn-filter">Jour</button>
-                <button class="btn-filter">Semaine</button>
-                <button class="btn-filter">Mois</button>
-            </div>
-            
-            <!-- Liste des arrosages -->
-            <table class="history-table">
-                <thead>
-                    <tr>
-                        <th>Nom</th>
-                        <th>Prénom</th>
-                        <th>Date</th>
-                        <th>Heure</th>
-                        <th>Durée</th>
-                        <th>Type</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let arrosage of arrosages; let i = index">
-                        <td>{{ arrosage.nom }}</td>
-                        <td>{{ arrosage.prenom }}</td>
-                        <td>{{ arrosage.date }}</td>
-                        <td>{{ arrosage.heure }}</td>
-                        <td>{{ arrosage.duree }}</td>
-                        <td>{{ arrosage.type }}</td>
-                        <td>
-                            <button class="action-button" (click)="editSchedule(i)">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="action-button1" (click)="deleteSchedule(i)">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+      </div>
     </div>
+
+    <div class="zones-container">
+      <h3><i class="fas fa-history"></i> Historique des Arrosages</h3>
+      <div class="filters">
+        <button class="btn-filter">Jour</button>
+        <button class="btn-filter">Semaine</button>
+        <button class="btn-filter">Mois</button>
+      </div>
+
+      <!-- Message de succès -->
+      <div *ngIf="successMessage" class="alert alert-success mt-2">
+        {{ successMessage }}
+      </div>
+
+      <!-- Notification d'arrosage -->
+      <div *ngIf="nextWateringTime" class="notification">
+        <p>Prochain arrosage dans : {{ nextWateringTime }}</p>
+      </div>
+
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Plante</th>
+            <th>Type</th>
+            <th>Heure de début</th>
+            <th>Heure de fin</th>
+            <th>Volume d'eau</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let arrosage of paginatedArrosages; let i = index" (mouseover)="startTimer(arrosage.heureFin)" (mouseleave)="stopTimer()">
+            <td>{{ arrosage.plante.nom }}</td>
+            <td>{{ arrosage.type }}</td>
+            <td>{{ arrosage.heureDebut.heures }}:{{ arrosage.heureDebut.minutes }}:{{ arrosage.heureDebut.secondes }}</td>
+            <td>{{ arrosage.heureFin.heures }}:{{ arrosage.heureFin.minutes }}:{{ arrosage.heureFin.secondes }}</td>
+            <td>{{ arrosage.volumeEau }} litres</td>
+            <td>
+              <button class="action-button" (click)="editSchedule(i)">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="action-button1" (click)="deleteSchedule(i)">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <!-- Pagination Controls -->
+      <div class="pagination-controls">
+        <button (click)="previousPage()" [disabled]="currentPage === 1">Précédent</button>
+        <span>Page {{ currentPage }} sur {{ totalPages }}</span>
+        <button (click)="nextPage()" [disabled]="currentPage === totalPages">Suivant</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" *ngIf="showModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4>{{ isEditing ? 'Modifier' : 'Programmer' }} un arrosage</h4>
+        <button class="close-button" (click)="closeModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <form [formGroup]="arrosageForm">
+          <div class="form-group">
+            <label>Type d'arrosage</label>
+            <select formControlName="type" class="form-control">
+              <option value="manuel">Manuel</option>
+              <option value="automatique">Automatique</option>
+            </select>
+            <div *ngIf="arrosageForm.get('type')?.invalid && arrosageForm.get('type')?.touched" class="error">
+              Type d'arrosage est requis.
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Plante</label>
+            <select formControlName="plante" class="form-control">
+              <option *ngFor="let plante of plantes" [value]="plante._id">
+                {{ plante.nom }}
+              </option>
+            </select>
+            <div *ngIf="arrosageForm.get('plante')?.invalid && arrosageForm.get('plante')?.touched" class="error">
+              Plante est requis.
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Heure de début</label>
+            <div class="time-inputs">
+              <div>
+                <label>Heures</label>
+                <input type="number" formControlName="heureDebutHeures" min="0" max="23" class="form-control">
+                <div *ngIf="arrosageForm.get('heureDebutHeures')?.invalid && arrosageForm.get('heureDebutHeures')?.touched" class="error">
+                  Valide entre 0 et 23.
+                </div>
+              </div>
+              <div>
+                <label>Minutes</label>
+                <input type="number" formControlName="heureDebutMinutes" min="0" max="59" class="form-control">
+                <div *ngIf="arrosageForm.get('heureDebutMinutes')?.invalid && arrosageForm.get('heureDebutMinutes')?.touched" class="error">
+                  Valide entre 0 et 59.
+                </div>
+              </div>
+              <div>
+                <label>Secondes</label>
+                <input type="number" formControlName="heureDebutSecondes" min="0" max="59" class="form-control">
+                <div *ngIf="arrosageForm.get('heureDebutSecondes')?.invalid && arrosageForm.get('heureDebutSecondes')?.touched" class="error">
+                  Valide entre 0 et 59.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Heure de fin</label>
+            <div class="time-inputs">
+              <div>
+                <label>Heures</label>
+                <input type="number" formControlName="heureFinHeures" min="0" max="23" class="form-control">
+                <div *ngIf="arrosageForm.get('heureFinHeures')?.invalid && arrosageForm.get('heureFinHeures')?.touched" class="error">
+                  Valide entre 0 et 23.
+                </div>
+              </div>
+              <div>
+                <label>Minutes</label>
+                <input type="number" formControlName="heureFinMinutes" min="0" max="59" class="form-control">
+                <div *ngIf="arrosageForm.get('heureFinMinutes')?.invalid && arrosageForm.get('heureFinMinutes')?.touched" class="error">
+                  Valide entre 0 et 59.
+                </div>
+              </div>
+              <div>
+                <label>Secondes</label>
+                <input type="number" formControlName="heureFinSecondes" min="0" max="59" class="form-control">
+                <div *ngIf="arrosageForm.get('heureFinSecondes')?.invalid && arrosageForm.get('heureFinSecondes')?.touched" class="error">
+                  Valide entre 0 et 59.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group" *ngIf="arrosageForm.get('type')?.value === 'automatique'">
+            <label>Humidité du sol requise (%)</label>
+            <input type="number" formControlName="humiditeSolRequise" min="0" max="100" class="form-control">
+            <div *ngIf="arrosageForm.get('humiditeSolRequise')?.invalid && arrosageForm.get('humiditeSolRequise')?.touched" class="error">
+              Valide entre 0 et 100.
+            </div>
+          </div>
+
+          <div class="form-group" *ngIf="arrosageForm.get('type')?.value === 'automatique'">
+            <label>Luminosité requise (lux)</label>
+            <input type="number" formControlName="luminositeRequise" min="0" class="form-control">
+            <div *ngIf="arrosageForm.get('luminositeRequise')?.invalid && arrosageForm.get('luminositeRequise')?.touched" class="error">
+              Luminosité requise est requise.
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Volume d'eau (en litres)</label>
+            <input type="number" formControlName="volumeEau" min="0" class="form-control">
+            <div *ngIf="arrosageForm.get('volumeEau')?.invalid && arrosageForm.get('volumeEau')?.touched" class="error">
+              Volume d'eau doit être positif.
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="cancel-button" (click)="closeModal()">Annuler</button>
+        <button class="save-button" [disabled]="!arrosageForm.valid" (click)="saveSchedule()">
+          Programmer
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
-<!-- Modal de programmation -->
-<div class="modal-overlay" *ngIf="showModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h4>{{ isEditing ? 'Modifier' : 'Programmer' }} un arrosage</h4>
-            <button class="close-button" (click)="closeModal()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-
-        <div class="modal-body">
-            <form [formGroup]="arrosageForm">
-                <!-- Type d'arrosage -->
-                <div class="form-group">
-                    <label>Type d'arrosage</label>
-                    <select formControlName="type" class="form-control">
-                        <option value="manuel">Manuel</option>
-                        <option value="automatique">Automatique</option>
-                    </select>
-                </div>
-
-                <!-- Sélection de plante -->
-                <div class="form-group">
-                    <label>Plante</label>
-                    <select formControlName="plante" class="form-control">
-                        <option *ngFor="let plante of plantes" [value]="plante._id">
-                            {{ plante.nom }}
-                        </option>
-                    </select>
-                </div>
-
-                <!-- Heure de début -->
-                <div class="form-group">
-                    <label>Heure de début</label>
-                    <div class="time-inputs">
-                        <div>
-                            <label>Heures</label>
-                            <input type="number" formControlName="heureDebutHeures" 
-                                   min="0" max="23" class="form-control">
-                        </div>
-                        <div>
-                            <label>Minutes</label>
-                            <input type="number" formControlName="heureDebutMinutes" 
-                                   min="0" max="59" class="form-control">
-                        </div>
-                        <div>
-                            <label>Secondes</label>
-                            <input type="number" formControlName="heureDebutSecondes" 
-                                   min="0" max="59" class="form-control">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Heure de fin -->
-                <div class="form-group">
-                    <label>Heure de fin</label>
-                    <div class="time-inputs">
-                        <div>
-                            <label>Heures</label>
-                            <input type="number" formControlName="heureFinHeures" 
-                                   min="0" max="23" class="form-control">
-                        </div>
-                        <div>
-                            <label>Minutes</label>
-                            <input type="number" formControlName="heureFinMinutes" 
-                                   min="0" max="59" class="form-control">
-                        </div>
-                        <div>
-                            <label>Secondes</label>
-                            <input type="number" formControlName="heureFinSecondes" 
-                                   min="0" max="59" class="form-control">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Volume d'eau -->
-                <div class="form-group">
-                    <label>Volume d'eau (en litres)</label>
-                    <input type="number" formControlName="volumeEau" 
-                           min="0" class="form-control">
-                </div>
-
-                <!-- État actif/inactif -->
-                <div class="form-group">
-                    <label class="checkbox-container">
-                        <input type="checkbox" formControlName="actif">
-                        Activer la programmation
-                    </label>
-                </div>
-            </form>
-        </div>
-
-        <div class="modal-footer">
-            <button class="cancel-button" (click)="closeModal()">Annuler</button>
-            <button class="save-button" 
-                    [disabled]="!arrosageForm.valid" 
-                    (click)="saveSchedule()">
-                <!-- {{ isEditing ? 'Modifier' : 'Programmer' }} -->
-                Programmer
-            </button>
-        </div>
+<!-- Weather Flyer -->
+<div class="weather-flyer">
+  <div class="weather-header">
+    <i class="fas fa-cloud-sun"></i> Météo Actuelle
+  </div>
+  <div class="weather-content">
+    <div class="weather-info">
+      <div class="temperature">{{ temperature }}°C</div>
+      <div class="humidity">Humidité: {{ humidity }}%</div>
     </div>
+    <div class="weather-forecast">
+      <div *ngIf="isRaining">🌧️ Pluie prévue</div>
+      <div *ngIf="!isRaining">☀️ Pas de pluie prévue</div>
+    </div>
+  </div>
 </div>

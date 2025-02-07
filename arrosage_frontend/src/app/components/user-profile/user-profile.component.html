@@ -2,43 +2,58 @@
 
 <div class="user-profile">
   <!-- Icône Home pour rediriger vers le tableau de bord -->
-  <a routerLink="/dashboard" class="home-icon">
-    <i class="fas fa-home"></i> <!-- Si vous utilisez Font Awesome -->
-    Accueil
+  <a (click)="onHomeClick()" class="home-icon">
+    <i class="fas fa-home"></i> Accueil
   </a>
 
   <h2>
-    <i class="fas fa-user"></i>
-    Profil de l'utilisateur
+    <i class="fas fa-user"></i> Profil de l'utilisateur
   </h2>
 
-  <div *ngIf="user" class="profile-details">
-    <form (ngSubmit)="updateUser()" #userForm="ngForm">
+  <div *ngIf="loading">Chargement...</div>
+  <div *ngIf="error" class="error-message">{{ error }}</div> <!-- Message d'erreur -->
+  <div *ngIf="formError" class="error-message">Tous les champs doivent être remplis correctement.</div>
+  <div *ngIf="successMessage" class="success-message">{{ successMessage }}</div> <!-- Message de succès -->
+
+  <div *ngIf="userForm" class="profile-details">
+    <form [formGroup]="userForm" (ngSubmit)="updateUser()">
       <div class="profile-item">
         <label for="matricule">Matricule :</label>
-        <input type="text" id="matricule" [(ngModel)]="user.matricule" name="matricule" class="disabled" required readonly />
+        <input type="text" id="matricule" formControlName="matricule" class="disabled" readonly />
       </div>
       <div class="profile-item">
         <label for="nom">Nom :</label>
-        <input type="text" id="nom" [(ngModel)]="user.nom" name="nom" required />
+        <input type="text" id="nom" formControlName="nom" required />
+        <div *ngIf="userForm.get('nom')?.invalid && userForm.get('nom')?.touched" class="error-message">
+          Le nom est requis.
+        </div>
       </div>
       <div class="profile-item">
         <label for="prenom">Prénom :</label>
-        <input type="text" id="prenom" [(ngModel)]="user.prenom" name="prenom" required />
+        <input type="text" id="prenom" formControlName="prenom" required />
+        <div *ngIf="userForm.get('prenom')?.invalid && userForm.get('prenom')?.touched" class="error-message">
+          Le prénom est requis.
+        </div>
       </div>
       <div class="profile-item">
         <label for="email">Email :</label>
-        <input type="email" id="email" [(ngModel)]="user.email" name="email" />
+        <input type="email" id="email" formControlName="email" />
+        <div *ngIf="userForm.get('email')?.invalid && userForm.get('email')?.touched" class="error-message">
+          Veuillez entrer une adresse email valide.
+        </div>
       </div>
       <div class="profile-item">
         <label for="role">Rôle :</label>
-        <input type="text" id="role" [(ngModel)]="user.role" name="role" class="disabled" required readonly />
+        <input type="text" id="role" formControlName="role" class="disabled" readonly />
       </div>
-      <button type="submit" class="update-button">Modifier</button>
+      <div class="profile-item">
+        <label for="code">Code Secret :</label>
+        <input type="text" id="code" formControlName="code" />
+        <div *ngIf="userForm.get('code')?.invalid && userForm.get('code')?.touched" class="error-message">
+          Le code secret doit être composé de 4 chiffres.
+        </div>
+      </div>
+      <button type="submit" class="update-button" [disabled]="!userForm.valid || userForm.pristine">Modifier</button>
     </form>
-  </div>
-
-  <div *ngIf="!user" class="loading">
-    Aucun utilisateur connecté.
   </div>
 </div>

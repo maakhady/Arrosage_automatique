@@ -10,6 +10,7 @@ export interface User {
   prenom: string;
   email?: string;
   role: string;
+  code?: string;
   date_creation: Date;
 }
 
@@ -30,6 +31,7 @@ export class AuthService {
 
   currentUser$ = this.currentUserSubject.asObservable();
   token$ = this.tokenSubject.asObservable();
+  
 
   constructor(private http: HttpClient) {
     // Récupérer le token et l'utilisateur du localStorage au démarrage
@@ -45,6 +47,9 @@ export class AuthService {
       console.log('Utilisateur récupéré depuis le localStorage :', JSON.parse(storedUser));
     }
   }
+
+
+  
 
   private updateAuthState(response: AuthResponse): void {
     if (response.token) {
@@ -192,5 +197,9 @@ export class AuthService {
 
   get userRole(): string | null {
     return this.currentUserSubject.value?.role || null;
+  }
+
+  getUserId(): string | null {
+    return this.currentUserSubject.value?._id || null;
   }
 }

@@ -30,36 +30,32 @@
       <div class="info-grid">
         <div class="info-item">
           <label>Matricule</label>
-          <p>{{ user.matricule }}</p>
+          <p>{{ user.matricule || 'Non renseigné' }}</p>
         </div>
         <div class="info-item">
           <label>Prénom</label>
-          <p>{{ user.prenom }}</p>
+          <p>{{ user.prenom || 'Non renseigné' }}</p>
         </div>
         <div class="info-item">
           <label>Nom</label>
-          <p>{{ user.nom }}</p>
+          <p>{{ user.nom || 'Non renseigné' }}</p>
         </div>
         <div class="info-item">
           <label>Email</label>
-          <p>{{ user.email ?? 'Non renseigné' }}</p>
+          <p>{{ user.email || 'Non renseigné' }}</p>
         </div>
         <div class="info-item">
           <label>Rôle</label>
-          <p>{{ user.role }}</p>
+          <p>{{ user.role || 'Non renseigné' }}</p>
         </div>
         <div class="info-item">
-            <label>Date de création</label>
-            <p>{{ user.date_creation | date:'dd/MM/yyyy HH:mm' }}</p>
+          <label>Date de création</label>
+          <p>{{ user.date_creation | date:'dd/MM/yyyy HH:mm' }}</p>
         </div>
         <div class="info-item" *ngIf="user.date_modification">
-            <label>Date de modification</label>
-            <p>{{ user.date_modification | date:'dd/MM/yyyy HH:mm' }}</p>
+          <label>Date de modification</label>
+          <p>{{ user.date_modification | date:'dd/MM/yyyy HH:mm' }}</p>
         </div>
-        <!-- <div class="info-item" *ngIf="user?.dernierAcces">
-          <label>Dernier accès</label>
-          <p>{{ user?.dernierAcces | date:'dd/MM/yyyy HH:mm' }}</p>
-        </div> -->
       </div>
     </div>
   </div>

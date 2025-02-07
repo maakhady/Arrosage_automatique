@@ -10,6 +10,7 @@ import { AuthService } from '../../services/auth.service';
 import { HeaderComponent } from '../header/header.component';
 // import { HistoriquesComponent } from '../historiques/historiques.component';
 
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,

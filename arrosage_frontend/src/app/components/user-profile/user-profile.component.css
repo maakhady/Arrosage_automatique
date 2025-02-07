@@ -17,6 +17,7 @@
   text-decoration: none;
   font-size: 16px;
   pointer-events: auto !important;
+  cursor: pointer;
 }
 
 .home-icon i {
@@ -93,4 +94,22 @@ h2 {
 .disabled {
   background-color: #e9ecef;
   cursor: not-allowed;
+}
+
+.error-message {
+  color: #dc3545; /* Rouge */
+  background-color: #f8d7da;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  border: 1px solid #f5c6cb;
+}
+
+.success-message {
+  color: #28a745; /* Vert */
+  background-color: #d4edda;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  border: 1px solid #c3e6cb;
 }

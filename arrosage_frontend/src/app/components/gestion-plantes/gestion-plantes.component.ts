@@ -4,6 +4,7 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { PlanteService, Plante } from './../../services/plante.service';
 import {HeaderComponent} from '../header/header.component';
+import Swal from 'sweetalert2';
 
 declare var bootstrap: any;
 
@@ -74,23 +75,55 @@ export class GestionPlantesComponent implements OnInit {
     modal.show();
   }
 
-  confirmDeletePlante(plante: Plante) {
-    this.planteToDelete = plante;
-    this.selectedPlantes = [];
-    const modal = new bootstrap.Modal(this.confirmDeleteModal.nativeElement);
-    modal.show();
+  confirmDeletePlante(plante: Plante): void {
+    Swal.fire({
+      title: 'Êtes-vous sûr?',
+      text: `Voulez-vous vraiment supprimer la plante ${plante.nom} ?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Oui, supprimer',
+      cancelButtonText: 'Non, annuler'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.deletePlantes(plante);
+      }
+    });
   }
 
-  confirmDeleteSelectedPlantes() {
-    this.planteToDelete = null;
+  confirmDeleteSelectedPlantes(): void {
     this.selectedPlantes = this.plantes.filter(plante => plante.selected);
-    const modal = new bootstrap.Modal(this.confirmDeleteModal.nativeElement);
-    modal.show();
+  
+    // Vérifie si des plantes sont sélectionnées
+    if (this.selectedPlantes.length === 0) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Aucune plante sélectionnée',
+        text: 'Veuillez sélectionner au moins une plante à supprimer.'
+      });
+      return;
+    }
+  
+    const planteNames = this.selectedPlantes.map(plante => plante.nom).join(', ');
+  
+    Swal.fire({
+      title: 'Êtes-vous sûr?',
+      text: `Voulez-vous vraiment supprimer les plantes suivantes : ${planteNames} ?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Oui, supprimer',
+      cancelButtonText: 'Non, annuler'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.deletePlantes();
+      }
+    });
   }
 
-  deletePlante() {
-    if (this.planteToDelete && this.planteToDelete._id) {
-      this.planteService.supprimerPlante(this.planteToDelete._id).subscribe({
+
+  deletePlantes(planteToDelete?: any) {
+    if (planteToDelete) {
+      // Suppression d'une seule plante via l'icône de suppression
+      this.planteService.supprimerPlante(planteToDelete._id).subscribe({
         next: () => {
           this.chargerPlantes();
           this.successMessage = 'Plante supprimée avec succès';
@@ -102,24 +135,23 @@ export class GestionPlantesComponent implements OnInit {
           console.error('Erreur lors de la suppression:', error);
         }
       });
-    }
-  }
-
-  deletePlantes() {
-    const selectedIds = this.selectedPlantes.map(plante => plante._id as string);
-    if (selectedIds.length > 0) {
-      this.planteService.supprimerPlusieursPlantes(selectedIds).subscribe({
-        next: () => {
-          this.chargerPlantes();
-          this.successMessage = 'Plantes supprimées avec succès';
-          this.clearSuccessMessageAfterDelay();
-          bootstrap.Modal.getInstance(this.confirmDeleteModal.nativeElement).hide();
-        },
-        error: (error) => {
-          this.error = error.message;
-          console.error('Erreur lors de la suppression multiple:', error);
-        }
-      });
+    } else {
+      // Suppression de plusieurs plantes sélectionnées
+      const selectedIds = this.selectedPlantes.map(plante => plante._id as string);
+      if (selectedIds.length > 0) {
+        this.planteService.supprimerPlusieursPlantes(selectedIds).subscribe({
+          next: () => {
+            this.chargerPlantes();
+            this.successMessage = 'Plantes supprimées avec succès';
+            this.clearSuccessMessageAfterDelay();
+            bootstrap.Modal.getInstance(this.confirmDeleteModal.nativeElement).hide();
+          },
+          error: (error) => {
+            this.error = error.message;
+            console.error('Erreur lors de la suppression multiple:', error);
+          }
+        });
+      }
     }
   }
 

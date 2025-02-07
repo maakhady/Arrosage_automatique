@@ -1,8 +1,9 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, Renderer2, ElementRef } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { AuthService, AuthResponse } from './../../services/auth.service';
 
 @Component({
@@ -10,9 +11,9 @@ import { AuthService, AuthResponse } from './../../services/auth.service';
   templateUrl: './auth.component.html',
   styleUrls: ['./auth.component.css'],
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, HttpClientModule]
+  imports: [CommonModule, ReactiveFormsModule, HttpClientModule, FormsModule]
 })
-export class AuthComponent implements OnInit, OnDestroy {
+export class AuthComponent implements OnInit, OnDestroy, AfterViewInit {
   authForm: FormGroup;
   isLogin = true;
   showPassword = false;
@@ -25,11 +26,14 @@ export class AuthComponent implements OnInit, OnDestroy {
   timer: number = 0; // Timer en secondes
   timerInterval: any; // Intervalle pour le timer
   isLocked: boolean = false; // État de verrouillage des champs
+  lockDuration: number = 20; // Durée du verrouillage en secondes
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private renderer: Renderer2,
+    private el: ElementRef
   ) {
     this.authForm = this.fb.group({
       digit1: ['', [Validators.required, Validators.pattern(/^[0-9]$/)]],
@@ -40,8 +44,15 @@ export class AuthComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.focusInput('digit1');
     this.checkLockState(); // Vérifier l'état de verrouillage au chargement
+  }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      if (!this.isLocked) {
+        this.focusInput('digit1');
+      }
+    }, 0);
   }
 
   ngOnDestroy(): void {
@@ -60,6 +71,7 @@ export class AuthComponent implements OnInit, OnDestroy {
       if (now < lockTime) {
         this.isLocked = true;
         this.startTimer(Math.floor((lockTime - now) / 1000)); // Démarrer le timer avec le temps restant
+        this.updateInputStyles();
       } else {
         localStorage.removeItem('lockUntil'); // Supprimer le verrouillage expiré
       }
@@ -67,7 +79,8 @@ export class AuthComponent implements OnInit, OnDestroy {
   }
 
   // Démarrer le timer
-  startTimer(duration: number): void {
+   // Démarrer le timer
+   startTimer(duration: number): void {
     this.timer = duration;
     this.timerInterval = setInterval(() => {
       this.timer--;
@@ -75,19 +88,22 @@ export class AuthComponent implements OnInit, OnDestroy {
         clearInterval(this.timerInterval);
         this.isLocked = false;
         localStorage.removeItem('lockUntil'); // Supprimer le verrouillage
+        this.updateInputStyles();
+        this.onDelayEnd(); // Appeler la méthode pour afficher le curseur
       }
     }, 1000);
   }
 
-  // Verrouiller les champs pendant 3 minutes
+  // Verrouiller les champs pendant 20 secondes
   lockInputs(): void {
-    const lockDuration = 3 * 60; // 3 minutes en secondes
-    const lockUntil = new Date().getTime() + lockDuration * 1000;
+    const lockUntil = new Date().getTime() + this.lockDuration * 1000;
 
     localStorage.setItem('lockUntil', lockUntil.toString()); // Stocker dans localStorage
     this.isLocked = true;
-    this.startTimer(lockDuration);
+    this.startTimer(this.lockDuration);
+    this.updateInputStyles();
   }
+  
 
   // Formater le timer en minutes:secondes
   formatTimer(seconds: number): string {
@@ -157,16 +173,45 @@ export class AuthComponent implements OnInit, OnDestroy {
   }
 
   focusInput(digit: string): void {
+    if (this.isLocked) return; // Ne pas focaliser si les champs sont verrouillés
+
     const inputElement = document.querySelector(`[formControlName="${digit}"]`) as HTMLInputElement;
     if (inputElement) {
       inputElement.focus();
     }
   }
 
+  focusFirstInput(): void {
+    const firstInputElement = document.querySelector('input[formControlName]') as HTMLInputElement;
+    if (firstInputElement) {
+      firstInputElement.focus();
+    }
+  }
+
+  // Méthode à appeler lorsque le délai se termine
+  onDelayEnd(): void {
+    this.focusFirstInput();
+  }
+
+  updateInputStyles(): void {
+    const inputElements = this.el.nativeElement.querySelectorAll('.form-control');
+    inputElements.forEach((inputElement: HTMLInputElement) => {
+      if (this.isLocked) {
+        this.renderer.addClass(inputElement, 'input-disabled');
+        inputElement.disabled = true; // désactiver les champs
+      } else {
+        this.renderer.removeClass(inputElement, 'input-disabled');
+        inputElement.disabled = false; // réactiver les champs
+      }
+    });
+  }
+
   onSubmit(): void {
     if (this.authForm.invalid || this.isLocked) {
       console.error('Formulaire invalide ou champs verrouillés');
-      this.focusInput('digit1');
+      if (!this.isLocked) {
+        this.focusInput('digit1');
+      }
       return;
     }
 
@@ -200,7 +245,7 @@ export class AuthComponent implements OnInit, OnDestroy {
 
     if (this.attempts >= 3) {
       this.showPopup = true;
-      this.lockInputs(); // Verrouiller les champs pendant 3 minutes
+      this.lockInputs(); // Verrouiller les champs pendant 20 secondes
     }
 
     this.authForm.reset();
@@ -209,7 +254,9 @@ export class AuthComponent implements OnInit, OnDestroy {
       this.errorMessage = null;
     }, 3000);
 
-    this.focusInput('digit1');
+    if (!this.isLocked) {
+      this.focusInput('digit1');
+    }
     this.showRfidMessage = false;
   }
 

@@ -796,3 +796,73 @@ body {
         padding: 0.5rem;
     }
 }
+
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+  }
+  
+  .pagination-controls button {
+    margin: 0 10px;
+    padding: 5px 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .pagination-controls button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+  
+  .pagination-controls span {
+    margin: 0 10px;
+    font-weight: bold;
+  }
+  .error {
+    color: red;
+  }
+
+  .weather-flyer {
+    position: fixed;
+    top: 150px;
+    right: 10px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    z-index: 1000;
+  }
+  
+  .weather-header {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .weather-header i {
+    margin-right: 5px;
+  }
+  
+  .weather-content {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .weather-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+  }
+  
+  .weather-forecast {
+    text-align: center;
+    font-size: 14px;
+  }

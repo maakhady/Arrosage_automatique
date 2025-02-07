@@ -1,0 +1,139 @@
+<app-header></app-header>
+<div class="container">
+  <div class="header">
+    <h1>Gestion des Utilisateurs</h1>
+  </div>
+  <div class="controls">
+    <div class="actions">
+      <button (click)="openUserModal()" class="add-button">
+        <i class="fas fa-user-plus"></i> Ajouter Utilisateur
+      </button>
+      <button (click)="confirmDeleteUser()" class="delete-button" [disabled]="!anySelected">
+        <i class="fas fa-trash"></i> Supprimer Sélectionnés
+      </button>
+      <button class="csv-btn" (click)="fileInput.click()">
+        <i class="fas fa-file-csv"></i> Ajouter par CSV
+      </button>
+      <input type="file" accept=".csv" (change)="onFileSelected($event)" #fileInput style="display: none;" />
+      <a href="/../demo/dashboard/dashboard-utilisateur" class="home-icon">
+        <i class="fas fa-home fa-2x"></i>
+      </a>
+    </div>
+    <div class="search-bar">
+      <input type="text" [(ngModel)]="searchQuery" (input)="filterUsers()" placeholder="Rechercher par Prénom, Email, Matricule...">
+    </div>
+  </div>
+
+  <!-- Message de succès -->
+  <div *ngIf="successMessage" class="alert alert-success mt-2">
+    {{ successMessage }}
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th><input type="checkbox" (change)="selectAllUsers($event)"></th>
+        <th>Matricule</th>
+        <th>Prénom et Nom</th>
+        <th>Email</th>
+        <th>Rôle</th>
+        <th>Statut</th>
+        <th>Actions</th>
+        <th>Assignation</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let utilisateur of filteredUsers">
+        <td><input type="checkbox" [(ngModel)]="utilisateur.selected" (change)="updateButtonState()"></td>
+        <td>{{ utilisateur.matricule }}</td>
+        <td>{{ utilisateur.prenom }} {{ utilisateur.nom }}</td>
+        <td>{{ utilisateur.email }}</td>
+        <td>{{ utilisateur.role }}</td>
+        <td>
+          <span [class.active]="utilisateur.actif" [class.inactive]="!utilisateur.actif">
+            {{ utilisateur.actif ? 'Actif' : 'Inactif' }}
+          </span>
+        </td>
+        <td>
+          <button (click)="viewUser(utilisateur)"><i class="fas fa-eye"></i></button>
+          <button (click)="editUser(utilisateur)"><i class="fas fa-edit"></i></button>
+          <button (click)="confirmDeleteUser(utilisateur)"><i class="fas fa-trash"></i></button>
+          <button (click)="toggleActivationUtilisateur(utilisateur)"><i class="fas fa-ban"></i></button>
+        </td>
+        <td>
+          <button (click)="assignerCarteRFID(utilisateur)"><i class="fas fa-user-plus"></i></button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Modal personnalisé pour l'ajout/modification d'utilisateur -->
+  <div #userModal class="custom-modal">
+    <div class="custom-modal-content">
+        <span class="close" (click)="hideModal()">&times;</span>
+      <h2>{{ isEditing ? 'Modifier l\'Utilisateur' : 'Ajouter un Utilisateur' }}</h2>
+      <form (ngSubmit)="onSubmit()" #userForm="ngForm">
+        <div class="form-group">
+          <label for="prenom">Prénom</label>
+          <input type="text" id="prenom" name="prenom" [(ngModel)]="currentUser.prenom" required />
+        </div>
+        <div class="form-group">
+          <label for="nom">Nom</label>
+          <input type="text" id="nom" name="nom" [(ngModel)]="currentUser.nom" required />
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" [(ngModel)]="currentUser.email" />
+        </div>
+        <div class="form-group">
+          <label for="code">Code Secret</label>
+          <input type="text" id="code" name="code" [(ngModel)]="currentUser.code" />
+        </div>
+        <div class="form-group">
+          <label for="role">Rôle</label>
+          <select id="role" name="role" [(ngModel)]="currentUser.role" required>
+            <option value="admin">Admin</option>
+            <option value="utilisateur">Utilisateur</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="cancel-btn" (click)="hideModal()">Annuler</button>
+          <button type="submit" class="submit-btn" [disabled]="userForm.invalid">{{ isEditing ? 'Modifier' : 'Ajouter' }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal personnalisé de confirmation de suppression -->
+  <div #confirmDeleteModal class="custom-modal">
+    <div class="custom-modal-content">
+      <span class="close" (click)="hideModal()">&times;</span>
+      <h2>Confirmation de suppression</h2>
+      <p *ngIf="userToDelete">Êtes-vous sûr de vouloir supprimer l'utilisateur "{{ userToDelete.prenom }} {{ userToDelete.nom }}" ?</p>
+      <p *ngIf="!userToDelete && selectedUsers.length > 0">Êtes-vous sûr de vouloir supprimer les utilisateurs suivants ?</p>
+      <ul *ngIf="!userToDelete && selectedUsers.length > 0">
+        <li *ngFor="let utilisateur of selectedUsers">{{ utilisateur.prenom }} {{ utilisateur.nom }}</li>
+      </ul>
+      <div class="modal-actions">
+        <button type="button" class="cancel-btn" (click)="hideModal()">Annuler</button>
+        <button type="button" class="delete-btn" (click)="deleteUsers()">Supprimer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal personnalisé pour afficher les informations de l'utilisateur -->
+  <div #viewUserModal class="custom-modal">
+    <div class="custom-modal-content">
+      <span class="close" (click)="hideModal()">&times;</span>
+      <h2>{{ currentUser.prenom }} {{ currentUser.nom }}</h2>
+      <div class="user-details">
+        <p><strong>Email:</strong> {{ currentUser.email }}</p>
+        <p><strong>Rôle:</strong> {{ currentUser.role }}</p>
+        <p><strong>Statut:</strong> {{ currentUser.actif ? 'Actif' : 'Inactif' }}</p>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="close-btn" (click)="hideModal()">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
