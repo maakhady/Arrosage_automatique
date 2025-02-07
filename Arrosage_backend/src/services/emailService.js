@@ -3,6 +3,11 @@ const transporter = require('../config/emailConfig');
 class EmailService {
     static async sendUserCredentials(userData) {
         try {
+            // Logs pour débugger
+            console.log('=== Debug EmailService ===');
+            console.log('Code reçu dans EmailService:', userData.code);
+            console.log('Données utilisateur complètes:', userData);
+
             const mailOptions = {
                 from: `"NAATANGÉ (Arrosage Intelligent)" <${process.env.EMAIL_USER}>`,
                 to: userData.email,
@@ -25,12 +30,14 @@ class EmailService {
 
                         <p style="color: #e74c3c;"><strong>Important :</strong> Pour des raisons de sécurité, nous vous recommandons de changer votre code dès votre première connexion.</p>
                         
-                        <p>Pour vous connecter, utilisez votre code ou votre carte RFID fourni ci-dessus.</p>
+                        <p>Pour vous connecter, utilisez votre email et le code fourni ci-dessus.</p>
                         
-                        <p style="margin-top: 30px;">Cordialement,<br>L'équipe Arrosage Intelligent "NAATANGÉÉ</p>
+                        <p style="margin-top: 30px;">Cordialement,<br>L'équipe Arrosage Intelligent "NAATANGÉÉ"</p>
                     </div>
                 `
             };
+
+            console.log('Code utilisé dans le template email:', userData.code);
 
             const info = await transporter.sendMail(mailOptions);
             console.log('Email envoyé avec succès:', info.messageId);
