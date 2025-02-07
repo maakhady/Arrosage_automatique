@@ -126,7 +126,7 @@ body {
   }
 
   .search-bar input {
-    width: 300px;
+    width: 200px;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -280,6 +280,55 @@ body {
   opacity: 0.7; /* Opacité réduite */
 }
 
+/* Styles pour le champ de recherche personnalisé */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
+.search-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
 
+.search-input-container input {
+  flex: 1;
+  padding: 10px;
+  padding-right: 40px; /* Espace pour l'icône du dropdown */
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
 
+.role-select-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.role-select {
+  appearance: none; /* Supprimer le style par défaut du sélecteur */
+  -webkit-appearance: none; /* Supprimer le style par défaut du sélecteur pour Safari */
+  -moz-appearance: none; /* Supprimer le style par défaut du sélecteur pour Firefox */
+  background: none; /* Supprimer le fond par défaut */
+  border: none; /* Supprimer la bordure par défaut */
+  padding: 0; /* Supprimer le padding par défaut */
+  margin: 0; /* Supprimer la marge par défaut */
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.role-select-container i {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #ccc;
+}
+
+.role-select:focus + i,
+.role-select-container:hover i {
+  color: #50A24C;
+}

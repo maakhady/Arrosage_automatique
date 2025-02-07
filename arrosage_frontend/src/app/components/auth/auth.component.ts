@@ -4,6 +4,8 @@ import { Router } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { AuthService } from './../../services/auth.service';
 import { HttpClientModule } from '@angular/common/http';
+import { WebsocketService } from '../../services/websocket.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-auth',
@@ -21,11 +23,15 @@ export class AuthComponent implements OnInit {
   remainingAttempts = 3;
   errorMessage: string | null = null;
   showRfidMessage = false;
+  private wsSubscription!: Subscription;
+
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private websocketService: WebsocketService
+
   ) {
     // Initialisation du formulaire avec validation
     this.authForm = this.fb.group({
@@ -46,6 +52,36 @@ export class AuthComponent implements OnInit {
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
       this.focusInput('digit1');
+    }
+    
+    this.wsSubscription = this.websocketService.getMessages().subscribe({
+      next: (msg: any) => {
+        if (msg.type === 'keypad' && /^[0-9]$/.test(msg.value)) {
+          this.fillNextInput(msg.value);
+        }
+      },
+      error: (err) => console.error('Erreur WebSocket:', err)
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.wsSubscription) {
+      this.wsSubscription.unsubscribe();
+    }
+  }
+
+  fillNextInput(value: string): void {
+    for (let i = 1; i <= 4; i++) {
+      const controlName = `digit${i}`;
+      if (!this.authForm.get(controlName)?.value) {
+        this.authForm.get(controlName)?.setValue(value);
+        this.focusInput(`digit${i + 1}`);
+        break;
+      }
+    }
+
+    if (this.authForm.valid) {
+      this.onSubmit();
     }
   }
 

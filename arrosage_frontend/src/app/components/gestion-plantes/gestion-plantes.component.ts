@@ -33,7 +33,7 @@ export class GestionPlantesComponent implements OnInit {
   successMessage: string = '';
   successTimeout: any;
 
-  itemsPerPage = 5;
+  itemsPerPage = 7;
   currentPage = 1;
   totalPages = 1;
   paginatedPlantes: Plante[] = [];

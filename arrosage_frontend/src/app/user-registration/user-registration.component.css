@@ -73,3 +73,15 @@ span.text-danger {
   font-size: 12px;
   margin-top: 5px;
 }
+
+.btn-custom {
+  background-color: #50A24C;
+  border-color: #50A24C;
+  color: white;
+}
+
+.btn-custom:disabled {
+  background-color: #a5d6a7;
+  border-color: #a5d6a7;
+  color: white;
+}
