@@ -7,7 +7,7 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { HttpClientModule } from '@angular/common/http';
 import { AuthService } from '../../../services/auth.service';
 import { Router } from '@angular/router';
-
+import { WebSocketService } from '../../../services/capteur.service'; // Importez votre service WebSocket
 
 @Component({
   selector: 'app-dashboard-simple',
@@ -25,12 +25,14 @@ import { Router } from '@angular/router';
 })
 export class DashboardSimpleComponent implements OnInit {
   private platformId = inject(PLATFORM_ID);
-  reservoirVolume = 50;
+  niveau_eau: number | null = null;
   isWatering = false;
   showModal = false;
   faTimes = faTimes;
-  isEditing = false;
+  public isEditing = false; // Rendre public
   editingIndex: number | null = null;
+  humidite: number | null = null; // Ajoutez cette propriété
+  luminosite: number | null = null; // Ajoutez cette propriété
 
   // Vos données existantes
   arrosages = [
@@ -52,22 +54,26 @@ export class DashboardSimpleComponent implements OnInit {
     type: 'automatique'
   };
 
-
-  constructor(private authService: AuthService,
-    private router: Router
-
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private webSocketService: WebSocketService // Injectez votre service WebSocket
   ) {}
 
- // Remplacer isAuthenticated par isLoggedIn$
   ngOnInit(): void {
     this.authService.isLoggedIn$.subscribe(isLoggedIn => {
       if (!isLoggedIn) {
         this.router.navigate(['/']);
       }
     });
+
+    // Abonnez-vous aux données WebSocket
+    this.webSocketService.socket$.subscribe((data) => {
+      this.humidite = data.humidite;
+      this.luminosite = data.lumiere;
+      this.niveau_eau = data.niveau_eau;
+    });
   }
-
-
 
   // Méthode pour démarrer l'arrosage
   startWatering() {
@@ -86,8 +92,8 @@ export class DashboardSimpleComponent implements OnInit {
     if (!isPlatformBrowser(this.platformId)) return;
 
     const interval = setInterval(() => {
-      if (this.reservoirVolume > 0 && this.isWatering) {
-        this.reservoirVolume -= 1;
+      if (this.niveau_eau !== null && this.niveau_eau > 0 && this.isWatering) {
+        this.niveau_eau -= 1;
       } else {
         clearInterval(interval);
       }
@@ -96,7 +102,7 @@ export class DashboardSimpleComponent implements OnInit {
 
   // Réinitialiser le volume du réservoir
   resetVolume() {
-    this.reservoirVolume = 500; // Réinitialiser à 50%
+    this.niveau_eau = 500; // Réinitialiser à 50%
   }
 
   // Ouvrir le modal de programmation
@@ -166,5 +172,9 @@ export class DashboardSimpleComponent implements OnInit {
 
   navigateToPlante(): void {
     this.router.navigate(['/components/gestion-plantes']);
+  }
+
+  navigateToUsers(): void {
+    this.router.navigate(['/user-list']);
   }
 }

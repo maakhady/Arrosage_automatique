@@ -4,6 +4,8 @@ import { Router } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { AuthService } from './../../services/auth.service';
 import { HttpClientModule } from '@angular/common/http';
+import Swal from 'sweetalert2';
+
 
 @Component({
   selector: 'app-auth',
@@ -114,7 +116,21 @@ export class AuthComponent implements OnInit {
       },
       error: (error) => {
         console.error('Erreur de connexion:', error);
-        this.handleFailedLogin();
+        if (error.status === 403) {
+          // Afficher le message de blocage avec SweetAlert2
+          Swal.fire({
+            icon: 'error',
+            title: 'Compte bloqué',
+            text: error.error.message || 'Votre compte est désactivé. Veuillez contacter l\'administrateur.',
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'OK'
+          }).then(() => {
+            this.authForm.reset();
+            this.focusInput('digit1');
+          });
+        } else {
+          this.handleFailedLogin();
+        }
       },
       complete: () => {
         this.isLoading = false;

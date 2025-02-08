@@ -7,7 +7,7 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { HttpClientModule } from '@angular/common/http';
 import { AuthService } from '../../../services/auth.service';
 import { Router } from '@angular/router';
-
+import { WebSocketService } from '../../../services/capteur.service'; // Importez votre service WebSocket
 
 @Component({
   selector: 'app-dashboard-utilisateur',
@@ -25,14 +25,15 @@ import { Router } from '@angular/router';
 })
 export class DashboardUtilisateurComponent implements OnInit {
   private platformId = inject(PLATFORM_ID);
-  reservoirVolume = 50;
+  niveau_eau: number | null = null;
   isWatering = false;
   showModal = false;
   faTimes = faTimes;
   isEditing = false;
   editingIndex: number | null = null;
+  humidite: number | null = null;
+  luminosite: number | null = null;
 
-  // Vos données existantes
   arrosages = [
     { date: '01/02/2025', heure: '08:30', duree: '10 min', type: 'Automatique', nom: 'John', prenom: 'Doe' },
     { date: '02/02/2025', heure: '09:00', duree: '15 min', type: 'Manuel', nom: 'Jane', prenom: 'Doe' },
@@ -52,58 +53,57 @@ export class DashboardUtilisateurComponent implements OnInit {
     type: 'automatique'
   };
 
-
-  constructor(private authService: AuthService,
-    private router: Router
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private webSocketService: WebSocketService // Injectez votre service WebSocket
   ) {}
 
- // Remplacer isAuthenticated par isLoggedIn$
   ngOnInit(): void {
     this.authService.isLoggedIn$.subscribe(isLoggedIn => {
       if (!isLoggedIn) {
         this.router.navigate(['/']);
       }
     });
+
+    // Abonnez-vous aux données WebSocket
+    this.webSocketService.socket$.subscribe((data) => {
+      this.humidite = data.humidite;
+      this.luminosite = data.lumiere;
+      this.niveau_eau = data.niveau_eau;
+    });
   }
 
-
-
-  // Méthode pour démarrer l'arrosage
   startWatering() {
-    this.isWatering = true; // Activer l'état d'arrosage
-    this.decreaseVolume(); // Démarrer la diminution du volume
+    this.isWatering = true;
+    this.decreaseVolume();
   }
 
-  // Méthode pour arrêter l'arrosage
   stopWatering() {
-    this.isWatering = false; // Désactiver l'état d'arrosage
-    this.resetVolume(); // Réinitialiser le volume
+    this.isWatering = false;
+    this.resetVolume();
   }
 
-  // Diminuer le volume du réservoir
   decreaseVolume() {
     if (!isPlatformBrowser(this.platformId)) return;
 
     const interval = setInterval(() => {
-      if (this.reservoirVolume > 0 && this.isWatering) {
-        this.reservoirVolume -= 1;
+      if (this.niveau_eau !== null && this.niveau_eau > 0 && this.isWatering) {
+        this.niveau_eau -= 1;
       } else {
         clearInterval(interval);
       }
     }, 1000);
   }
 
-  // Réinitialiser le volume du réservoir
   resetVolume() {
-    this.reservoirVolume = 500; // Réinitialiser à 50%
+    this.niveau_eau = 500; // Réinitialiser à 50%
   }
 
-  // Ouvrir le modal de programmation
   openModal() {
     this.showModal = true;
   }
 
-  // Fermer le modal de programmation
   closeModal() {
     this.showModal = false;
     this.isEditing = false;
@@ -111,7 +111,6 @@ export class DashboardUtilisateurComponent implements OnInit {
     this.resetNewSchedule();
   }
 
-  // Ajouter ou modifier un horaire
   saveSchedule() {
     if (this.isEditing && this.editingIndex !== null) {
       this.scheduledTimes[this.editingIndex] = {
@@ -135,7 +134,6 @@ export class DashboardUtilisateurComponent implements OnInit {
     this.closeModal();
   }
 
-  // Modifier un horaire
   editSchedule(index: number) {
     this.newSchedule = { ...this.scheduledTimes[index] };
     this.isEditing = true;
@@ -143,12 +141,10 @@ export class DashboardUtilisateurComponent implements OnInit {
     this.openModal();
   }
 
-  // Supprimer un horaire
   deleteSchedule(index: number) {
     this.scheduledTimes.splice(index, 1);
   }
 
-  // Réinitialiser le programme d'arrosage
   resetNewSchedule() {
     this.newSchedule = {
       hour: '',

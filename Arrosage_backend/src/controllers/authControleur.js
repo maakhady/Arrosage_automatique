@@ -18,12 +18,12 @@ const genererToken = (utilisateur) => {
 };
 
 // Connexion avec code
+
 const loginAvecCode = async (req, res) => {
     try {
         const { code } = req.body;
         console.log('1. Code reçu:', code, typeof code);
-
-        // Vérification de la présence du code
+        
         if (!code) {
             return res.status(400).json({
                 success: false,
@@ -31,7 +31,6 @@ const loginAvecCode = async (req, res) => {
             });
         }
 
-        // Vérification du format du code (4 chiffres)
         const codeStr = code.toString();
         console.log('2. Code après conversion:', codeStr, typeof codeStr);
         
@@ -42,36 +41,38 @@ const loginAvecCode = async (req, res) => {
             });
         }
 
-        // Rechercher tous les utilisateurs ayant un code
         const utilisateurs = await Utilisateur.find({ 
             code: { $exists: true }
         }).select('code actif matricule nom prenom email role');
-
         console.log('3. Nombre d\'utilisateurs avec code:', utilisateurs.length);
         
-        // Afficher les détails de chaque utilisateur trouvé
         utilisateurs.forEach((user, index) => {
             console.log(`Utilisateur ${index + 1}:`, {
                 matricule: user.matricule,
                 role: user.role,
-                email:user.email,
-                code:user.code,
+                email: user.email,
+                code: user.code,
                 actif: user.actif,
                 codePresent: !!user.code,
                 codeHash: user.code
             });
         });
 
-        // Tester la vérification pour chaque utilisateur
         for (const user of utilisateurs) {
             console.log(`4. Test de vérification pour ${user.matricule}:`);
             const codeValide = await user.verifierCode(codeStr);
-            console.log('Résultat:', codeValide);
             
             if (codeValide) {
-                // Si le code est valide, procéder à la connexion
-                const token = genererToken(user);
+                // Vérifier si l'utilisateur est bloqué
+                if (!user.actif) {
+                    return res.status(403).json({
+                        success: false,
+                        message: 'Votre compte est désactivé. Veuillez contacter l\'administrateur.'
+                    });
+                }
 
+                // Si le code est valide et l'utilisateur est actif, procéder à la connexion
+                const token = genererToken(user);
                 return res.json({
                     success: true,
                     message: 'Connexion réussie',
@@ -81,7 +82,7 @@ const loginAvecCode = async (req, res) => {
                         matricule: user.matricule,
                         nom: user.nom,
                         email: user.email,
-                        code:user.code,
+                        code: user.code,
                         prenom: user.prenom,
                         role: user.role
                     }
@@ -89,12 +90,10 @@ const loginAvecCode = async (req, res) => {
             }
         }
 
-        // Si aucun utilisateur n'a été trouvé avec ce code
         return res.status(401).json({
             success: false,
             message: 'Code invalide'
         });
-
     } catch (error) {
         console.error('Erreur complète:', error);
         res.status(500).json({
@@ -122,6 +121,14 @@ const loginAvecRFID = async (req, res) => {
             return res.status(401).json({
                 success: false,
                 message: 'Carte RFID non reconnue'
+            });
+        }
+
+        // Vérifier si l'utilisateur est bloqué
+        if (!utilisateur.actif) {
+            return res.status(403).json({
+                success: false,
+                message: 'Votre compte est désactivé. Veuillez contacter l\'administrateur.'
             });
         }
 
