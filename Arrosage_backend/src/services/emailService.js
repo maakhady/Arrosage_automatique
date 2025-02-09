@@ -28,9 +28,9 @@ class EmailService {
                             <p><strong>Rôle :</strong> ${userData.role}</p>
                         </div>
 
-                        <p style="color: #e74c3c;"><strong>Important :</strong> Pour des raisons de sécurité, nous vous recommandons de changer votre code dès votre première connexion.</p>
+                        // <p style="color: #e74c3c;"><strong>Important :</strong> Pour des raisons de sécurité, nous vous recommandons de changer votre code dès votre première connexion.</p>
                         
-                        <p>Pour vous connecter, utilisez votre email et le code fourni ci-dessus.</p>
+                        <p>Pour vous connecter, utilisez  le code fourni ci-dessus.</p>
                         
                         <p style="margin-top: 30px;">Cordialement,<br>L'équipe Arrosage Intelligent "NAATANGÉÉ"</p>
                     </div>

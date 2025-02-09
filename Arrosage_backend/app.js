@@ -7,6 +7,7 @@ const http = require('http');
 const WebSocket = require('ws'); // Importez le module WebSocket
 require('dotenv').config();
 
+
 // Import des services
 const capteurService = require('./src/services/capteurService');
 
@@ -57,6 +58,9 @@ app.use('/api/arrosage', arrosageRoutes);
 app.use('/api/historique', historiqueArrosageRoutes);
 app.use('/api/capteurs', capteurRoutes);
 
+const startScheduler = require('./scheduler');
+
+
 // Gestion des erreurs
 app.use((req, res) => {
     res.status(404).json({
@@ -90,5 +94,9 @@ process.on('SIGINT', () => {
     capteurService.arreterLecture();
     process.exit(0);
 });
+
+// Démarrez le scheduler après avoir configuré votre app Express
+startScheduler();
+
 
 module.exports = app;

@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const Arrosage = require('../models/Arrosage');
 const Plante = require('../models/Plante');
 const HistoriqueArrosage = require('../models/HistoriqueArrosage');
+const pompeService = require('../services/pompeService');
+
 
 // Fonction utilitaire pour créer un historique
 
@@ -664,101 +666,137 @@ const arrosageManuelPlante = async (req, res) => {
 // Arrêt d'urgence de l'arrosage
 const arreterArrosage = async (req, res) => {
     try {
-        // Ici, vous désactiverez toutes les pompes
-        // Code pour arrêter tous les relais/pompes
+        // Utiliser le service pompe pour arrêter l'arrosage
+        const flaskResponse = await pompeService.arreterArrosage();
 
-        res.json({
-            success: true,
-            message: 'Arrosage arrêté avec succès'
-        });
+        if (flaskResponse.success) {
+            // Mettre à jour tous les arrosages actifs en cours à inactif
+            await Arrosage.updateMany(
+                { actif: true },
+                { 
+                    actif: false,
+                    heureFin: {
+                        heures: new Date().getHours(),
+                        minutes: new Date().getMinutes(),
+                        secondes: new Date().getSeconds()
+                    }
+                }
+            );
+
+            // Mettre à jour l'historique correspondant
+            await HistoriqueArrosage.updateMany(
+                { actif: true },
+                { 
+                    actif: false,
+                    heureFin: {
+                        heures: new Date().getHours(),
+                        minutes: new Date().getMinutes(),
+                        secondes: new Date().getSeconds()
+                    }
+                }
+            );
+
+            res.json({
+                success: true,
+                message: 'Arrosage arrêté avec succès'
+            });
+        } else {
+            throw new Error('Échec de l\'arrêt de la pompe');
+        }
     } catch (error) {
         console.error('Erreur arrêt arrosage:', error);
         res.status(500).json({
             success: false,
-            message: 'Erreur lors de l\'arrêt de l\'arrosage'
+            message: 'Erreur lors de l\'arrêt de l\'arrosage',
+            details: error.message
         });
     }
 };
 
-
 // Arrosage manuel de toutes les plantes
 const arrosageManuelGlobal = async (req, res) => {
     try {
-        const plantes = await Plante.find();
+        // Utiliser le service pompe pour démarrer l'arrosage
+        const flaskResponse = await pompeService.demarrerArrosageManuel();
 
-        if (plantes.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: 'Aucune plante trouvée dans le système'
-            });
-        }
+        if (flaskResponse.success) {
+            const plantes = await Plante.find();
 
-        const resultatArrosages = [];
+            if (plantes.length === 0) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Aucune plante trouvée dans le système'
+                });
+            }
 
-        for (const plante of plantes) {
+            const resultatArrosages = [];
             const maintenant = new Date();
-            const finArrosage = new Date(maintenant.getTime() + 300000);
-            const volumeEauPlante = plante.volumeEau;
+            const finArrosage = new Date(maintenant.getTime() + 300000); // +5 minutes
 
-            const arrosage = new Arrosage({
-                plante: plante._id,
-                utilisateur: req.user._id,
-                type: 'manuel',
-                heureDebut: {
-                    heures: maintenant.getHours(),
-                    minutes: maintenant.getMinutes(),
-                    secondes: maintenant.getSeconds()
-                },
-                heureFin: {
-                    heures: finArrosage.getHours(),
-                    minutes: finArrosage.getMinutes(),
-                    secondes: finArrosage.getSeconds()
-                },
-                volumeEau: volumeEauPlante,
-                parametresArrosage: {
-                    humiditeSolRequise: plante.humiditeSol,
-                    luminositeRequise: plante.luminosite,
-                    volumeEau: volumeEauPlante
-                }
+            for (const plante of plantes) {
+                const volumeEauPlante = plante.volumeEau;
+
+                const arrosage = new Arrosage({
+                    plante: plante._id,
+                    utilisateur: req.user._id,
+                    type: 'manuel',
+                    heureDebut: {
+                        heures: maintenant.getHours(),
+                        minutes: maintenant.getMinutes(),
+                        secondes: maintenant.getSeconds()
+                    },
+                    heureFin: {
+                        heures: finArrosage.getHours(),
+                        minutes: finArrosage.getMinutes(),
+                        secondes: finArrosage.getSeconds()
+                    },
+                    volumeEau: volumeEauPlante,
+                    parametresArrosage: {
+                        humiditeSolRequise: plante.humiditeSol,
+                        luminositeRequise: plante.luminosite,
+                        volumeEau: volumeEauPlante
+                    }
+                });
+
+                const arrosageSauve = await arrosage.save();
+
+                const historique = new HistoriqueArrosage({
+                    plante: arrosageSauve.plante,
+                    utilisateur: arrosageSauve.utilisateur,
+                    id_arrosage: arrosageSauve._id,
+                    type: arrosageSauve.type,
+                    heureDebut: arrosageSauve.heureDebut,
+                    heureFin: arrosageSauve.heureFin,
+                    volumeEau: volumeEauPlante,
+                    parametresArrosage: {
+                        humiditeSolRequise: plante.humiditeSol,
+                        luminositeRequise: plante.luminosite,
+                        volumeEau: volumeEauPlante
+                    },
+                    actif: arrosageSauve.actif
+                });
+
+                const historiqueSauve = await historique.save();
+
+                resultatArrosages.push({
+                    plante: {
+                        id: plante._id,
+                        nom: plante.nom
+                    },
+                    arrosage: arrosageSauve,
+                    historique: historiqueSauve
+                });
+            }
+
+            res.json({
+                success: true,
+                message: 'Arrosage manuel global déclenché avec succès',
+                nombrePlantes: plantes.length,
+                resultats: resultatArrosages
             });
-
-            const arrosageSauve = await arrosage.save();
-            
-            // Créer directement l'historique au lieu d'utiliser creerHistoriqueArrosage
-            const historique = new HistoriqueArrosage({
-                plante: arrosageSauve.plante,
-                utilisateur: arrosageSauve.utilisateur,
-                id_arrosage: arrosageSauve._id,
-                type: arrosageSauve.type,
-                heureDebut: arrosageSauve.heureDebut,
-                heureFin: arrosageSauve.heureFin,
-                volumeEau: volumeEauPlante,
-                parametresArrosage: {
-                    humiditeSolRequise: plante.humiditeSol,
-                    luminositeRequise: plante.luminosite,
-                    volumeEau: volumeEauPlante
-                },
-                actif: arrosageSauve.actif
-            });
-
-            const historiqueSauve = await historique.save();
-
-            resultatArrosages.push({
-                plante: {
-                    id: plante._id,
-                    nom: plante.nom
-                },
-                arrosage: arrosageSauve,
-                historique: historiqueSauve
-            });
+        } else {
+            throw new Error('Échec du démarrage de la pompe');
         }
-
-        res.json({
-            success: true,
-            message: 'Arrosage manuel global déclenché avec succès',
-            nombrePlantes: plantes.length,
-            resultats: resultatArrosages
-        });
     } catch (error) {
         console.error('Erreur arrosage manuel global:', error);
         if (error.name === 'ValidationError') {
@@ -775,6 +813,53 @@ const arrosageManuelGlobal = async (req, res) => {
         });
     }
 };
+
+// controllers/arrosageControleur.js
+const getArrosagesScheduled = async (req, res) => {
+    try {
+        const now = new Date();
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes();
+
+        console.log(`Vérification des arrosages à ${currentHour}:${currentMinute}`);
+
+        // Trouver les arrosages qui doivent démarrer maintenant
+        const arrosagesADemarrer = await Arrosage.find({
+            actif: true,
+            type: 'automatique',
+            'heureDebut.heures': currentHour,
+            'heureDebut.minutes': currentMinute
+        }).populate('plante');
+
+        console.log('Arrosages à démarrer:', arrosagesADemarrer);
+
+        // Trouver les arrosages qui doivent s'arrêter maintenant
+        const arrosagesAArreter = await Arrosage.find({
+            actif: true,
+            type: 'automatique',
+            'heureFin.heures': currentHour,
+            'heureFin.minutes': currentMinute
+        }).populate('plante');
+
+        console.log('Arrosages à arrêter:', arrosagesAArreter);
+
+        res.json({
+            success: true,
+            message: 'Arrosages programmés récupérés',
+            arrosagesADemarrer,
+            arrosagesAArreter
+        });
+
+    } catch (error) {
+        console.error('Erreur récupération arrosages programmés:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur lors de la récupération des arrosages programmés'
+        });
+    }
+};
+
+
 module.exports = {
     creerArrosage,
     getMesArrosages,
@@ -784,5 +869,6 @@ module.exports = {
     toggleArrosage,
     arrosageManuelPlante,
     arreterArrosage,
-    arrosageManuelGlobal
+    arrosageManuelGlobal,
+    getArrosagesScheduled
 };

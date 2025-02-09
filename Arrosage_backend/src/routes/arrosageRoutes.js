@@ -51,4 +51,10 @@ router.patch('/:id/toggle',
    arrosageControleur.toggleArrosage
 );
 
+router.get('/scheduled', 
+   auth, 
+   arrosageControleur.getArrosagesScheduled
+);
+
+
 module.exports = router;
