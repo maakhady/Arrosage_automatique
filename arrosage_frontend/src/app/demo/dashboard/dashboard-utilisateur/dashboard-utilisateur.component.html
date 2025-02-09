@@ -5,6 +5,7 @@
         <!-- Statistiques -->
         <div class="stats">
             <!-- Autres cartes -->
+             
             <div class="card">
                 <i class="fas fa-tint large-icon"></i>
                 <h3>Humidité du Sol</h3>
@@ -117,55 +118,99 @@
 
 <!-- Modal de programmation -->
 <div class="modal-overlay" *ngIf="showModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h4>{{ isEditing ? 'Modifier' : 'Ajouter' }} un arrosage</h4>
-            <button class="close-button" (click)="closeModal()">
-                <fa-icon [icon]="faTimes"></fa-icon>
-            </button>
-        </div>
+  <div class="modal-content scrollable-modal">
+      <div class="modal-header">
+          <h4>{{ isEditing ? 'Modifier' : 'Programmer' }} un arrosage</h4>
+          <button class="close-button" (click)="closeModal()">
+              <i class="fas fa-times"></i>
+          </button>
+      </div>
 
-        <div class="modal-body">
-            <div class="form-group">
-                <label>Heure</label>
-                <input type="time" [(ngModel)]="newSchedule.hour">
-            </div>
+      <div class="modal-body">
+          <form [formGroup]="arrosageForm">
+              <div class="form-group">
+                  <label>Plante</label>
+                  <select formControlName="plante" class="form-control" [class.grayscale-input]="isEditing" [disabled]="isEditing">
+                      <option *ngFor="let plante of plantes" [value]="plante._id">
+                          {{ plante.nom }}
+                      </option>
+                  </select>
+                  <div *ngIf="arrosageForm.get('plante')?.invalid && arrosageForm.get('plante')?.touched" class="error">
+                      Plante est requise.
+                  </div>
+              </div>
 
-            <div class="form-group">
-                <label>Préférence</label>
-                <select [(ngModel)]="newSchedule.preference">
-                    <option value="none">Aucune préférence</option>
-                    <option value="humidity">Humidité du sol</option>
-                    <option value="light">Luminosité</option>
-                </select>
-            </div>
+              <div class="form-group">
+                  <label>Heure de début</label>
+                  <div class="time-inputs">
+                      <div>
+                          <label>Heures</label>
+                          <input type="number" formControlName="heureDebutHeures" min="0" max="23" class="form-control">
+                          <div *ngIf="arrosageForm.get('heureDebutHeures')?.invalid && arrosageForm.get('heureDebutHeures')?.touched" class="error">
+                              Valide entre 0 et 23.
+                          </div>
+                      </div>
+                      <div>
+                          <label>Minutes</label>
+                          <input type="number" formControlName="heureDebutMinutes" min="0" max="59" class="form-control">
+                          <div *ngIf="arrosageForm.get('heureDebutMinutes')?.invalid && arrosageForm.get('heureDebutMinutes')?.touched" class="error">
+                              Valide entre 0 et 59.
+                          </div>
+                      </div>
+                  </div>
+              </div>
 
-            <div class="form-group" *ngIf="newSchedule.preference !== 'none'">
-                <label>Seuil</label>
-                <div class="threshold-input">
-                    <input type="number" [(ngModel)]="newSchedule.threshold" min="0" max="100">
-                    <span>%</span>
-                </div>
-            </div>
+              <div class="form-group">
+                  <label>Heure de fin</label>
+                  <div class="time-inputs">
+                      <div>
+                          <label>Heures</label>
+                          <input type="number" formControlName="heureFinHeures" min="0" max="23" class="form-control">
+                          <div *ngIf="arrosageForm.get('heureFinHeures')?.invalid && arrosageForm.get('heureFinHeures')?.touched" class="error">
+                              Valide entre 0 et 23.
+                          </div>
+                      </div>
+                      <div>
+                          <label>Minutes</label>
+                          <input type="number" formControlName="heureFinMinutes" min="0" max="59" class="form-control">
+                          <div *ngIf="arrosageForm.get('heureFinMinutes')?.invalid && arrosageForm.get('heureFinMinutes')?.touched" class="error">
+                              Valide entre 0 et 59.
+                          </div>
+                      </div>
+                  </div>
+              </div>
 
-            <div class="form-group">
-                <label>Durée (minutes)</label>
-                <input type="number" [(ngModel)]="newSchedule.duration" min="1">
-            </div>
+              <div class="form-group">
+                  <label>Humidité du sol requise (%)</label>
+                  <input type="number" formControlName="humiditeSolRequise" min="0" max="100" class="form-control">
+                  <div *ngIf="arrosageForm.get('humiditeSolRequise')?.invalid && arrosageForm.get('humiditeSolRequise')?.touched" class="error">
+                      Valide entre 0 et 100.
+                  </div>
+              </div>
 
-            <div class="form-group">
-                <label>Type</label>
-                <select [(ngModel)]="newSchedule.type">
-                    <option value="automatique">Automatique</option>
-                    <option value="manuel">Manuel</option>
-                </select>
-            </div>
+              <div class="form-group">
+                  <label>Luminosité requise (lux)</label>
+                  <input type="number" formControlName="luminositeRequise" min="0" class="form-control">
+                  <div *ngIf="arrosageForm.get('luminositeRequise')?.invalid && arrosageForm.get('luminositeRequise')?.touched" class="error">
+                      Luminosité requise est requise.
+                  </div>
+              </div>
 
-            <button class="add-button" (click)="saveSchedule()">{{ isEditing ? 'Modifier' : 'Ajouter' }}</button>
-        </div>
+              <div class="form-group">
+                  <label>Volume d'eau (en litres)</label>
+                  <input type="number" formControlName="volumeEau" min="0" class="form-control">
+                  <div *ngIf="arrosageForm.get('volumeEau')?.invalid && arrosageForm.get('volumeEau')?.touched" class="error">
+                      Volume d'eau doit être positif.
+                  </div>
+              </div>
+          </form>
+      </div>
 
-        <div class="modal-footer">
-            <button class="cancel-button" (click)="closeModal()">Annuler</button>
-        </div>
-    </div>
+      <div class="modal-footer">
+          <button class="cancel-button" (click)="closeModal()">Annuler</button>
+          <button class="save-button" [disabled]="!arrosageForm.valid" (click)="saveSchedule()">
+              {{ isEditing ? 'Modifier' : 'Programmer' }}
+          </button>
+      </div>
+  </div>
 </div>

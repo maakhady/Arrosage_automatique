@@ -27,3 +27,10 @@ export interface Arrosage {
   date_creation?: Date;
   date_modification?: Date;
 }
+
+
+export interface Plante {
+  _id: string;
+  nom: string;
+  categorie: string;
+}
