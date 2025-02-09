@@ -48,6 +48,14 @@ router.post('/:id/rfid',
     utilisateurControleur.assignerCarteRFID
 );
 
+
+// Route pour désassigner une carte RFID
+router.delete('/:id/rfid', 
+    superAdminMiddleware, 
+    utilisateurControleur.desassignerCarteRFID
+);
+
+
 // Route pour l'import CSV
 router.post('/import-csv', 
     superAdminMiddleware, 

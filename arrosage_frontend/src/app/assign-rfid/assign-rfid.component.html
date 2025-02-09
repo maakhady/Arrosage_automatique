@@ -2,12 +2,6 @@
   <div class="modal-content">
     <span class="close" (click)="closeModal()">&times;</span>
     <h2>Assigner une carte RFID</h2>
-    <form (ngSubmit)="onSubmit()" #assignForm="ngForm">
-      <div>
-        <label for="rfid">ID de la carte RFID</label><br>
-        <input type="text" id="rfid" [(ngModel)]="rfid" name="rfid" required placeholder="Scanner la carte...">
-      </div>
-      <button type="submit" [disabled]="!assignForm.valid">Assigner</button>
-    </form>
+    <button (click)="openModal()">Assigner une carte RFID</button>
   </div>
 </div>

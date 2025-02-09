@@ -1,14 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { AuthService } from './auth.service'; // Importez AuthService
-// import { UtilisateurResponse } from '../models/utilisateur.model';
+import { AuthService } from './auth.service';
 import { catchError } from 'rxjs/operators';
 
 export type Role = 'super-admin' | 'utilisateur';
 
 export interface Utilisateur {
-  _id: string; // Ajoutez cette ligne
+  _id: string;
   matricule: string;
   prenom: string;
   nom: string;
@@ -16,6 +15,7 @@ export interface Utilisateur {
   role: Role;
   actif?: boolean;
   selected?: boolean;
+  cardId?: string;
   date_creation: Date;
   date_modification: Date;
 }
@@ -48,7 +48,8 @@ export class UtilisateurService {
   constructor(private http: HttpClient, private authService: AuthService) {}
 
   private getHeaders(): HttpHeaders {
-    const token = this.authService.getToken();     return new HttpHeaders({
+    const token = this.authService.getToken();
+    return new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
     });
@@ -87,6 +88,11 @@ export class UtilisateurService {
   // Assigner une carte RFID à un utilisateur
   assignerCarteRFID(id: string, cardId: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/${id}/rfid`, { cardId }, { headers: this.getHeaders() });
+  }
+
+  // Désassigner une carte RFID à un utilisateur
+  desassignerCarteRFID(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}/rfid`, { headers: this.getHeaders() });
   }
 
   // Importer des utilisateurs à partir d'un fichier CSV

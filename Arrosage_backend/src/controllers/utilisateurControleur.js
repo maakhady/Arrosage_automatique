@@ -420,6 +420,72 @@ const assignerCarteRFID = async (req, res) => {
     }
 };
 
+
+
+
+
+
+
+
+
+const desassignerCarteRFID = async (req, res) => {
+    try {
+        const utilisateurId = req.params.id;
+
+        // Trouver l'utilisateur par ID
+        const utilisateur = await Utilisateur.findById(utilisateurId);
+
+        if (!utilisateur) {
+            return res.status(404).json({
+                success: false,
+                message: 'Utilisateur non trouvé'
+            });
+        }
+
+        // Vérifier si l'utilisateur a une carte RFID assignée
+        if (!utilisateur.cardId) {
+            return res.status(400).json({
+                success: false,
+                message: 'Aucune carte RFID assignée à cet utilisateur'
+            });
+        }
+
+        // Mettre à jour l'utilisateur pour retirer la carte RFID
+        utilisateur.cardId = undefined;
+        utilisateur.date_modification = Date.now();
+        await utilisateur.save();
+
+        res.json({
+            success: true,
+            message: 'Carte RFID désassignée avec succès',
+            data: {
+                utilisateur: {
+                    id: utilisateur._id,
+                    matricule: utilisateur.matricule,
+                    nom: utilisateur.nom,
+                    prenom: utilisateur.prenom,
+                    email: utilisateur.email,
+                    role: utilisateur.role,
+                    actif: utilisateur.actif
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Erreur désassignation RFID:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur lors de la désassignation de la carte RFID'
+        });
+    }
+};
+
+
+
+
+
+
+
+
 const importerUtilisateursCSV = async (req, res) => {
     try {
         if (!req.files || !req.files.file) {
@@ -659,6 +725,7 @@ module.exports = {
     modifierUtilisateur,
     supprimerUtilisateur,
     assignerCarteRFID,
+    desassignerCarteRFID,
     importerUtilisateursCSV,
     toggleActivationUtilisateur
 };

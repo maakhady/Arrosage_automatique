@@ -9,8 +9,18 @@
 
         <form [formGroup]="authForm" (ngSubmit)="onSubmit()" #form="ngForm">
           <div class="form-group">
-            <p class="instruction-message">Veuillez renseigner votre code secret pour vous connecter.</p>
-            <div class="password-input-wrapper" style="justify-content: center;">
+            <p *ngIf="!isLocked" class="instruction-message">Veuillez renseigner votre code secret pour vous connecter.</p>
+
+            <!-- Barre de progression lorsque les champs sont verrouillés -->
+            <div *ngIf="isLocked" class="progress-container">
+              <progress [value]="timer" [max]="lockDuration"></progress>
+              <div class="timer-message">
+                Veuillez patienter {{ formatTimer(timer) }} avant de réessayer.
+              </div>
+            </div>
+
+            <!-- Champs de saisie lorsque les champs ne sont pas verrouillés -->
+            <div *ngIf="!isLocked" class="password-input-wrapper" style="justify-content: center;">
               <input
                 type="text"
                 formControlName="digit1"

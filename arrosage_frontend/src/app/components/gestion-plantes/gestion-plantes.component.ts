@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { PlanteService, Plante } from './../../services/plante.service';
-import {HeaderComponent} from '../header/header.component';
+import { HeaderComponent } from '../header/header.component';
 import Swal from 'sweetalert2';
 
 declare var bootstrap: any;
@@ -38,7 +38,6 @@ export class GestionPlantesComponent implements OnInit {
   totalPages = 1;
   paginatedPlantes: Plante[] = [];
 
-
   constructor(private planteService: PlanteService) {}
 
   ngOnInit(): void {
@@ -57,7 +56,6 @@ export class GestionPlantesComponent implements OnInit {
       }
     });
   }
-
 
   private getEmptyPlante(): Plante {
     return {
@@ -105,7 +103,10 @@ export class GestionPlantesComponent implements OnInit {
       Swal.fire({
         icon: 'info',
         title: 'Aucune plante sélectionnée',
-        text: 'Veuillez sélectionner au moins une plante à supprimer.'
+        text: 'Veuillez sélectionner au moins une plante à supprimer.',
+        timer: 3000,
+        timerProgressBar: true,
+        showConfirmButton: false
       });
       return;
     }
@@ -126,15 +127,20 @@ export class GestionPlantesComponent implements OnInit {
     });
   }
 
-
   deletePlantes(planteToDelete?: any) {
     if (planteToDelete) {
       // Suppression d'une seule plante via l'icône de suppression
       this.planteService.supprimerPlante(planteToDelete._id).subscribe({
         next: () => {
           this.chargerPlantes();
-          this.successMessage = 'Plante supprimée avec succès';
-          this.clearSuccessMessageAfterDelay();
+          Swal.fire({
+            icon: 'success',
+            title: 'Succès',
+            text: 'Plante supprimée avec succès',
+            timer: 3000,
+            timerProgressBar: true,
+            showConfirmButton: false
+          });
           bootstrap.Modal.getInstance(this.confirmDeleteModal.nativeElement).hide();
         },
         error: (error) => {
@@ -149,8 +155,14 @@ export class GestionPlantesComponent implements OnInit {
         this.planteService.supprimerPlusieursPlantes(selectedIds).subscribe({
           next: () => {
             this.chargerPlantes();
-            this.successMessage = 'Plantes supprimées avec succès';
-            this.clearSuccessMessageAfterDelay();
+            Swal.fire({
+              icon: 'success',
+              title: 'Succès',
+              text: 'Plantes supprimées avec succès',
+              timer: 3000,
+              timerProgressBar: true,
+              showConfirmButton: false
+            });
             bootstrap.Modal.getInstance(this.confirmDeleteModal.nativeElement).hide();
           },
           error: (error) => {
@@ -173,9 +185,15 @@ export class GestionPlantesComponent implements OnInit {
         next: () => {
           this.chargerPlantes();
           this.resetForm();
-          this.successMessage = 'Plante modifiée avec succès';
+          Swal.fire({
+            icon: 'success',
+            title: 'Succès',
+            text: 'Plante modifiée avec succès',
+            timer: 3000,
+            timerProgressBar: true,
+            showConfirmButton: false
+          });
           bootstrap.Modal.getInstance(this.planteModal.nativeElement).hide();
-          this.clearSuccessMessageAfterDelay();
         },
         error: (error) => {
           this.error = error.message;
@@ -187,9 +205,15 @@ export class GestionPlantesComponent implements OnInit {
         next: () => {
           this.chargerPlantes();
           this.resetForm();
-          this.successMessage = 'Nouvelle plante ajoutée avec succès';
+          Swal.fire({
+            icon: 'success',
+            title: 'Succès',
+            text: 'Nouvelle plante ajoutée avec succès',
+            timer: 3000,
+            timerProgressBar: true,
+            showConfirmButton: false
+          });
           bootstrap.Modal.getInstance(this.planteModal.nativeElement).hide();
-          this.clearSuccessMessageAfterDelay();
         },
         error: (error) => {
           this.error = error.message;
@@ -271,33 +295,7 @@ export class GestionPlantesComponent implements OnInit {
     this.planteForm.resetForm();
   }
 
-
   backToDashboard(): void {
     window.history.back();
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

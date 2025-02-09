@@ -1,20 +1,23 @@
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 
 // Interfaces
-interface User {
+export interface User {
+  _id: any;
   id: string;
   matricule: string;
   nom: string;
   prenom: string;
-  role: string;
   email?: string;
+  role: string;
+  code?: string;
+  date_creation: Date;
 }
 
-interface AuthResponse {
+export interface AuthResponse {
   success: boolean;
   message: string;
   token: string;
@@ -115,10 +118,18 @@ export class AuthService {
       withCredentials: true // Ajoutez ceci si vous utilisez des cookies
     }).pipe(
       tap(() => this.clearAuthState()),
-      catchError(error => {
-        //  console.error('Erreur lors de la déconnexion totale:', error);
-        this.clearAuthState();
-        throw error; // Propagez l'erreur au lieu de retourner un succès
+      catchError((error: HttpErrorResponse) => {
+        console.error('Erreur lors de la déconnexion totale:', error);
+        let errorMessage = 'Une erreur est survenue lors de la déconnexion.';
+        if (error.status === 0) {
+          errorMessage = 'Impossible de contacter le serveur. Veuillez vérifier votre connexion.';
+        } else if (error.status === 401) {
+          errorMessage = 'Session expirée. Veuillez vous reconnecter.';
+        } else {
+          errorMessage = `Erreur: ${error.message}`;
+        }
+        alert(errorMessage);
+        return of({ success: false, message: errorMessage });
       })
     );
   }

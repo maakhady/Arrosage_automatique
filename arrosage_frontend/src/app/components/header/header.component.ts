@@ -33,26 +33,31 @@ export class HeaderComponent {
 
   onLogoutAll() {
     this.authService.logoutAll().subscribe({
-      next: (response: {success: boolean; message: string}) => {
-        if (response.success) {
+      next: ({ success }) => {
+        if (success) {
           this.router.navigate(['/login']);
         }
       },
       error: (err: HttpErrorResponse) => {
-        //console.error('Échec de la déconnexion', err);
-
-        let errorMessage = 'Une erreur est survenue lors de la déconnexion';
-        if (err.status === 0) {
-          errorMessage = 'Impossible de contacter le serveur. Veuillez vérifier votre connexion.';
-        } else if (err.status === 401) {
-          errorMessage = 'Session expirée. Veuillez vous reconnecter.';
-          this.router.navigate(['/login']);
+        let errorMessage = 'Une erreur est survenue lors de la déconnexion.';
+  
+        switch (err.status) {
+          case 0:
+            errorMessage = 'Impossible de contacter le serveur. Veuillez vérifier votre connexion.';
+            break;
+          case 401:
+            errorMessage = 'Session expirée. Veuillez vous reconnecter.';
+            this.router.navigate(['/login']);
+            break;
         }
-
+  
         alert(errorMessage);
       }
     });
   }
+  
+
+
   navigateToProfile(): void {
     this.router.navigate(['/components/user-profile']);
   }

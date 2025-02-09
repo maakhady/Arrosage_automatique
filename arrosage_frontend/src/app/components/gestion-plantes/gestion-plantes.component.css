@@ -391,3 +391,11 @@ td button:focus {
 .page-number:hover:not(.active) {
   background-color: #e9ecef;
 }
+
+.zoomable {
+  transition: transform 0.2s ease-in-out;
+}
+
+.zoomable:hover {
+  transform: scale(1.03);
+}

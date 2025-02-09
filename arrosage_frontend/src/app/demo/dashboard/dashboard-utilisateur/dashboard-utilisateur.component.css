@@ -1,93 +1,88 @@
 /* Global Styles */
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    background-color: #f4f4f4;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background-color: #f4f4f4;
 }
 
 /* Dashboard Layout */
 .dashboard {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 1rem;
 }
 
 /* Statistiques */
 .stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-    padding: 60px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  padding: 60px;
 }
 
 .card {
-    background: white;
-    border-radius: 25px;
-    padding: 4rem;
-    text-align: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-
+  background: white;
+  border-radius: 25px;
+  padding: 4rem;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
 }
 
 .card h3 {
-    margin-bottom: 1rem;
+  margin-bottom: 1rem;
 }
 
 .card .value {
-    font-size: 1.5rem;
-    font-weight: bold;
+  font-size: 1.5rem;
+  font-weight: bold;
 }
 
 /* Icônes avec couleurs naturelles */
 .large-icon {
-    font-size: 2.5rem;
-    color: #4CAF50;
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  font-size: 2.5rem;
+  color: #4CAF50;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
 .large-icon:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transform: scale(1.05);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 /* Icônes spécifiques */
 .card .fa-tint {
-    color: #2975D8;
+  color: #2975D8;
 }
 
 .card .fa-sun {
-    color: #FFB84D;
+  color: #FFB84D;
 }
 
 .card .fa-temperature-high {
-    color: #FF6347;
+  color: #FF6347;
 }
 
 /* Section Options + Réservoir + Historique */
 .bottom-section {
-    display: flex;
-    gap: 2rem;
-    align-items: flex-start;
-    padding: 1rem;
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  padding: 1rem;
 }
 
 /* Partie gauche : Options + Réservoir */
 .left-section {
-    display: flex;
-    flex-direction: column;
-    width: 25%;
-    gap: 1rem;
-}
-
-.left-section {
+  display: flex;
+  flex-direction: column;
+  width: 25%;
+  gap: 1rem;
   padding: 1rem;
   background: white;
   border-radius: 15px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  width: 100%;
   max-width: 500px;
 }
 
@@ -97,208 +92,190 @@ body {
   gap: 10px;
 }
 
-
-
 .options button {
-    padding: 1.5rem;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
-    transition: background-color 0.2s ease-in-out;
+  padding: 1.5rem;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+  transition: background-color 0.2s ease-in-out;
 }
 
 .options button:hover {
-    background-color: #388E3C;
+  background-color: #388E3C;
 }
 
 .btn1 {
-    /* background-color: #4EB49C; */
-    background-color:  #607D8B;/* Vert légèrement plus foncé au survol */
-    font-size: 20px;
+  background-color: #4EB49C;
 }
 
-/* .btn5 {
-  background-color: #4EB49C;
-} */
 .btn2 {
-    /* background-color: #4CAF50; */
-    background-color: #4EB49C;
-
-    font-size: 20px;
+  background-color: #45a049;
 }
 
 .btn3 {
-    background-color: #2975d8c0;
-    font-size: 20px;
+  background-color: #2975D8;
 }
 
 .btn4 {
-    background-color: #016ba8;
-    font-size: 20px;
+  background-color: #FF7043;
 }
 
-
-
 .action-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    margin: 0 5px;
-    color: #007bff;
-    font-size: 1.2em;
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin: 0 5px;
+  color: #007bff;
+  font-size: 1.2em;
 }
 
 .action-button:hover {
-    color: #0056b3;
+  color: #0056b3;
 }
 
 .action-button1 {
-    background: none;
-    border: none;
-    cursor: pointer;
-    margin: 0 5px;
-    color: red;
-    font-size: 1.2em;
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin: 0 5px;
+  color: red;
+  font-size: 1.2em;
 }
 
 .action-button1:hover {
-    color: #DC0808;
+  color: #DC0808;
 }
 
 /* Réservoir sous les options */
 .reservoir {
-    background: white;
-    border-radius: 25px;
-    padding: 2rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 4rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* Ombre subtile */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-
+  background: #fff;
+  border-radius: 25px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .reservoir-title {
-    font-size: 2rem;
-    /* font-weight: bold; */
-    text-align: center;
-    margin-bottom: 1rem;
+  font-size: 2rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 1rem;
 }
-
 
 /* Animation du volume du réservoir */
 .reservoir-volume-container {
-    width: 100%;
-    height: 200px; /* Hauteur du conteneur du volume */
-    background-color: #e0e0e0; /* Couleur de fond du réservoir */
-    border-radius: 10px;
-    position: relative;
-    overflow: hidden;
+  width: 100%;
+  height: 200px;
+  background-color: #e0e0e0;
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
 }
 
 .reservoir-volume-fill {
-    width: 100%;
-    height: 100%;
-    background-color: #50DCFB; /* Couleur de l'eau */
-    position: absolute;
-    bottom: 0;
-    transition: height 0.5s ease-in-out; /* Animation fluide */
+  width: 100%;
+  height: 100%;
+  background-color: #50DCFB;
+  position: absolute;
+  bottom: 0;
+  transition: height 0.5s ease-in-out;
 }
 
-/* Animation de l'eau qui diminue */
 @keyframes decreaseVolume {
-    from {
-        height: 100%;
-    }
-    to {
-        height: 0%;
-    }
+  from {
+      height: 100%;
+  }
+  to {
+      height: 0%;
+  }
 }
 
-/* Appliquer l'animation lorsque l'arrosage est actif */
 .reservoir-volume-fill.decrease {
-    animation: decreaseVolume 5s linear forwards; /* Durée de l'animation */
+  animation: decreaseVolume 5s linear forwards;
 }
 
 .reservoir-content {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    gap: 2rem;
-    color: #2975D8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 2rem;
+  color: #2975D8;
 }
 
 .reservoir-controls {
-    background: white;
-    border-radius: 15px;
-    padding: 1rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    width: 50%;
+  background: white;
+  border-radius: 15px;
+  padding: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .reservoir-controls button {
-    color: white;
-    font-size: 1.2rem;
-    transition: background-color 0.2s ease-in-out;
+  color: white;
+  font-size: 1.2rem;
+  transition: background-color 0.2s ease-in-out;
+  margin: 0.5rem 0;
 }
 
 .reservoir-controls button:hover {
-    background-color: #1c5bbf;
+  background-color: #1c5bbf;
 }
 
 .large-reservoir-icon {
-    font-size: 4rem;
-    transition: transform 0.5s ease-in-out;
-    transform-origin: top center;
+  font-size: 4rem;
+  transition: transform 0.5s ease-in-out;
+  transform-origin: top center;
 }
 
 .large-reservoir-icon.bend {
-    transform: rotate(45deg);
+  transform: rotate(45deg);
 }
 
 .large-reservoir-icon:hover {
-    transform: scale(1.1);
+  transform: scale(1.1);
 }
-
 
 /* Animation de pluie */
 @keyframes rain {
-    0% {
-        transform: translateY(-10px);
-        opacity: 1;
-    }
-    100% {
-        transform: translateY(20px);
-        opacity: 0;
-    }
+  0% {
+      transform: translateY(-10px);
+      opacity: 1;
+  }
+  100% {
+      transform: translateY(20px);
+      opacity: 0;
+  }
 }
 
 .rain-container {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    display: none;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  display: none;
 }
 
 .rain-container.active {
-    display: block;
+  display: block;
 }
 
 .raindrop {
-    position: absolute;
-    width: 2px;
-    height: 10px;
-    background: #2975D8;
-    opacity: 0;
+  position: absolute;
+  width: 2px;
+  height: 10px;
+  background: #2975D8;
+  opacity: 0;
 }
 
-/* Générer plusieurs gouttes de pluie */
 .raindrop:nth-child(1) { left: 10%; animation: rain 1s infinite linear; }
 .raindrop:nth-child(2) { left: 20%; animation: rain 1.2s infinite linear; }
 .raindrop:nth-child(3) { left: 30%; animation: rain 0.8s infinite linear; }
@@ -309,324 +286,511 @@ body {
 .raindrop:nth-child(8) { left: 80%; animation: rain 1.2s infinite linear; }
 
 .arr {
-    background-color: #2975D8;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-bottom: 15px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
-    transition: background-color 0.2s ease-in-out;
+  background-color: #2975D8;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+  transition: background-color 0.2s ease-in-out;
 }
 
 .aret {
-    background-color: #cf443a;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
-    transition: background-color 0.2s ease-in-out;
+  background-color: #cf443a;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+  transition: background-color 0.2s ease-in-out;
 }
 
 /* Historique des Arrosages */
 .zones-container {
-    flex: 1;
-    background: white;
-    border-radius: 25px;
-    padding: 5.5rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Ombre subtile */
-
+  flex: 1;
+  background: white;
+  border-radius: 25px;
+  padding: 5.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 /* Boutons de filtre */
 .filters {
-    display: flex;
-    /* justify-content: flex-start; */
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
-.left-buttons {
   display: flex;
+  justify-content: flex-start;
   gap: 1rem;
+  margin-bottom: 1rem;
 }
 
 .btn-filter {
-    color: black;
-    border: none;
-    padding: 0.8rem 1.5rem;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  color: black;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
 .btn-filter:hover {
-    background-color: #1c5bbf;
+  background-color: #1c5bbf;
 }
 
 /* Tableau de l'historique */
 .history-table {
-    width: 100%;
-    border-collapse: collapse;
+  width: 100%;
+  border-collapse: collapse;
 }
 
 .history-table th,
 .history-table td {
-    padding: 1rem;
-    text-align: center;
-    border-bottom: 1px solid #ddd;
+  padding: 1rem;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
 }
 
 .history-table th {
-    background-color: #4CAF50;
-    color: white;
-    font-weight: bold;
+  background-color: #4CAF50;
+  color: white;
+  font-weight: bold;
 }
 
 .history-table tbody tr:hover {
-    background-color: #f1f1f1;
+  background-color: #f1f1f1;
 }
 
 /* Réservoir volume */
 .reservoir-content .volume {
-    font-size: 1.4rem;
-    color: #FF7043;
+  font-size: 1.4rem;
+  color: #FF7043;
 }
 
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
 
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
 
-  .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
 
-  .modal-content {
-    background-color: white;
-    border-radius: 8px;
-    width: 90%;
-    max-width: 800px;
-    max-height: 90vh;
-    overflow-y: auto;
-  }
+.modal-body {
+  padding: 1rem;
+}
 
-  .modal-header {
-    padding: 1rem;
-    border-bottom: 1px solid #ddd;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+.modal-footer {
+  padding: 1rem;
+  border-top: 1px solid #ddd;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
 
-  .modal-body {
-    padding: 1rem;
-  }
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+}
 
-  .modal-footer {
-    padding: 1rem;
-    border-top: 1px solid #ddd;
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-  }
+.table-container {
+  margin: 1rem 0;
+  overflow-x: auto;
+}
 
-  .close-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1.2rem;
-  }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
 
-  .table-container {
-    margin: 1rem 0;
-    overflow-x: auto;
-  }
+th, td {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  text-align: left;
+}
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 1rem;
-  }
+th {
+  background-color: #f5f5f5;
+}
 
-  th, td {
-    padding: 0.75rem;
-    border: 1px solid #ddd;
-    text-align: left;
-  }
+.form-group {
+  margin-bottom: 20px;
+}
 
-  th {
-    background-color: #f5f5f5;
-  }
+.form-control {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
 
-  .form-group {
-    margin-bottom: 1rem;
-  }
+.time-inputs {
+  display: flex;
+  gap: 10px;
+}
 
-  .form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-  }
+.time-inputs > div {
+  flex: 1;
+}
 
-  .form-group input,
-  .form-group select {
-    width: 100%;
-    padding: 0.5rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-  }
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
 
-  .threshold-input {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
+.cancel-button, .save-button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
 
-  .threshold-input input {
-    flex: 1;
-  }
+.cancel-button {
+  background: #f1f1f1;
+  color: #333;
+}
 
-  .add-button {
-    background-color: #50A24C;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-top: 1rem;
-  }
+.save-button {
+  background: #4CAF50;
+  color: white;
+}
 
-  .cancel-button {
-    background-color: #6c757d;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    cursor: pointer;
-  }
+.save-button:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+}
 
-  .save-button {
-    background-color: #50A24C;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    cursor: pointer;
-  }
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+}
 
-  /* Hover effects */
-  .add-button:hover,
-  .save-button:hover {
-    background-color: #408540;
-  }
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
 
-  .cancel-button:hover {
-    background-color: #5a6268;
-  }
+.threshold-input {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.threshold-input input {
+  flex: 1;
+}
+
+.add-button {
+  background-color: #50A24C;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+.add-button:hover,
+.save-button:hover {
+  background-color: #408540;
+}
+
+.cancel-button:hover {
+  background-color: #5a6268;
+}
+
+.home-icon {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  color: #50A24C;
+  text-decoration: none;
+}
+
+.home-icon:hover {
+  color: #408239;
+}
 
 /* Responsive */
 @media (max-width: 1200px) {
-    .stats {
-        padding: 2rem;
-    }
+  .stats {
+      padding: 2rem;
+  }
 
-    .card {
-        padding: 2rem;
-    }
+  .card {
+      padding: 2rem;
+  }
 
-    .reservoir {
-        padding: 1.5rem;
-    }
+  .reservoir {
+      padding: 1.5rem;
+  }
 
-    .zones-container {
-        padding: 2rem;
-    }
+  .zones-container {
+      padding: 2rem;
+  }
 }
 
 @media (max-width: 992px) {
-    .stats {
-        grid-template-columns: repeat(2, 1fr);
-    }
+  .stats {
+      grid-template-columns: repeat(2, 1fr);
+  }
 
-    .bottom-section {
-        flex-direction: column;
-    }
+  .bottom-section {
+      flex-direction: column;
+  }
 
-    .left-section {
-        width: 100%;
-    }
+  .left-section {
+      width: 100%;
+  }
 
-    .reservoir-content {
-        flex-direction: column;
-        gap: 1rem;
-    }
+  .reservoir-content {
+      flex-direction: column;
+      gap: 1rem;
+  }
 
-    .reservoir-controls {
-        width: 100%;
-    }
+  .reservoir-controls {
+      width: 100%;
+  }
 }
 
 @media (max-width: 768px) {
-    .stats {
-        grid-template-columns: 1fr;
-        padding: 1rem;
-    }
+  .stats {
+      grid-template-columns: 1fr;
+      padding: 1rem;
+  }
 
-    .card {
-        padding: 1.5rem;
-    }
+  .card {
+      padding: 1.5rem;
+  }
 
-    .options button {
-        padding: 1rem;
-    }
+  .options button {
+      padding: 1rem;
+  }
 
-    .reservoir {
-        padding: 1rem;
-    }
+  .reservoir {
+      padding: 1rem;
+  }
 
-    .zones-container {
-        padding: 1rem;
-    }
+  .zones-container {
+      padding: 1rem;
+  }
 
-    .history-table th,
-    .history-table td {
-        padding: 0.75rem;
-    }
+  .history-table th,
+  .history-table td {
+      padding: 0.75rem;
+  }
 }
 
 @media (max-width: 480px) {
-    .card {
-        padding: 1rem;
-    }
+  .card {
+      padding: 1rem;
+  }
 
-    .options button {
-        padding: 0.75rem;
-    }
+  .options button {
+      padding: 0.75rem;
+  }
 
-    .reservoir-title {
-        font-size: 1.5rem;
-    }
+  .reservoir-title {
+      font-size: 1.5rem;
+  }
 
-    .reservoir-controls button {
-        font-size: 1rem;
-    }
+  .reservoir-controls button {
+      font-size: 1rem;
+  }
 
-    .large-reservoir-icon {
-        font-size: 3rem;
-    }
+  .large-reservoir-icon {
+      font-size: 3rem;
+  }
 
-    .history-table th,
-    .history-table td {
-        padding: 0.5rem;
-    }
+  .history-table th,
+  .history-table td {
+      padding: 0.5rem;
+  }
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.pagination-controls button {
+  margin: 0 10px;
+  padding: 5px 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.pagination-controls button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.pagination-controls span {
+  margin: 0 10px;
+  font-weight: bold;
+}
+
+.error {
+  color: red;
+}
+
+.zoomable {
+  transition: transform 0.2s ease-in-out;
+}
+
+.zoomable:hover {
+  transform: scale(1.03);
+}
+
+/* Tooltip for weather */
+.tooltip {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 10px;
+  border-radius: 5px;
+  display: none;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.tooltip.visible {
+  display: block;
+  opacity: 1;
+}
+
+.tooltip p {
+  margin: 0;
+}
+.scrollable-modal {
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.grayscale-input {
+  background-color: #f0f0f0; /* Couleur de fond grisée */
+  color: #888; /* Couleur du texte grisée */
+  cursor: not-allowed; /* Curseur indiquant que le champ est désactivé */
+}
+
+
+
+/* Style par défaut (mode clair) */
+body {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+/* Style pour le mode sombre */
+body.dark-mode {
+  background-color: #121212;
+  color: #ffffff;
+}
+
+/* Style pour le bouton de commutation */
+.theme-toggle {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+}
+
+.theme-toggle button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+
+.weather-flyer {
+  border: 1px solid #ddd; /* Bordure légère */
+  border-radius: 8px; /* Coins arrondis */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Ombre légère */
+  padding: 16px; /* Espace intérieur */
+  background-color: #f9f9f9; /* Fond clair */
+  max-width: 500px; /* Largeur maximale */
+  margin: 16px auto; /* Centrage et espace extérieur */
+  font-family: Arial, sans-serif; /* Police de caractères */
+}
+
+.weather-header {
+  display: flex;
+  align-items: center;
+  font-size: 18px; /* Taille de la police */
+  font-weight: bold; /* Texte en gras */
+  margin-bottom: 12px; /* Espace en dessous */
+}
+
+.weather-header i {
+  margin-right: 8px; /* Espace entre l'icône et le texte */
+  color: #ffcc00; /* Couleur de l'icône */
+}
+
+.weather-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.weather-info {
+  flex: 1;
+}
+
+.temperature {
+  font-size: 24px; /* Taille de la police pour la température */
+  font-weight: bold; /* Texte en gras */
+  color: #333; /* Couleur du texte */
+}
+
+.humidity {
+  font-size: 16px; /* Taille de la police pour l'humidité */
+  color: #666; /* Couleur du texte */
+}
+
+.weather-forecast {
+  margin-left: 16px; /* Espace à gauche */
+  font-size: 16px; /* Taille de la police */
+  color: #666; /* Couleur du texte */
+}
+
+.weather-forecast div {
+  margin-top: 8px; /* Espace entre les prévisions */
 }

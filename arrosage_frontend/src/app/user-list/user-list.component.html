@@ -1,4 +1,3 @@
-<!-- filepath: /home/ousmane/Documents/Arrosage_automatique/arrosage_frontend/src/app/user-list/user-list.component.html -->
 <app-header></app-header>
 
 <div class="container">
@@ -17,7 +16,7 @@
           [disabled]="!anySelected"
           aria-label="Supprimer les utilisateurs sélectionnés" >
           <i class="fas fa-trash"></i> Suppression Multiples
-    </button>
+      </button>
 
       <button (click)="openRegistrationModal()" class="add-button" aria-label="Ajouter un utilisateur">
         <i class="fas fa-user-plus"></i> Ajouter Utilisateur
@@ -32,8 +31,6 @@
         #fileInput
         style="display: none;"
       />
-
-
     </div>
     <div class="search-bar">
       <input type="text" [(ngModel)]="searchQuery" (input)="filterUsers()" placeholder="Rechercher par prénom et nom, email ou matricule" aria-label="Rechercher des utilisateurs">
@@ -54,14 +51,13 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let user of filteredUsers">
+      <tr *ngFor="let user of filteredUsers" class="zoomable">
         <td>
           <input
-  type="checkbox"
-  [(ngModel)]="user.selected"
-  (change)="onUserCheckboxChange(user)"
-/>
-
+            type="checkbox"
+            [(ngModel)]="user.selected"
+            (change)="onUserCheckboxChange(user)"
+          />
         </td>
         <td>{{ user.matricule }}</td>
         <td>{{ user.prenom }} {{ user.nom }}</td>
@@ -121,47 +117,56 @@
             <i [ngClass]="user.actif ? 'fas fa-lock-open' : 'fas fa-lock'"></i>
           </button>
         </td>
-
         <td>
-          <button (click)="assignRFID(user)" class="assign-button" aria-label="Assigner une carte RFID">
-            Assigner
+          <button
+            class="btn"
+            *ngIf="!isCardAssigned(user)"
+            (click)="assignRFID(user)"
+            aria-label="Assigner une carte RFID"
+            [ngClass]="{'btn-success': user.actif, 'btn-secondary bg-gray': !user.actif}"
+          >
+            <i class="fa fa-id-card"></i> Assigner
+          </button>
+          <button
+            class="btn btn-danger"
+            *ngIf="isCardAssigned(user)"
+            (click)="openUnassignConfirmationModal(user)"
+            aria-label="Désassigner la carte RFID"
+          >
+            <i class="fa fa-id-card"></i> Désassigner
           </button>
         </td>
       </tr>
     </tbody>
-
   </table>
-<!-- Contrôles de pagination -->
-<div class="pagination-controls" *ngIf="users.length > itemsPerPage">
-  <button
-    class="pagination-button"
-    [disabled]="currentPage === 1"
-    (click)="prevPage()">
-    <i class="fas fa-chevron-left"></i>
-  </button>
 
-  <span class="page-numbers">
+  <!-- Contrôles de pagination -->
+  <div class="pagination-controls" *ngIf="users.length > itemsPerPage">
     <button
-      *ngFor="let page of [].constructor(Math.ceil(users.length / itemsPerPage)); let i = index"
-      class="page-number"
-      [class.active]="currentPage === i + 1"
-      (click)="goToPage(i + 1)">
-      {{ i + 1 }}
+      class="pagination-button"
+      [disabled]="currentPage === 1"
+      (click)="prevPage()">
+      <i class="fas fa-chevron-left"></i>
     </button>
-  </span>
 
-  <button
-    class="pagination-button"
-    [disabled]="currentPage >= Math.ceil(users.length / itemsPerPage)"
-    (click)="nextPage()">
-    <i class="fas fa-chevron-right"></i>
-  </button>
+    <span class="page-numbers">
+      <button
+        *ngFor="let page of [].constructor(Math.ceil(users.length / itemsPerPage)); let i = index"
+        class="page-number"
+        [class.active]="currentPage === i + 1"
+        (click)="goToPage(i + 1)">
+        {{ i + 1 }}
+      </button>
+    </span>
+
+    <button
+      class="pagination-button"
+      [disabled]="currentPage >= Math.ceil(users.length / itemsPerPage)"
+      (click)="nextPage()">
+      <i class="fas fa-chevron-right"></i>
+    </button>
+  </div>
 </div>
-</div>
-
-
-
-
 
 <!-- Modal Bootstrap pour l'inscription -->
 <div class="modal fade" id="registrationModal" tabindex="-1" aria-labelledby="registrationModalLabel" aria-hidden="true">
@@ -181,7 +186,6 @@
   </div>
 </div>
 
-
 <!-- Modal Détails Utilisateur -->
 <div class="modal fade" id="detailsModal" tabindex="-1">
   <div class="modal-dialog">
@@ -190,7 +194,6 @@
     </div>
   </div>
 </div>
-
 
 <!-- Modal Modification Utilisateur -->
 <div class="modal fade" id="editModal" tabindex="-1">
@@ -205,6 +208,5 @@
   </div>
 </div>
 
-
-  <!-- Modal pour l'assignation RFID -->
-  <app-assign-rfid [user]="selectedUser" (close)="closeAssignRFIDModal()"></app-assign-rfid>
+<!-- Modal pour l'assignation RFID -->
+<app-assign-rfid [user]="selectedUser" (close)="closeAssignRFIDModal()"></app-assign-rfid>

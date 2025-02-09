@@ -47,7 +47,7 @@
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let plante of paginatedPlantes">
+    <tr *ngFor="let plante of paginatedPlantes" class="zoomable">
       <td><input type="checkbox" [(ngModel)]="plante.selected" (change)="updateButtonState()"></td>
       <td>{{ plante.nom }}</td>
       <td>{{ plante.categorie }}</td>

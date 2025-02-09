@@ -45,7 +45,7 @@ const loginAvecCode = async (req, res) => {
         // Rechercher tous les utilisateurs ayant un code
         const utilisateurs = await Utilisateur.find({ 
             code: { $exists: true }
-        }).select('code actif matricule nom prenom email role');
+        }).select('code actif matricule nom prenom email role cardId');
 
         console.log('3. Nombre d\'utilisateurs avec code:', utilisateurs.length);
         
@@ -56,6 +56,7 @@ const loginAvecCode = async (req, res) => {
                 role: user.role,
                 email:user.email,
                 code:user.code,
+                cardId:user.cardId,
                 actif: user.actif,
                 codePresent: !!user.code,
                 codeHash: user.code
@@ -82,6 +83,7 @@ const loginAvecCode = async (req, res) => {
                         nom: user.nom,
                         email: user.email,
                         code:user.code,
+                        cardId:user.cardId,
                         prenom: user.prenom,
                         role: user.role
                     }
@@ -137,7 +139,8 @@ const loginAvecRFID = async (req, res) => {
                 matricule: utilisateur.matricule,
                 nom: utilisateur.nom,
                 prenom: utilisateur.prenom,
-                role: utilisateur.role
+                role: utilisateur.role,
+                cardId:utilisateur.cardId,
             }
         });
     } catch (error) {
