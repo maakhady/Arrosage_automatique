@@ -175,13 +175,6 @@
                   Valide entre 0 et 59.
                 </div>
               </div>
-              <div>
-                <label>Secondes</label>
-                <input type="number" formControlName="heureDebutSecondes" min="0" max="59" class="form-control">
-                <div *ngIf="arrosageForm.get('heureDebutSecondes')?.invalid && arrosageForm.get('heureDebutSecondes')?.touched" class="error">
-                  Valide entre 0 et 59.
-                </div>
-              </div>
             </div>
           </div>
 
@@ -199,13 +192,6 @@
                 <label>Minutes</label>
                 <input type="number" formControlName="heureFinMinutes" min="0" max="59" class="form-control">
                 <div *ngIf="arrosageForm.get('heureFinMinutes')?.invalid && arrosageForm.get('heureFinMinutes')?.touched" class="error">
-                  Valide entre 0 et 59.
-                </div>
-              </div>
-              <div>
-                <label>Secondes</label>
-                <input type="number" formControlName="heureFinSecondes" min="0" max="59" class="form-control">
-                <div *ngIf="arrosageForm.get('heureFinSecondes')?.invalid && arrosageForm.get('heureFinSecondes')?.touched" class="error">
                   Valide entre 0 et 59.
                 </div>
               </div>
