@@ -11,6 +11,7 @@ import { WebSocketService } from '../../../services/capteur.service';
 import { ArrosageService } from '../../../services/arrosage.service';
 import { MeteoService } from '../../../services/meteo.service';
 import { PlanteService } from '../../../services/plante.service';
+import { PompeService } from '../../../services/pompe.service';
 import { Arrosage, Plante} from '../../../models/arrosage.model';
 import Swal from 'sweetalert2';
 
@@ -58,6 +59,7 @@ export class DashboardUtilisateurComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
+    private pompeService: PompeService,
     private router: Router,
     private webSocketService: WebSocketService,
     private arrosageService: ArrosageService,
@@ -119,30 +121,55 @@ export class DashboardUtilisateurComponent implements OnInit {
   }
 
   startWatering() {
-    this.isWatering = true;
-    this.decreaseVolume();
+    this.pompeService.demarrerPompe().subscribe({
+      next: (response) => {
+        console.log('Pompe démarrée:', response);
+        this.isWatering = true;
+        Swal.fire({
+          title: 'Succès!',
+          text: 'Arrosage démarré avec succès',
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      },
+      error: (error) => {
+        console.error('Erreur pompe:', error);
+        Swal.fire({
+          title: 'Erreur!',
+          text: 'Erreur lors du démarrage de l\'arrosage',
+          icon: 'error'
+        });
+      }
+    });
   }
+
 
   stopWatering() {
-    this.isWatering = false;
-    this.resetVolume();
-  }
-
-  decreaseVolume() {
-    if (!isPlatformBrowser(this.platformId)) return;
-
-    const interval = setInterval(() => {
-      if (this.niveau_eau !== null && this.niveau_eau > 0 && this.isWatering) {
-        this.niveau_eau -= 1;
-      } else {
-        clearInterval(interval);
+    this.pompeService.arreterPompe().subscribe({
+      next: (response) => {
+        console.log('Pompe arrêtée:', response);
+        this.isWatering = false;
+        Swal.fire({
+          title: 'Succès!',
+          text: 'Arrosage arrêté avec succès',
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      },
+      error: (error) => {
+        console.error('Erreur pompe:', error);
+        Swal.fire({
+          title: 'Erreur!',
+          text: 'Erreur lors de l\'arrêt de l\'arrosage',
+          icon: 'error'
+        });
       }
-    }, 1000);
+    });
   }
 
-  resetVolume() {
-    this.niveau_eau = 500;
-  }
+
 
   getVolumeEau(arrosage: Arrosage): number {
     if (arrosage.volumeEau) return arrosage.volumeEau;
