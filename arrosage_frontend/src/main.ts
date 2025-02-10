@@ -7,6 +7,8 @@ import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { routes } from './app/app.routes';
 import { ApplicationConfig } from '@angular/core';
+import 'jquery';
+import 'bootstrap';
 
 const appConfig: ApplicationConfig = {
   providers: [

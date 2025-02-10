@@ -4,50 +4,57 @@ import { HeaderComponent } from '../../../components/header/header.component';
 import { FormsModule, FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { Router } from '@angular/router';
-import { faTimes } from '@fortawesome/free-solid-svg-icons';
-import { RouterModule } from '@angular/router';
-import { HttpClientModule, HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { AuthService } from '../../../services/auth.service';
-import { ArrosageService, Arrosage, ArrosageResponse } from '../../../services/arrosage.service';
-import { PlanteService, Plante } from '../../../services/plante.service';
-import Swal from 'sweetalert2';
+import { WebSocketService } from '../../../services/capteur.service';
+import { ArrosageService } from '../../../services/arrosage.service';
+import { Arrosage } from '../../../models/arrosage.model';
 
 @Component({
   selector: 'app-dashboard-utilisateur',
   standalone: true,
-  imports: [CommonModule, HeaderComponent, FormsModule, ReactiveFormsModule, FontAwesomeModule, RouterModule, HttpClientModule],
+  imports: [
+    CommonModule,
+    HeaderComponent,
+    FormsModule,
+    FontAwesomeModule,
+    HttpClientModule
+  ],
+  providers: [AuthService, ArrosageService],
   templateUrl: './dashboard-utilisateur.component.html',
   styleUrls: ['./dashboard-utilisateur.component.css']
 })
 export class DashboardUtilisateurComponent implements OnInit {
-  reservoirVolume = 50;
+  private platformId = inject(PLATFORM_ID);
+  niveau_eau: number | null = null;
   isWatering = false;
   showModal = false;
   faTimes = faTimes;
   isEditing = false;
   arrosageForm!: FormGroup;
   editingIndex: number | null = null;
-  arrosages: Arrosage[] = [];
-  plantes: Plante[] = [];
-  currentPage = 1;
-  itemsPerPage = 4;
-  successMessage = '';
-  successTimeout: any;
-  hoveredPlantTimer: any = null;
-  remainingTime = '';
-  temperature = 0;
-  humidity = 0;
-  isRaining = false;
-  weatherErrorMessage = '';
-  nextWateringTime = '';
+  humidite: number | null = null;
+  luminosite: number | null = null;
+
+  // Nouvelles propriétés pour la pagination et les arrosages
+  paginatedArrosages: Arrosage[] = [];
+  currentPage: number = 1;
+  pageSize: number = 5;
+  totalPages: number = 0;
+  timer: any;
+  allArrosages: Arrosage[] = [];
+
+  newSchedule = {
+    hour: '',
+    preference: 'none',
+    threshold: 0,
+    duration: 1,
+    type: 'automatique'
+  };
 
   constructor(
-    private fb: FormBuilder,
     private authService: AuthService,
-    private arrosageService: ArrosageService,
-    private planteService: PlanteService,
-    private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private webSocketService: WebSocketService,
+    private arrosageService: ArrosageService
   ) {}
 
   ngOnInit(): void {
@@ -205,199 +212,222 @@ export class DashboardUtilisateurComponent implements OnInit {
         });
       }
     });
+
+    this.webSocketService.socket$.subscribe((data) => {
+      this.humidite = data.humidite;
+      this.luminosite = data.lumiere;
+      this.niveau_eau = data.niveau_eau;
+    });
+
+    // Charger les arrosages au démarrage
+    this.loadArrosages();
   }
 
-  decreaseVolume(): void {
+  // Méthodes existantes
+  startWatering() {
+    this.isWatering = true;
+    this.decreaseVolume();
+  }
+
+  stopWatering() {
+    this.isWatering = false;
+    this.resetVolume();
+  }
+
+  decreaseVolume() {
+    if (!isPlatformBrowser(this.platformId)) return;
+
     const interval = setInterval(() => {
-      if (this.reservoirVolume > 0 && this.isWatering) {
-        this.reservoirVolume -= 1;
+      if (this.niveau_eau !== null && this.niveau_eau > 0 && this.isWatering) {
+        this.niveau_eau -= 1;
       } else {
         clearInterval(interval);
       }
     }, 1000);
   }
 
-  resetVolume(): void {
-    this.reservoirVolume = 50;
+  resetVolume() {
+    this.niveau_eau = 500;
   }
 
-  openModal(): void {
+
+  getVolumeEau(arrosage: Arrosage): number {
+    if (arrosage.volumeEau) return arrosage.volumeEau;
+    if (arrosage.parametresArrosage?.volumeEau) return arrosage.parametresArrosage.volumeEau;
+    return 0;
+  }
+
+  openModal() {
     this.showModal = true;
   }
 
-  closeModal(): void {
+  closeModal() {
     this.showModal = false;
     this.isEditing = false;
     this.editingIndex = null;
     this.arrosageForm.reset();
   }
 
-  get totalPages(): number {
-    return Math.ceil(this.arrosages.length / this.itemsPerPage);
+  // Nouvelles méthodes pour la gestion des arrosages
+  loadArrosages() {
+    this.arrosageService.getMesArrosages().subscribe({
+      next: (arrosages) => {
+        this.allArrosages = arrosages; // Stockez tous les arrosages
+        this.updatePagination();
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des arrosages:', error);
+      }
+    });
   }
 
-  saveSchedule(): void {
-    if (this.arrosageForm.valid) {
-      const formData = this.arrosageForm.value;
-      const currentUser = this.authService.getCurrentUser();
 
-      const arrosageData: Arrosage = {
-        plante: this.plantes.find(p => p._id === formData.plante)!,
-        utilisateur: { _id: currentUser?._id || '', nom: currentUser?.nom || '', prenom: currentUser?.prenom || '' },
-        type: 'automatique',
-        heureDebut: {
-          heures: formData.heureDebutHeures,
-          minutes: formData.heureDebutMinutes,
-          secondes: formData.heureDebutSecondes
-        },
-        heureFin: {
-          heures: formData.heureFinHeures,
-          minutes: formData.heureFinMinutes,
-          secondes: formData.heureFinSecondes
-        },
-        volumeEau: formData.volumeEau,
-        actif: formData.actif,
-        date_creation: new Date(),
-        date_modification: new Date(),
-        parametresArrosage: {
-          humiditeSolRequise: formData.humiditeSolRequise,
-          luminositeRequise: formData.luminositeRequise,
-          volumeEau: formData.volumeEau
-        }
-      };
+  updatePagination() {
+    this.totalPages = Math.ceil(this.allArrosages.length / this.pageSize);
+    const start = (this.currentPage - 1) * this.pageSize;
+    const end = start + this.pageSize;
+    this.paginatedArrosages = this.allArrosages.slice(start, end);
+  }
 
-      if (this.isEditing && this.editingIndex !== null) {
-        const arrosageId = this.arrosages[this.editingIndex]._id;
-        if (arrosageId) {
-          this.arrosageService.modifierArrosage(arrosageId, arrosageData).subscribe(
-            () => {
-              this.loadArrosages();
-              this.closeModal();
-              Swal.fire({
-                title: 'Succès',
-                text: 'Programme d\'arrosage mis à jour avec succès.',
-                icon: 'success',
-                timer: 2000,
-                timerProgressBar: true
-              });
-            },
-            (error) => {
-              console.error('Erreur lors de la mise à jour de l\'arrosage:', error);
-              Swal.fire({
-                title: 'Erreur',
-                text: 'Erreur lors de la mise à jour de l\'arrosage.',
-                icon: 'error',
-                timer: 2000,
-                timerProgressBar: true
-              });
-            }
-          );
-        }
-      } else {
-        this.arrosageService.creerArrosage(arrosageData).subscribe(
-          () => {
-            this.loadArrosages();
-            this.closeModal();
-            Swal.fire({
-              title: 'Succès',
-              text: 'Programme d\'arrosage créé avec succès.',
-              icon: 'success',
-              timer: 2000,
-              timerProgressBar: true
-            });
-          },
-          (error) => {
-            console.error('Erreur lors de l\'ajout de l\'arrosage:', error);
-            Swal.fire({
-              title: 'Erreur',
-              text: 'Erreur lors de l\'ajout de l\'arrosage.',
-              icon: 'error',
-              timer: 2000,
-              timerProgressBar: true
-            });
-          }
-        );
-      }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePagination();
     }
   }
 
-  calculateDuration(formData: any): string {
-    const debut = new Date();
-    debut.setHours(formData.heureDebutHeures, formData.heureDebutMinutes, formData.heureDebutSecondes);
-    const fin = new Date();
-    fin.setHours(formData.heureFinHeures, formData.heureFinMinutes, formData.heureFinSecondes);
-    const diff = fin.getTime() - debut.getTime();
-
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-    return `${hours}h ${minutes}m ${seconds}s`;
+  goToPage(page: number): void {
+    this.currentPage = page;
+    this.updatePagination();
   }
 
-  editSchedule(index: number): void {
-    const arrosage = this.arrosages[index];
-    this.arrosageForm.patchValue({
-      type: arrosage.type,
-      plante: arrosage.plante._id,
-      heureDebutHeures: arrosage.heureDebut.heures,
-      heureDebutMinutes: arrosage.heureDebut.minutes,
-      heureDebutSecondes: arrosage.heureDebut.secondes,
-      heureFinHeures: arrosage.heureFin.heures,
-      heureFinMinutes: arrosage.heureFin.minutes,
-      heureFinSecondes: arrosage.heureFin.secondes,
-      volumeEau: arrosage.volumeEau,
-      actif: arrosage.actif,
-      humiditeSolRequise: arrosage.parametresArrosage?.humiditeSolRequise,
-      luminositeRequise: arrosage.parametresArrosage?.luminositeRequise
-    });
-    this.isEditing = true;
-    this.editingIndex = index;
-    this.openModal();
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePagination();
+    }
   }
 
-  deleteSchedule(index: number): void {
-    Swal.fire({
-      title: 'Confirmer',
-      text: 'Êtes-vous sûr de vouloir supprimer cet arrosage ?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Oui, supprimer',
-      cancelButtonText: 'Annuler'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        const arrosageId = this.arrosages[index]._id;
-        if (arrosageId) {
-          this.arrosageService.supprimerArrosage(arrosageId).subscribe(
-            () => {
-              this.loadArrosages();
-              Swal.fire({
-                title: 'Supprimé !',
-                text: 'L\'arrosage a été supprimé avec succès.',
-                icon: 'success',
-                timer: 2000,
-                timerProgressBar: true
-              });
-            },
-            (error) => {
-              console.error('Erreur lors de la suppression de l\'arrosage:', error);
-              Swal.fire({
-                title: 'Erreur',
-                text: 'Erreur lors de la suppression de l\'arrosage.',
-                icon: 'error',
-                timer: 2000,
-                timerProgressBar: true
-              });
-            }
-          );
-        }
+  startTimer(heureFin: any) {
+    this.stopTimer();
+    this.timer = setInterval(() => {
+      const now = new Date();
+      const end = new Date(heureFin);
+      const diff = end.getTime() - now.getTime();
+
+      if (diff <= 0) {
+        this.stopTimer();
       }
-    });
+    }, 1000);
   }
 
-  get paginatedArrosages(): Arrosage[] {
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    return Array.isArray(this.arrosages) ? this.arrosages.slice(startIndex, startIndex + this.itemsPerPage) : [];
+  stopTimer() {
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
+  }
+
+  saveSchedule() {
+    const [hours, minutes] = this.newSchedule.hour.split(':').map(Number);
+    const endHours = hours + Math.floor(this.newSchedule.duration / 60);
+    const endMinutes = minutes + (this.newSchedule.duration % 60);
+
+    const newArrosage: Arrosage = {
+      type: this.newSchedule.type,
+      heureDebut: {
+        heures: hours,
+        minutes: minutes,
+        secondes: 0  // Ajout des secondes
+      },
+      heureFin: {
+        heures: endHours,
+        minutes: endMinutes,
+        secondes: 0  // Ajout des secondes
+      },
+      volumeEau: this.newSchedule.duration,
+      plante: {
+        _id: '679adb05afe9042fc3bb9cb8',  // ID de la plante par défaut
+        nom: "Plante par défaut",
+        categorie: "Défaut"
+      },
+      utilisateur: this.authService.getCurrentUser()?.id || '',
+      actif: true
+    };
+
+    if (this.isEditing && this.editingIndex !== null) {
+      const arrosage = this.paginatedArrosages[this.editingIndex];
+      if (arrosage._id) {
+        this.arrosageService.modifierArrosage(arrosage._id, newArrosage).subscribe({
+          next: () => {
+            this.loadArrosages();
+            this.closeModal();
+          },
+          error: (error) => {
+            console.error('Erreur lors de la modification:', error);
+          }
+        });
+      }
+    } else {
+      this.arrosageService.creerArrosage(newArrosage).subscribe({
+        next: () => {
+          this.loadArrosages();
+          this.closeModal();
+        },
+        error: (error) => {
+          console.error('Erreur lors de la création:', error);
+        }
+      });
+    }
+  }
+  editSchedule(arrosage: Arrosage) {
+    if (arrosage._id) {
+      this.arrosageService.modifierArrosage(arrosage._id, arrosage).subscribe({
+        next: (updatedArrosage) => {
+          this.loadArrosages();
+          this.closeModal();
+        },
+        error: (error) => {
+          console.error('Erreur lors de la modification:', error);
+        }
+      });
+    }
+  }
+
+
+
+  deleteSchedule(arrosage: Arrosage) {
+    if (arrosage._id) {
+      this.arrosageService.supprimerArrosage(arrosage._id).subscribe({
+        next: () => {
+          this.loadArrosages();
+        },
+        error: (error) => {
+          console.error('Erreur lors de la suppression:', error);
+        }
+      });
+    }
+  }
+
+
+  // Dans votre composant
+formatTime(time: { heures: number; minutes: number; secondes: number }): string {
+  const heures = time.heures.toString().padStart(2, '0');
+  const minutes = time.minutes.toString().padStart(2, '0');
+  const secondes = time.secondes.toString().padStart(2, '0');
+  return `${heures}:${minutes}:${secondes}`;
+}
+
+
+  resetNewSchedule() {
+    this.newSchedule = {
+      hour: '',
+      preference: 'none',
+      threshold: 0,
+      duration: 1,
+      type: 'automatique'
+    };
   }
 
   nextPage(): void {
@@ -406,65 +436,15 @@ export class DashboardUtilisateurComponent implements OnInit {
     }
   }
 
-  previousPage(): void {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-    }
-  }
-
-  startTimer(heureFin: any): void {
-    const fin = new Date();
-    fin.setHours(heureFin.heures, heureFin.minutes, heureFin.secondes);
-
-    this.hoveredPlantTimer = setInterval(() => {
-      const now = new Date();
-      const diff = fin.getTime() - now.getTime();
-
-      if (diff <= 0) {
-        clearInterval(this.hoveredPlantTimer);
-        this.remainingTime = 'Arrosage terminé';
-      } else {
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-        this.remainingTime = `${hours}h ${minutes}m ${seconds}s`;
-      }
-    }, 1000);
-  }
-
-  stopTimer(): void {
-    if (this.hoveredPlantTimer) {
-      clearInterval(this.hoveredPlantTimer);
-      this.remainingTime = '';
-    }
-  }
-
-  showTooltip(event: MouseEvent, weatherInfo: string) {
-    const tooltip = document.getElementById('weatherTooltip');
-    if (tooltip) {
-      tooltip.innerHTML = `<p>${weatherInfo}</p>`;
-      tooltip.style.left = `${event.pageX + 10}px`;
-      tooltip.style.top = `${event.pageY + 10}px`;
-      tooltip.classList.add('visible');
-    }
-  }
-
-  hideTooltip() {
-    const tooltip = document.getElementById('weatherTooltip');
-    if (tooltip) {
-      tooltip.classList.remove('visible');
-    }
-  }
-
-  navigateToUsers() {
-    this.router.navigate(['/user-list']);
-  }
-
-  navigateToPlante() {
+  navigateToPlante(): void {
     this.router.navigate(['/components/gestion-plantes']);
   }
 
-  navigateToHistorique() {
-    this.router.navigate(['/historique']);
+  navigateToUsers(): void {
+    this.router.navigate(['/user-list']);
+  }
+
+  ngOnDestroy() {
+    this.stopTimer();
   }
 }

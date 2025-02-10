@@ -1,72 +1,150 @@
-
 <app-header></app-header>
+<div class="dashboard">
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Statistiques -->
+        <div class="stats">
+            <!-- Autres cartes -->
+            <div class="card">
+                <i class="fas fa-tint large-icon"></i>
+                <h3>Humidité du Sol</h3>
+                <div class="value">{{ humidite }}%</div>
+            </div>
+            <div class="card">
+                <i class="fas fa-sun large-icon"></i>
+                <h3>Luminosité</h3>
+                <div class="value">{{ luminosite }} lux</div>
+            </div>
 
-<div class="dashboard grayscale">
-  <div class="main-content">
-    <div class="stats">
-      <div class="card">
-        <i class="fas fa-tint large-icon"></i>
-        <h3>Humidité du Sol</h3>
-        <div class="value">78%</div>
-      </div>
-      <div class="card">
-        <i class="fas fa-sun large-icon"></i>
-        <h3>Luminosité</h3>
-        <div class="value">820 lux</div>
-      </div>
+            <!-- Réservoir intégré dans stats -->
+            <div class="card reservoir">
+                <h2 class="reservoir-title">Volume Réservoir</h2>
+                <div class="reservoir-content">
+                    <div class="reservoir-controls">
+                        <button class="arr" (click)="startWatering()">
+                            <i class="fas fa-play"></i> Arroser
+                        </button>
+                        <button class="aret" (click)="stopWatering()">
+                            <i class="fas fa-stop"></i> Arrêter
+                        </button>
+                        <div class="volume">Niveau d'Eau: {{ niveau_eau }}%</div>
+                        <!-- <div class="water-level">Niveau d'Eau: {{ niveau_eau }}%</div> -->
+                    </div>
+                    <i class="fas fa-fill-drip large-reservoir-icon" [class.bend]="isWatering"></i>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="reservoir">
-      <h2>Volume du Réservoir</h2>
-      <div class="reservoir-content">
-        <div class="reservoir-controls">
-          <button class="arr" (click)="startWatering()">
-            <i class="fas fa-play"></i> Arroser
-          </button>
-          <button class="aret" (click)="stopWatering()">
-            <i class="fas fa-stop"></i> Arrêter
-          </button>
-          <div class="volume">{{ reservoirVolume }}%</div>
+    <!-- Section Options + Réservoir + Zones -->
+    <div class="bottom-section">
+        <!-- Partie gauche : Options + Réservoir -->
+        <div class="left-section">
+            <!-- Options -->
+            <div class="options">
+                <button class="btn1" (click)="navigateToUsers()"><i class="fa-solid fa-user"></i>
+                    <span>Gestion des utilisateurs</span></button>
+                <button class="btn2" (click)="openModal()"><i class="fas fa-clock"></i>
+                    <span>Programmer un arrosage</span></button>
+                <button class="btn3" (click)="navigateToPlante()"><i class="fas fa-plus-circle"></i>
+                    <span>Gestion des plantes</span></button>
+                <button class="btn4" (click)="navigateToHistorique()">
+                    <i class="fas fa-history"></i>
+                    <span>Voir Historique</span>
+                </button>
+            </div>
         </div>
-        <div style="position: relative;">
-          <i class="fas fa-fill-drip large-reservoir-icon" [class.bend]="isWatering"></i>
-          <div class="rain-container" [class.active]="isWatering">
-            <div class="raindrop"></div>
-            <div class="raindrop"></div>
-            <div class="raindrop"></div>
-            <div class="raindrop"></div>
-            <div class="raindrop"></div>
-            <div class="raindrop"></div>
-            <div class="raindrop"></div>
-            <div class="raindrop"></div>
-          </div>
+
+       <!-- Programme des Arrosages -->
+       <div class="zones-container">
+        <h3><i class="fa-solid fa-list"></i> Programme des Arrosages</h3><br>
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>Plante</th>
+                    <th>Type</th>
+                    <th>Heure de début</th>
+                    <th>Heure de fin</th>
+                    <th>Volume d'eau</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let arrosage of paginatedArrosages">
+                    <td>{{ arrosage.plante.nom || 'N/A' }}</td>
+                    <td>{{ arrosage.type }}</td>
+                    <td>{{ formatTime(arrosage.heureDebut) }}</td>
+                    <td>{{ formatTime(arrosage.heureFin) }}</td>
+                    <td>{{ getVolumeEau(arrosage) }} litres</td>
+                    <td>
+                        <button class="action-button" (click)="editSchedule(arrosage)">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-button1" (click)="deleteSchedule(arrosage)">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="pagination-controls" *ngIf="allArrosages.length > pageSize">
+          <button
+            class="pagination-button"
+            [disabled]="currentPage === 1"
+            (click)="previousPage()">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+
+          <span class="page-numbers">
+            <button
+              *ngFor="let page of [].constructor(totalPages); let i = index"
+              class="page-number"
+              [class.active]="currentPage === i + 1"
+              (click)="goToPage(i + 1)">
+              {{ i + 1 }}
+            </button>
+          </span>
+
+          <button
+            class="pagination-button"
+            [disabled]="currentPage >= totalPages"
+            (click)="nextPage()">
+            <i class="fas fa-chevron-right"></i>
+          </button>
         </div>
-      </div>
     </div>
-  </div>
 
-  <div class="bottom-section">
-    <div class="left-section">
-      <div class="options">
-        <button (click)="navigateToUsers()" class="btn1">Gestion des utilisateurs</button>
-        <button class="btn2" (click)="openModal()"><i class="fas fa-clock"></i> Programmer un arrosage</button>
-        <button (click)="navigateToPlante()" class="btn3"><i class="fas fa-plus-circle"></i> Gestion des plantes</button>
-        <button (click)="navigateToHistorique()" class="btn4"><i class="fas fa-history"></i> Voir Historique</button>
-      </div>
 
-      <div class="reservoir">
-        <h2 class="reservoir-title">Météo Actuelle</h2>
-        <div class="reservoir-content">
-          <!-- <div class="reservoir-controls"> -->
-            <!-- Weather Flyer -->
-            <div class="weather-flyer">
-              <div class="weather-header">
-                <i class="fas fa-cloud-sun"></i> Météo Actuelle
-              </div>
-              <div class="weather-content">
-                <div class="weather-info">
-                  <div class="temperature">{{ temperature }}°C</div>
-                  <div class="humidity">Humidité: {{ humidity }}%</div>
+<!-- Modal de programmation -->
+<div class="modal-overlay" *ngIf="showModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4>{{ isEditing ? 'Modifier' : 'Ajouter' }} un arrosage</h4>
+            <button class="close-button" (click)="closeModal()">
+                <fa-icon [icon]="faTimes"></fa-icon>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Heure</label>
+                <input type="time" [(ngModel)]="newSchedule.hour">
+            </div>
+
+            <div class="form-group">
+                <label>Préférence</label>
+                <select [(ngModel)]="newSchedule.preference">
+                    <option value="none">Aucune préférence</option>
+                    <option value="humidity">Humidité du sol</option>
+                    <option value="light">Luminosité</option>
+                </select>
+            </div>
+
+            <div class="form-group" *ngIf="newSchedule.preference !== 'none'">
+                <label>Seuil</label>
+                <div class="threshold-input">
+                    <input type="number" [(ngModel)]="newSchedule.threshold" min="0" max="100">
+                    <span>%</span>
                 </div>
                 <div class="weather-forecast">
                   <div *ngIf="isRaining">🌧️ Pluie prévue</div>

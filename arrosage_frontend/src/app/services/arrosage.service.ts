@@ -1,62 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { map } from 'rxjs/operators';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
-import { AuthService } from './auth.service';
-
-export interface Utilisateur {
-  _id: string;
-  nom: string;
-  prenom: string;
-}
-
-export interface Plante {
-  _id?: string;
-  nom: string;
-  categorie: string;
-  humiditeSol: number;
-  volumeEau: number;
-  luminosite: number;
-  date_modification?: Date;
-  selected: boolean;
-}
-
-export interface Arrosage {
-  _id?: string;
-  plante: Plante;
-  utilisateur: Utilisateur;
-  type: string;
-  heureDebut: {
-    heures: number;
-    minutes: number;
-    secondes: number;
-  };
-  heureFin: {
-    heures: number;
-    minutes: number;
-    secondes: number;
-  };
-  volumeEau: number;
-  actif: boolean;
-  date_creation: Date;
-  date_modification: Date;
-  recurrence?: string; // quotidien, hebdomadaire, etc.
-  priorite?: number; // 1 (haute priorité), 2 (moyenne), 3 (basse)
-  parametresArrosage?: {
-    humiditeSolRequise: number;
-    luminositeRequise: number;
-    volumeEau: number;
-  };
-  temperature?: number; // Ajout de la température
-  humidity?: number; // Ajout de l'humidité
-}
-
-export interface ArrosageResponse {
-  success: boolean;
-  count: number;
-  arrosages: Arrosage[];
-}
+import { catchError, map } from 'rxjs/operators';
+import { Arrosage } from '../models/arrosage.model';
 
 @Injectable({
   providedIn: 'root'
@@ -84,81 +30,107 @@ export class ArrosageService {
     return throwError('Something went wrong; please try again later.');
   }
 
-  creerArrosage(arrosage: Arrosage): Observable<Arrosage> {
-    return this.http.post<Arrosage>(`${this.apiUrl}`, arrosage, { headers: this.getHeaders() })
-      .pipe(catchError(this.handleError));
+  private getHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token');
+    return new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    });
   }
 
-  getMesArrosages(): Observable<ArrosageResponse> {
-    return this.http.get<ArrosageResponse>(`${this.apiUrl}/mes-arrosages`, { headers: this.getHeaders() })
-      .pipe(catchError(this.handleError));
-  }
-
-  getArrosageParId(id: string): Observable<Arrosage> {
-    return this.http.get<Arrosage>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() })
-      .pipe(catchError(this.handleError));
-  }
-
-  modifierArrosage(id: string, updates: Partial<Arrosage>): Observable<Arrosage> {
-    return this.http.put<Arrosage>(`${this.apiUrl}/${id}`, updates, { headers: this.getHeaders() })
-      .pipe(catchError(this.handleError));
-  }
-
-  supprimerArrosage(id: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`, { headers: this.getHeaders() })
-      .pipe(catchError(this.handleError));
-  }
-
-  toggleArrosage(id: string): Observable<Arrosage> {
-    return this.http.patch<Arrosage>(`${this.apiUrl}/${id}/toggle`, {}, { headers: this.getHeaders() })
-      .pipe(catchError(this.handleError));
-  }
-
-  arrosageManuelPlante(planteId: string, volumeEau: number): Observable<Arrosage> {
-    return this.http.post<Arrosage>(`${this.apiUrl}/manuel/${planteId}`, { volumeEau }, { headers: this.getHeaders() })
-      .pipe(catchError(this.handleError));
-  }
-
-  arreterArrosage(): Observable<any> {
-    return this.http.post(`${this.apiUrl}/arret-urgence`, {}, { headers: this.getHeaders() })
-      .pipe(catchError(this.handleError));
-  }
-
-  arrosageManuelGlobal(): Observable<any> {
-    return this.http.post(`${this.apiUrl}/manuel-global`, {}, { headers: this.getHeaders() })
-      .pipe(catchError(this.handleError));
-  }
-
-  getWeatherData(city: string, apiKey: string): Observable<any> {
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
-    return this.http.get(url)
-      .pipe(catchError(this.handleError));
-  }
-
-  // ajuster la fréquence d'arrosage en fonction de la température
-  adjustFrequencyBasedOnTemperature(arrosage: Arrosage, temperature: number): Arrosage {
-    if (temperature > 30) {
-      // Augmenter la fréquence d'arrosage
-      arrosage.volumeEau += 10; // Exemple d'ajustement
-    }
-    return arrosage;
-  }
-
-
-  checkWeatherAndAdjust(arrosage: Arrosage, city: string, apiKey: string): Observable<Arrosage> {
-    return this.getWeatherData(city, apiKey).pipe(
-      map((weatherData: any) => {
-        const isRaining = weatherData.weather.some((weather: any) =>
-          weather.main.toLowerCase().includes('rain')
-        );
-        if (isRaining) {
-          arrosage.actif = false; // Désactiver l'arrosage si la pluie est prévue
-        }
-        return arrosage;
-      }),
+  getMesArrosages(): Observable<Arrosage[]> {
+    return this.http.get<any>(`${this.apiUrl}`, {
+      headers: this.getHeaders()
+    }).pipe(
+      map(response => response.arrosages),
       catchError(this.handleError)
     );
   }
-  
-  
+
+  creerArrosage(arrosage: Arrosage): Observable<Arrosage> {
+    return this.http.post<any>(`${this.apiUrl}`, arrosage, {
+      headers: this.getHeaders()
+    }).pipe(
+      map(response => response.arrosage),
+      catchError(this.handleError)
+    );
+  }
+
+  getArrosageParId(id: string): Observable<Arrosage> {
+    return this.http.get<any>(`${this.apiUrl}/${id}`, {
+      headers: this.getHeaders()
+    }).pipe(
+      map(response => response.arrosage),
+      catchError(this.handleError)
+    );
+  }
+
+  modifierArrosage(id: string, updates: Partial<Arrosage>): Observable<Arrosage> {
+    return this.http.put<any>(`${this.apiUrl}/${id}`, updates, {
+      headers: this.getHeaders()
+    }).pipe(
+      map(response => response.arrosage),
+      catchError(this.handleError)
+    );
+  }
+
+  supprimerArrosage(id: string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`, {
+      headers: this.getHeaders()
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  toggleArrosage(id: string): Observable<Arrosage> {
+    return this.http.patch<any>(`${this.apiUrl}/${id}/toggle`, {}, {
+      headers: this.getHeaders()
+    }).pipe(
+      map(response => response.arrosage),
+      catchError(this.handleError)
+    );
+  }
+
+  arrosageManuelPlante(planteId: string, volumeEau: number): Observable<Arrosage> {
+    return this.http.post<any>(`${this.apiUrl}/manuel/plante/${planteId}`,
+      { volumeEau },
+      { headers: this.getHeaders() }
+    ).pipe(
+      map(response => response.arrosage),
+      catchError(this.handleError)
+    );
+  }
+
+  arreterArrosage(): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/stop`, {}, {
+      headers: this.getHeaders()
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  arrosageManuelGlobal(): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/manuel/global`, {}, {
+      headers: this.getHeaders()
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  private handleError(error: any) {
+    console.error('Une erreur est survenue:', error);
+    let errorMessage = 'Une erreur est survenue';
+
+    if (error.error?.message) {
+      errorMessage = error.error.message;
+    } else if (error.status === 401) {
+      errorMessage = 'Non autorisé. Veuillez vous reconnecter.';
+    } else if (error.status === 403) {
+      errorMessage = 'Accès refusé';
+    } else if (error.status === 500) {
+      errorMessage = 'Erreur serveur';
+    }
+
+    return throwError(() => new Error(errorMessage));
+  }
 }
