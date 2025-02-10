@@ -16,6 +16,7 @@ export interface Utilisateur {
   role: Role;
   actif?: boolean;
   selected?: boolean;
+  cardId?:string;
   date_creation: Date;
   date_modification: Date;
 }
@@ -87,6 +88,11 @@ export class UtilisateurService {
   // Assigner une carte RFID à un utilisateur
   assignerCarteRFID(id: string, cardId: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/${id}/rfid`, { cardId }, { headers: this.getHeaders() });
+  }
+
+   // Désassigner une carte RFID à un utilisateur
+   desassignerCarteRFID(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}/rfid`, { headers: this.getHeaders() });
   }
 
   // Importer des utilisateurs à partir d'un fichier CSV

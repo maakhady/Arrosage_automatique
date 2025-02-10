@@ -1,11 +1,12 @@
-import { Component, OnInit, PLATFORM_ID, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, Renderer2, ElementRef, inject, PLATFORM_ID } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { AuthService } from './../../services/auth.service';
+import { RfidWebsocketService } from './../../services/rfid-websocket.service';
 import { HttpClientModule } from '@angular/common/http';
+import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
-
 
 @Component({
   selector: 'app-auth',
@@ -14,8 +15,10 @@ import Swal from 'sweetalert2';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, HttpClientModule],
 })
-export class AuthComponent implements OnInit {
+export class AuthComponent implements OnInit, OnDestroy, AfterViewInit {
   private platformId = inject(PLATFORM_ID);
+  private rfidSubscription?: Subscription;
+
   authForm: FormGroup;
   isLoading = false;
   attempts = 0;
@@ -23,13 +26,19 @@ export class AuthComponent implements OnInit {
   remainingAttempts = 3;
   errorMessage: string | null = null;
   showRfidMessage = false;
+  timer: number = 0;
+  timerInterval: any;
+  isLocked: boolean = false;
+  lockDuration: number = 20;
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private renderer: Renderer2,
+    private el: ElementRef,
+    private rfidWebsocketService: RfidWebsocketService
   ) {
-    // Initialisation du formulaire avec validation
     this.authForm = this.fb.group({
       digit1: ['', [Validators.required, Validators.pattern(/^[0-9]$/)]],
       digit2: ['', [Validators.required, Validators.pattern(/^[0-9]$/)]],
@@ -37,7 +46,6 @@ export class AuthComponent implements OnInit {
       digit4: ['', [Validators.required, Validators.pattern(/^[0-9]$/)]]
     });
 
-    // Vérifier si déjà connecté
     this.authService.isLoggedIn$.subscribe(isLoggedIn => {
       if (isLoggedIn) {
         this.redirectBasedOnRole();
@@ -48,7 +56,83 @@ export class AuthComponent implements OnInit {
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
       this.focusInput('digit1');
+
+      this.rfidSubscription = this.rfidWebsocketService.getCardScans()
+        .subscribe(data => {
+          if (data.cardID) {
+            this.loginWithRfid(data.cardID);
+          }
+        });
+
+      this.checkLockState();
     }
+  }
+
+  ngAfterViewInit(): void {
+    if (!this.isLocked && isPlatformBrowser(this.platformId)) {
+      this.focusInput('digit1');
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.rfidSubscription) {
+      this.rfidSubscription.unsubscribe();
+    }
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+    }
+  }
+
+  checkLockState(): void {
+    const lockUntil = localStorage.getItem('lockUntil');
+    if (lockUntil) {
+      const now = new Date().getTime();
+      const lockTime = parseInt(lockUntil, 10);
+
+      if (now < lockTime) {
+        this.isLocked = true;
+        this.startTimer(Math.floor((lockTime - now) / 1000));
+        this.updateInputStyles();
+      } else {
+        localStorage.removeItem('lockUntil');
+      }
+    }
+  }
+
+  onDelayEnd(): void {
+    this.focusInput('digit1');
+  }
+
+  startTimer(duration: number): void {
+    this.timer = duration;
+    this.timerInterval = setInterval(() => {
+      this.timer--;
+      if (this.timer <= 0) {
+        clearInterval(this.timerInterval);
+        this.isLocked = false;
+        localStorage.removeItem('lockUntil');
+        this.updateInputStyles();
+        this.onDelayEnd();
+      }
+    }, 1000);
+  }
+
+  lockInputs(): void {
+    const lockUntil = new Date().getTime() + this.lockDuration * 1000;
+    localStorage.setItem('lockUntil', lockUntil.toString());
+    this.isLocked = true;
+    this.startTimer(this.lockDuration);
+    this.updateInputStyles();
+  }
+
+  formatTimer(seconds: number): string {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${this.padZero(minutes)}:${this.padZero(remainingSeconds)}`;
+  }
+
+  padZero(value: number): string {
+    return value < 10 ? `0${value}` : `${value}`;
   }
 
   onInputChange(event: Event, digit: string, inputElement: HTMLInputElement): void {
@@ -117,7 +201,6 @@ export class AuthComponent implements OnInit {
       error: (error) => {
         console.error('Erreur de connexion:', error);
         if (error.status === 403) {
-          // Afficher le message de blocage avec SweetAlert2
           Swal.fire({
             icon: 'error',
             title: 'Compte bloqué',
@@ -131,6 +214,27 @@ export class AuthComponent implements OnInit {
         } else {
           this.handleFailedLogin();
         }
+      },
+      complete: () => {
+        this.isLoading = false;
+      }
+    });
+  }
+
+  private loginWithRfid(cardID: string): void {
+    this.isLoading = true;
+    this.authService.loginWithRFID(cardID).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.showSuccessAlert();
+          this.redirectBasedOnRole();
+        } else {
+          this.handleFailedLogin();
+        }
+      },
+      error: (error) => {
+        console.error('Erreur de connexion:', error);
+        this.handleFailedLogin();
       },
       complete: () => {
         this.isLoading = false;
@@ -173,6 +277,16 @@ export class AuthComponent implements OnInit {
     this.showRfidMessage = false;
   }
 
+  private showSuccessAlert(): void {
+    Swal.fire({
+      icon: 'success',
+      title: 'Connexion réussie',
+      text: 'Vous êtes maintenant connecté.',
+      timer: 2000,
+      showConfirmButton: false
+    });
+  }
+
   focusInput(digit: string): void {
     if (!isPlatformBrowser(this.platformId)) return;
 
@@ -200,5 +314,25 @@ export class AuthComponent implements OnInit {
     setTimeout(() => {
       inputElement.type = originalType;
     }, 1000);
+  }
+
+  updateInputStyles(): void {
+    const inputElements = this.el.nativeElement.querySelectorAll('.form-control');
+    inputElements.forEach((inputElement: HTMLInputElement) => {
+      if (this.isLocked) {
+        this.renderer.addClass(inputElement, 'input-disabled');
+        inputElement.disabled = true;
+      } else {
+        this.renderer.removeClass(inputElement, 'input-disabled');
+        inputElement.disabled = false;
+      }
+    });
+  }
+
+  focusFirstInput(): void {
+    const firstInputElement = document.querySelector('input[formControlName]') as HTMLInputElement;
+    if (firstInputElement) {
+      firstInputElement.focus();
+    }
   }
 }

@@ -54,7 +54,8 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let user of filteredUsers">
+      <tr *ngFor="let user of filteredUsers"
+      class="zoomable">
         <td>
           <input
   type="checkbox"
@@ -123,8 +124,22 @@
         </td>
 
         <td>
-          <button (click)="assignRFID(user)" class="assign-button" aria-label="Assigner une carte RFID">
-            Assigner
+          <button
+            class="btn"
+            *ngIf="!isCardAssigned(user)"
+            (click)="assignRFID(user)"
+            aria-label="Assigner une carte RFID"
+            [ngClass]="{'btn-success': user.actif, 'btn-secondary bg-gray': !user.actif}"
+          >
+            <i class="fa fa-id-card"></i> Assigner
+          </button>
+          <button
+            class="btn btn-danger"
+            *ngIf="isCardAssigned(user)"
+            (click)="openUnassignConfirmationModal(user)"
+            aria-label="Désassigner la carte RFID"
+          >
+            <i class="fa fa-id-card"></i> Désassigner
           </button>
         </td>
       </tr>

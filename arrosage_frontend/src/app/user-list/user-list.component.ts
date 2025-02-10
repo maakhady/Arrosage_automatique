@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UserRegistrationComponent } from '../user-registration/user-registration.component';
@@ -7,12 +7,13 @@ import { UserEditComponent } from '../user-edit/user-edit.component';
 import { AssignRfidComponent } from '../assign-rfid/assign-rfid.component';
 import { UtilisateurService, Utilisateur, ImportResponse } from '../services/utilisateur.service';
 import { AuthService } from '../services/auth.service';
+import { RfidWebsocketService } from '../services/rfid-websocket.service';
+import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
 import { HeaderComponent } from '../components/header/header.component';
 import { HttpErrorResponse } from '@angular/common/http';
 declare var bootstrap: any;
-declare var $: any; // Pour utiliser jQuery avec Bootstrap
-
+declare var $: any;
 
 @Component({
   selector: 'app-user-list',
@@ -21,7 +22,7 @@ declare var $: any; // Pour utiliser jQuery avec Bootstrap
   templateUrl: './user-list.component.html',
   styleUrls: ['./user-list.component.css']
 })
-export class UserListComponent implements OnInit {
+export class UserListComponent implements OnInit, OnDestroy {
   users: Utilisateur[] = [];
   filteredUsers: Utilisateur[] = [];
   selectedUser: Utilisateur | null = null;
@@ -30,7 +31,6 @@ export class UserListComponent implements OnInit {
   userToDelete: Utilisateur | null = null;
   userToBlock: Utilisateur | null = null;
 
-  // Propriétés de pagination
   currentPage: number = 1;
   itemsPerPage: number = 5;
 
@@ -38,39 +38,58 @@ export class UserListComponent implements OnInit {
   error: string | null = null;
   Math = Math;
 
+  private rfidSubscription?: Subscription;
 
   @ViewChild('fileInput') fileInput!: ElementRef;
 
-  constructor(private utilisateurService: UtilisateurService, private authService: AuthService) {}
+  constructor(
+    private utilisateurService: UtilisateurService,
+    private authService: AuthService,
+    private rfidWebsocketService: RfidWebsocketService
+  ) {}
 
   ngOnInit() {
     this.loadUsers();
     $(function () {
       $('[data-toggle="tooltip"]').tooltip();
     });
+
+    this.rfidSubscription = this.rfidWebsocketService.getCardScans()
+      .subscribe(data => {
+        if (this.selectedUser && data.cardID) {
+          this.assignCardToUser(this.selectedUser, data.cardID);
+        }
+      });
+  }
+
+  ngOnDestroy() {
+    if (this.rfidSubscription) {
+      this.rfidSubscription.unsubscribe();
+    }
   }
 
   loadUsers() {
-    this.utilisateurService.getTousUtilisateurs().subscribe(
-      (response: any) => {
+    this.utilisateurService.getTousUtilisateurs().subscribe({
+      next: (response: any) => {
         const users = response.utilisateurs || response;
         if (Array.isArray(users)) {
           this.users = users;
+          this.restoreButtonStates();
           this.filterUsers();
         } else {
           this.users = [];
           this.filteredUsers = [];
         }
       },
-      error => {
+      error: () => {
         this.users = [];
         this.filteredUsers = [];
       }
-    );
+    });
   }
 
-    onUserAdded() {
-    this.loadUsers(); // Recharge la liste des utilisateurs
+  onUserAdded() {
+    this.loadUsers();
   }
 
   selectAllUsers(event: any) {
@@ -87,69 +106,8 @@ export class UserListComponent implements OnInit {
     this.updateButtonState();
   }
 
-  // openDeleteConfirmationModal(user?: Utilisateur) {
-  //   if (user) {
-  //     if (user.role === 'super-admin') {
-  //       Swal.fire({
-  //         icon: 'error',
-  //         title: 'Impossible de supprimer',
-  //         text: 'Impossible de supprimer un super-admin. Pour supprimer ce dernier, il faut qu\'il soit d\'abord un utilisateur ',
-  //         timer: 4000, // Durée de 2 secondes
-  //         timerProgressBar: true,
-  //         showConfirmButton: false
-  //       });
-  //       return;
-  //     }
-  //     this.userToDelete = user;
-  //     Swal.fire({
-  //       title: 'Confirmer la suppression',
-  //       text: 'Êtes-vous sûr de vouloir supprimer cet utilisateur ?',
-  //       icon: 'warning',
-  //       showCancelButton: true,
-  //       confirmButtonText: 'Oui',
-  //       cancelButtonText: 'Non'
-  //     }).then((result) => {
-  //       if (result.isConfirmed) {
-  //         this.confirmDeleteUser();
-  //       }
-  //     });
-  //   } else {
-  //     const selectedUsers = this.filteredUsers.filter(user => user.selected);
-  //     if (selectedUsers.length === 0) {
-  //       return;
-  //     }
-
-  //     const hasSuperAdmin = selectedUsers.some(user => user.role === 'super-admin');
-  //     if (hasSuperAdmin) {
-  //       Swal.fire({
-  //         icon: 'error',
-  //         title: 'Supprimer',
-  //         text: 'Impossible de supprimer un super-admin.',
-  //         timer: 2000, // Durée de 2 secondes
-  //         timerProgressBar: true,
-  //         showConfirmButton: false
-  //       });
-  //       return;
-  //     }
-
-  //     Swal.fire({
-  //       title: 'Confirmer la suppression',
-  //       text: `Êtes-vous sûr de vouloir supprimer ${selectedUsers.length} utilisateur(s) sélectionné(s) ?`,
-  //       icon: 'warning',
-  //       showCancelButton: true,
-  //       confirmButtonText: 'Oui',
-  //       cancelButtonText: 'Non'
-  //     }).then((result) => {
-  //       if (result.isConfirmed) {
-  //         this.confirmDeleteUsers(selectedUsers);
-  //       }
-  //     });
-  //   }
-  // }
-
   openDeleteConfirmationModal(user?: Utilisateur) {
     if (user) {
-      // Suppression d'un seul utilisateur
       this.userToDelete = user;
       Swal.fire({
         title: 'Confirmer la suppression',
@@ -168,11 +126,8 @@ export class UserListComponent implements OnInit {
         }
       });
     } else {
-      // Suppression multiple
       const selectedUsers = this.filteredUsers.filter(user => user.selected);
-      if (selectedUsers.length === 0) {
-        return;
-      }
+      if (selectedUsers.length === 0) return;
 
       const superAdminCount = selectedUsers.filter(user => user.role === 'super-admin').length;
       const warningText = superAdminCount > 0
@@ -196,77 +151,69 @@ export class UserListComponent implements OnInit {
     }
   }
 
-
-   confirmDeleteUser() {
+  confirmDeleteUser() {
     if (this.userToDelete && this.userToDelete._id) {
-      this.utilisateurService.supprimerUtilisateur(this.userToDelete._id).subscribe(
-        () => {
+      this.utilisateurService.supprimerUtilisateur(this.userToDelete._id).subscribe({
+        next: () => {
           this.loadUsers();
           Swal.fire({
             icon: 'success',
             title: 'Supprimé!',
             text: 'L\'utilisateur a été supprimé.',
-            timer: 2000, // Durée de 2 secondes
+            timer: 2000,
             timerProgressBar: true,
             showConfirmButton: false
           });
         },
-        (error) => {
+        error: () => {
           Swal.fire({
             icon: 'error',
             title: 'Erreur!',
             text: 'Une erreur est survenue lors de la suppression.',
-            timer: 2000, // Durée de 2 secondes
+            timer: 2000,
             timerProgressBar: true,
             showConfirmButton: false
           });
         }
-      );
+      });
     }
   }
 
-
   confirmDeleteUsers(users: Utilisateur[]) {
     const ids = users.map(user => user._id);
-    this.utilisateurService.supprimerUtilisateurs(ids).subscribe(
-      () => {
+    this.utilisateurService.supprimerUtilisateurs(ids).subscribe({
+      next: () => {
         this.loadUsers();
         Swal.fire({
           icon: 'success',
           title: 'Supprimé!',
           text: 'Les utilisateurs ont été supprimés.',
-          timer: 2000, // Durée de 2 secondes
+          timer: 2000,
           timerProgressBar: true,
           showConfirmButton: false
         });
       },
-      (error) => {
+      error: () => {
         Swal.fire({
           icon: 'error',
           title: 'Erreur!',
           text: 'Une erreur est survenue lors de la suppression.',
-          timer: 2000, // Durée de 2 secondes
+          timer: 2000,
           timerProgressBar: true,
           showConfirmButton: false
         });
       }
-    );
+    });
   }
 
   openBlockConfirmationModal(user?: Utilisateur) {
     this.userToBlock = user || null;
-    if (!this.userToBlock || !this.userToBlock._id) {
-      return;
-    }
+    if (!this.userToBlock || !this.userToBlock._id) return;
 
-    const action = this.userToBlock.actif ? 'bloqué' : 'débloqué';
-    const message = this.userToBlock.actif
-      ? 'Êtes-vous sûr de vouloir débloquer cet utilisateur ?'
-      : 'Êtes-vous sûr de vouloir bloquer cet utilisateur ?';
-
+    const action = this.userToBlock.actif ? 'bloquer' : 'débloquer';
     Swal.fire({
-      title: `Confirmer le ${action}`,
-      text: message,
+      title: `Confirmer l'action`,
+      text: `Êtes-vous sûr de vouloir ${action} cet utilisateur ?`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Oui',
@@ -277,32 +224,33 @@ export class UserListComponent implements OnInit {
       }
     });
   }
+
   confirmBlockUser() {
     if (this.userToBlock && this.userToBlock._id) {
-      this.utilisateurService.toggleActivationUtilisateur(this.userToBlock._id).subscribe(
-        () => {
+      this.utilisateurService.toggleActivationUtilisateur(this.userToBlock._id).subscribe({
+        next: () => {
           this.loadUsers();
-          const action = this.userToBlock && this.userToBlock.actif ? 'bloqué' : 'débloqué';
+          const action = this.userToBlock && !this.userToBlock.actif ? 'débloqué' : 'bloqué';
           Swal.fire({
             icon: 'success',
             title: 'Succès!',
             text: `L'utilisateur a été ${action}.`,
-            timer: 2000, // Durée de 2 secondes
+            timer: 2000,
             timerProgressBar: true,
             showConfirmButton: false
           });
         },
-        (error) => {
+        error: () => {
           Swal.fire({
             icon: 'error',
             title: 'Erreur!',
             text: 'Une erreur est survenue lors du blocage.',
-            timer: 2000, // Durée de 2 secondes
+            timer: 2000,
             timerProgressBar: true,
             showConfirmButton: false
           });
         }
-      );
+      });
     }
   }
 
@@ -316,52 +264,139 @@ export class UserListComponent implements OnInit {
     this.openEditModal();
   }
 
+  assignRFID(user: Utilisateur) {
+    this.selectedUser = user;
+    Swal.fire({
+      title: 'Scanner votre carte RFID',
+      text: `Veuillez approcher votre carte RFID du lecteur pour l'utilisateur ${user.nom}.`,
+      icon: 'info',
+      allowOutsideClick: false,
+      showCancelButton: true,
+      confirmButtonText: 'Annuler',
+      cancelButtonText: 'Fermer'
+    }).then((result) => {
+      if (result.isDismissed || result.isConfirmed) {
+        this.selectedUser = null;
+      }
+    });
+  }
+
+  assignCardToUser(user: Utilisateur, cardID: string) {
+    if (user && user._id && cardID) {
+      if (!user.actif) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur',
+          text: `L'utilisateur ${user.nom} ${user.prenom} est inactif ou bloqué.`,
+        });
+        return;
+      }
+
+      this.utilisateurService.assignerCarteRFID(user._id, cardID).subscribe({
+        next: () => {
+          user.cardId = cardID;
+          localStorage.setItem(`user_${user._id}_assigned`, 'true');
+          Swal.fire({
+            icon: 'success',
+            title: 'Succès',
+            text: `Carte attribuée avec succès à ${user.nom} ${user.prenom}`,
+            timer: 2000,
+            showConfirmButton: false
+          });
+        },
+        error: () => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: 'Cette carte est déjà assignée à un utilisateur',
+          });
+        }
+      });
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Erreur',
+        text: 'ID de l\'utilisateur ou RFID non défini',
+      });
+    }
+  }
+
+  openUnassignConfirmationModal(user: Utilisateur) {
+    Swal.fire({
+      title: 'Confirmer la désassignation',
+      text: `Êtes-vous sûr de vouloir désassigner la carte RFID de l'utilisateur ${user.prenom} ${user.nom} ?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Oui, désassigner',
+      cancelButtonText: 'Annuler',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.unassignRFID(user);
+      }
+    });
+  }
+
+  unassignRFID(user: Utilisateur) {
+    if (user && user._id) {
+      this.utilisateurService.desassignerCarteRFID(user._id).subscribe({
+        next: () => {
+          user.cardId = undefined;
+          localStorage.removeItem(`user_${user._id}_assigned`);
+          Swal.fire({
+            icon: 'success',
+            title: 'Succès',
+            text: `Carte RFID désassignée avec succès pour l'utilisateur ${user.prenom} ${user.nom}`,
+            timer: 2000,
+            showConfirmButton: false
+          });
+        },
+        error: (error: HttpErrorResponse) => {
+          const errorMessage = error.error?.message === 'Aucune carte RFID assignée à cet utilisateur'
+            ? 'Aucune carte RFID assignée à cet utilisateur'
+            : 'Erreur lors de la désassignation de la carte RFID';
+
+          Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: errorMessage,
+          });
+        }
+      });
+    }
+  }
+
+  // Méthodes modales et utilitaires
   openDetailsModal() {
     const modal = document.getElementById('detailsModal');
-    if (modal) {
-      new bootstrap.Modal(modal).show();
-    }
+    if (modal) new bootstrap.Modal(modal).show();
   }
 
   openEditModal() {
     const modal = document.getElementById('editModal');
-    if (modal) {
-      new bootstrap.Modal(modal).show();
-    }
-  }
-
-  assignRFID(user: Utilisateur) {
-    this.selectedUser = user;
-    this.openAssignRFIDModal();
+    if (modal) new bootstrap.Modal(modal).show();
   }
 
   openRegistrationModal() {
     const modal = document.getElementById('registrationModal');
-    if (modal) {
-      new bootstrap.Modal(modal).show();
-    }
+    if (modal) new bootstrap.Modal(modal).show();
   }
 
   closeRegistrationModal() {
     const modal = document.getElementById('registrationModal');
-    if (modal) {
-      bootstrap.Modal.getInstance(modal)?.hide();
-    }
+    if (modal) bootstrap.Modal.getInstance(modal)?.hide();
   }
 
   closeDetailsModal() {
     const modal = document.getElementById('detailsModal');
-    if (modal) {
-      bootstrap.Modal.getInstance(modal)?.hide();
-    }
+    if (modal) bootstrap.Modal.getInstance(modal)?.hide();
     this.selectedUser = null;
   }
 
   closeEditModal() {
     const modal = document.getElementById('editModal');
-    if (modal) {
-      bootstrap.Modal.getInstance(modal)?.hide();
-    }
+    if (modal) bootstrap.Modal.getInstance(modal)?.hide();
     this.selectedUser = null;
   }
 
@@ -369,6 +404,7 @@ export class UserListComponent implements OnInit {
     this.selectedUser = null;
   }
 
+  // Méthodes de pagination et filtrage
   filterUsers() {
     const query = this.searchQuery.toLowerCase();
     let filtered = this.users.filter(user =>
@@ -378,8 +414,31 @@ export class UserListComponent implements OnInit {
       user.matricule.toLowerCase().includes(query)
     );
 
-    // Pagination logic
-    this.filteredUsers = filtered.slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage);
+    this.filteredUsers = filtered.slice(
+      (this.currentPage - 1) * this.itemsPerPage,
+      this.currentPage * this.itemsPerPage
+    );
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= Math.ceil(this.users.length / this.itemsPerPage)) {
+      this.currentPage = page;
+      this.filterUsers();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < Math.ceil(this.users.length / this.itemsPerPage)) {
+      this.currentPage++;
+      this.filterUsers();
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.filterUsers();
+    }
   }
 
   onFileSelected(event: Event): void {
@@ -398,7 +457,6 @@ export class UserListComponent implements OnInit {
       return;
     }
 
-    // Vérification du type de fichier
     if (!file.name.toLowerCase().endsWith('.csv')) {
       Swal.fire({
         icon: 'error',
@@ -450,7 +508,6 @@ export class UserListComponent implements OnInit {
     });
   }
 
-
   triggerFileInput() {
     this.fileInput.nativeElement.click();
   }
@@ -462,42 +519,48 @@ export class UserListComponent implements OnInit {
     }
   }
 
-  // Pagination methods
-  goToPage(page: number) {
-    if (page >= 1 && page <= Math.ceil(this.users.length / this.itemsPerPage)) {
-      this.currentPage = page;
-      this.filterUsers();
-    }
-  }
-
-    // Mettre à jour les méthodes existantes de pagination
-    nextPage() {
-      if (this.currentPage < Math.ceil(this.users.length / this.itemsPerPage)) {
-        this.currentPage++;
-        this.filterUsers();
-      }
-    }
-
-    prevPage() {
-      if (this.currentPage > 1) {
-        this.currentPage--;
-        this.filterUsers();
-      }
-    }
-
-
   updateUser(updatedUser: Utilisateur) {
     if (this.selectedUser && this.selectedUser._id) {
-      this.utilisateurService.modifierUtilisateur(this.selectedUser._id, updatedUser).subscribe(
-        () => {
+      this.utilisateurService.modifierUtilisateur(this.selectedUser._id, updatedUser).subscribe({
+        next: () => {
           this.loadUsers();
+          Swal.fire({
+            icon: 'success',
+            title: 'Succès',
+            text: 'Utilisateur mis à jour avec succès',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false
+          });
         },
-        (error) => {
-          Swal.fire('Erreur!', 'Une erreur est survenue lors de la mise à jour.', 'error');
+        error: () => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Erreur!',
+            text: 'Une erreur est survenue lors de la mise à jour.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false
+          });
         }
-      );
+      });
     }
   }
+
+  restoreButtonStates() {
+    this.users.forEach(user => {
+      if (localStorage.getItem(`user_${user._id}_assigned`)) {
+        user.cardId = 'assigned';
+      } else {
+        user.cardId = undefined;
+      }
+    });
+  }
+
+  isCardAssigned(user: Utilisateur): boolean {
+    return !!user.cardId;
+  }
+
   backToDashboard(): void {
     window.history.back();
   }

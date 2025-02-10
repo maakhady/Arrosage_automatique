@@ -61,4 +61,10 @@ router.patch('/:id/toggle-activation',
     utilisateurControleur.toggleActivationUtilisateur
 );
 
+// Route pour désassigner une carte RFID
+router.delete('/:id/rfid', 
+    superAdminMiddleware, 
+    utilisateurControleur.desassignerCarteRFID
+);
+
 module.exports = router;

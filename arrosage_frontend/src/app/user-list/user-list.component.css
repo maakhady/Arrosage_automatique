@@ -1,285 +1,331 @@
 /* user-list.component.css */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 0;
-  }
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 0;
+}
 
-  .container {
-    width: 90%;
-    margin: 20px auto;
-    padding-top: 5.5rem;
-    background-color: white;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-    overflow: hidden;
-  }
+.container {
+  width: 90%;
+  margin: 20px auto;
+  padding-top: 5.5rem;
+  background-color: white;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+}
 
-  .header {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    background-color: #50A24C;
-    color: white;
-    border-bottom: 2px solid #408239;
-  }
-
-  .header h1 {
-    margin: 0;
-  }
-
-  .controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    background-color: #e9ecef;
-    border-bottom: 1px solid #ccc;
-  }
-
-  .actions {
-    display: flex;
-    gap: 10px;
-  }
-
-  .actions button {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    padding: 10px 20px;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-
-  .actions i {
-    margin-right: 5px;
-  }
-
-  .delete-button {
-    background-color: #dc3545;
-  }
-
-  .delete-button:hover {
-    background-color: #c82333;
-  }
-
-  .block-button {
-    background-color: #fd7e14;
-  }
-
-  .block-button:hover {
-    background-color: #e06b0f;
-  }
-
-  .add-button {
-    background-color: #007bff;
-  }
-
-  .custom-csv-btn {
-    background-color: #50A24C; /* Couleur de fond */
-    color: white; /* Couleur du texte */
-    border: none; /* Supprimer la bordure */
-    padding: 10px 20px; /* Espacement interne */
-    border-radius: 5px; /* Coins arrondis */
-    cursor: pointer; /* Curseur de la main */
-    font-size: 16px; /* Taille de la police */
-    transition: background-color 0.3s ease; /* Effet de transition */
-  }
-
-  .custom-csv-btn:hover {
-    background-color: #408A3E; /* Couleur de fond au survol */
-  }
-
-  .back-button {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    background-color: #4175a6;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-  }
-
-  .back-button:hover {
-    background-color: #45a049;
-  }
-
-
-
-  .add-button:hover {
-    background-color: #0056b3;
-  }
-
-  .import-button {
-    background-color: #28a745;
-  }
-
-  .import-button:hover {
-    background-color: #218838;
-  }
-
-  .search-bar input {
-    width: 300px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-  }
-
-  .csv-import input {
-    margin-top: 20px;
-  }
-
-  table {
-    width: 100%;
-    margin: 20px auto;
-    border-collapse: collapse;
-  }
-
-  th, td {
-    padding: 15px;
-    text-align: center;
-  }
-
-  th {
-    background-color: #50A24C;
-    color: white;
-  }
-
-  tr:nth-child(even) {
-    background-color: #f9f9f9;
-  }
-
-  tr:hover {
-    background-color: #f1f1f1;
-  }
-
-  button {
-    background: none;
-    border: none;
-    color: #50A24C;
-    cursor: pointer;
-  }
-
-  button:hover {
-    color: #00b39b;
-  }
-
-  .assign-button {
-    background-color: #50A24C;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    padding: 5px 10px;
-  }
-
-  .assign-button:hover {
-    background-color: #50A24C;
-  }
-
-  /* Style pour le statut actif */
-.status-active {
+.header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
   background-color: #50A24C;
   color: white;
-  padding: 5px 10px;
+  border-bottom: 2px solid #408239;
+}
+
+.header h1 {
+  margin: 0;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background-color: #e9ecef;
+  border-bottom: 1px solid #ccc;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.actions button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 10px 20px;
+  color: white;
+  border: none;
   border-radius: 5px;
+  cursor: pointer;
+}
+
+.actions i {
+  margin-right: 5px;
+}
+
+.delete-button {
+  background-color: #dc3545;
+}
+
+.delete-button:hover {
+  background-color: #c82333;
+}
+
+.block-button {
+  background-color: #fd7e14;
+}
+
+.block-button:hover {
+  background-color: #e06b0f;
+}
+
+.add-button {
+  background-color: #007bff;
+}
+
+.custom-csv-btn {
+  background-color: #50A24C; /* Couleur de fond */
+  color: white; /* Couleur du texte */
+  border: none; /* Supprimer la bordure */
+  padding: 10px 20px; /* Espacement interne */
+  border-radius: 5px; /* Coins arrondis */
+  cursor: pointer; /* Curseur de la main */
+  font-size: 16px; /* Taille de la police */
+  transition: background-color 0.3s ease; /* Effet de transition */
+}
+
+.custom-csv-btn:hover {
+  background-color: #408A3E; /* Couleur de fond au survol */
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #4175a6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.back-button:hover {
+  background-color: #45a049;
+}
+
+
+
+.add-button:hover {
+  background-color: #0056b3;
+}
+
+.import-button {
+  background-color: #28a745;
+}
+
+.import-button:hover {
+  background-color: #218838;
+}
+
+.search-bar input {
+  width: 300px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.csv-import input {
+  margin-top: 20px;
+}
+
+table {
+  width: 100%;
+  margin: 20px auto;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 15px;
   text-align: center;
+}
+
+th {
+  background-color: #50A24C;
+  color: white;
+}
+
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+tr:hover {
+  background-color: #f1f1f1;
+}
+
+button {
+  background: none;
+  border: none;
+  color: #50A24C;
+  cursor: pointer;
+}
+
+button:hover {
+  color: #fff;
+  background-color: #218838;
+}
+
+button.danger:hover {
+  color: #fff;
+  background-color: #218838;
+}
+
+.assign-button {
+  background-color: #50A24C;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  padding: 5px 10px;
+}
+
+.assign-button:hover {
+  background-color: #be5252;
+}
+
+/* Style pour le statut actif */
+.status-active {
+background-color: #50A24C;
+color: white;
+padding: 5px 10px;
+border-radius: 5px;
+text-align: center;
 }
 
 /* Style pour le statut inactif */
 .status-inactive {
-  background-color: red;
-  color: white;
-  padding: 5px 10px;
-  border-radius: 5px;
-  text-align: center;
+background-color: red;
+color: white;
+padding: 5px 10px;
+border-radius: 5px;
+text-align: center;
 }
 
 /* Style pour le rôle utilisateur */
 .role-user {
-  background-color: #007bff;
-  color: white;
-  padding: 5px 10px;
-  border-radius: 5px;
-  text-align: center;
-  display: inline-block; /* Assure que le span ne prend que la place nécessaire */
+background-color: #007bff;
+color: white;
+padding: 5px 10px;
+border-radius: 5px;
+text-align: center;
+display: inline-block; /* Assure que le span ne prend que la place nécessaire */
 }
 
 /* Style pour le rôle super-admin */
 .role-super-admin {
-  background-color: #50A24C;
-  color: white;
-  padding: 5px 10px;
-  border-radius: 5px;
-  text-align: center;
-  display: inline-block; /* Assure que le span ne prend que la place nécessaire */
+background-color: #50A24C;
+color: white;
+padding: 5px 10px;
+border-radius: 5px;
+text-align: center;
+display: inline-block; /* Assure que le span ne prend que la place nécessaire */
 }
 
 /* Styles pour la pagination */
 .pagination-controls {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 20px;
-  gap: 10px;
+display: flex;
+justify-content: center;
+align-items: center;
+margin-top: 20px;
+gap: 10px;
 }
 
 .pagination-button {
-  background-color: #f8f9fa;
-  border: 1px solid #dee2e6;
-  padding: 8px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s;
+background-color: #f8f9fa;
+border: 1px solid #dee2e6;
+padding: 8px 12px;
+border-radius: 4px;
+cursor: pointer;
+transition: all 0.2s;
 }
 
 .pagination-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+opacity: 0.5;
+cursor: not-allowed;
 }
 
 .pagination-button:hover:not(:disabled) {
-  background-color: #e9ecef;
+background-color: #e9ecef;
 }
 
 .page-numbers {
-  display: flex;
-  gap: 5px;
+display: flex;
+gap: 5px;
 }
 
 .page-number {
-  background-color: #f8f9fa;
-  border: 1px solid #dee2e6;
-  padding: 8px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s;
+background-color: #f8f9fa;
+border: 1px solid #dee2e6;
+padding: 8px 12px;
+border-radius: 4px;
+cursor: pointer;
+transition: all 0.2s;
 }
 
 .page-number.active {
-  background-color: #50A24C;
-  color: white;
-  border-color: #007bff;
+background-color: #50A24C;
+color: white;
+border-color: #007bff;
 }
 
 .page-number:hover:not(.active) {
-  background-color: #e9ecef;
+background-color: #e9ecef;
 }
 
 .delete-button:disabled {
-  background-color: #be5252; /* Couleur de fond grisée */
-  color: #666666; /* Couleur du texte grisée */
-  cursor: not-allowed; /* Curseur non autorisé */
-  opacity: 0.7; /* Opacité réduite */
+background-color: #be5252; /* Couleur de fond grisée */
+color: #666666; /* Couleur du texte grisée */
+cursor: not-allowed; /* Curseur non autorisé */
+opacity: 0.7; /* Opacité réduite */
 }
 
 
+.btn.active {
+background-color: #007bff;
+color: white;
+}
+
+.alert {
+margin-top: 20px;
+}
+
+.text-danger {
+color: red;
+}
+
+.text-success {
+color: green;
+}
+
+/* Style pour les boutons Assigner et Désassigner */
+.btn-success {
+background-color: #28a745;
+color: white;
+}
 
 
+.btn-danger {
+background-color: #dc3545;
+color: white;
+}
+
+
+.bg-gray {
+background-color: #d3d3d3 !important;
+cursor: not-allowed;
+}
+
+.zoomable {
+transition: transform 0.2s ease-in-out;
+}
+
+.zoomable:hover {
+transform: scale(1.03);
+}
