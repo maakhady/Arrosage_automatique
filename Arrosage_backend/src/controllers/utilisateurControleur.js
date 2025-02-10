@@ -109,7 +109,7 @@ const creerUtilisateur = async (req, res) => {
                     nom: nouvelUtilisateur.nom,
                     matricule: nouvelUtilisateur.matricule,
                     email: nouvelUtilisateur.email,
-                    code: generatedCode,
+                    code: nouvelUtilisateur.code,
                     role: nouvelUtilisateur.role
                 });
                 console.log('8. Email envoyé avec succès');
@@ -617,7 +617,7 @@ const importerUtilisateursCSV = async (req, res) => {
                             nom: nouvelUtilisateur.nom,
                             matricule: nouvelUtilisateur.matricule,
                             email: nouvelUtilisateur.email,
-                            code: code,
+                            code: nouvelUtilisateur.code,
                             role: nouvelUtilisateur.role
                         });
                         emailsSendings.push({
