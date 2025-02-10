@@ -54,12 +54,12 @@ export class UserListComponent implements OnInit, OnDestroy {
       $('[data-toggle="tooltip"]').tooltip();
     });
 
-    this.rfidSubscription = this.rfidWebsocketService.getCardScans()
-      .subscribe(data => {
-        if (this.selectedUser && data.cardID) {
-          this.assignCardToUser(this.selectedUser, data.cardID);
-        }
-      });
+    this.rfidSubscription = this.rfidWebsocketService.getRfidScans()
+    .subscribe(data => {
+      if (this.selectedUser && data.value) {
+        this.assignCardToUser(this.selectedUser, data.value);
+      }
+    });
   }
 
   ngOnDestroy() {
@@ -268,14 +268,13 @@ export class UserListComponent implements OnInit, OnDestroy {
     this.selectedUser = user;
     Swal.fire({
       title: 'Scanner votre carte RFID',
-      text: `Veuillez approcher votre carte RFID du lecteur pour l'utilisateur ${user.nom}.`,
+      text: `Veuillez approcher votre carte RFID du lecteur pour ${user.prenom} ${user.nom}`,
       icon: 'info',
       allowOutsideClick: false,
       showCancelButton: true,
-      confirmButtonText: 'Annuler',
       cancelButtonText: 'Fermer'
     }).then((result) => {
-      if (result.isDismissed || result.isConfirmed) {
+      if (result.isDismissed) {
         this.selectedUser = null;
       }
     });

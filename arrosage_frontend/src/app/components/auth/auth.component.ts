@@ -3,7 +3,8 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { AuthService } from './../../services/auth.service';
-import { RfidWebsocketService } from './../../services/rfid-websocket.service';
+import { RfidWebsocketService, RFIDMessage } from '../../services/rfid-websocket.service';
+import { WebsocketService } from './../../services/websocket.service';
 import { HttpClientModule } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
@@ -18,6 +19,7 @@ import Swal from 'sweetalert2';
 export class AuthComponent implements OnInit, OnDestroy, AfterViewInit {
   private platformId = inject(PLATFORM_ID);
   private rfidSubscription?: Subscription;
+  private keypadSubscription?: Subscription;
 
   authForm: FormGroup;
   isLoading = false;
@@ -37,7 +39,8 @@ export class AuthComponent implements OnInit, OnDestroy, AfterViewInit {
     private authService: AuthService,
     private renderer: Renderer2,
     private el: ElementRef,
-    private rfidWebsocketService: RfidWebsocketService
+    private rfidWebsocketService: RfidWebsocketService,
+    private websocketService: WebsocketService
   ) {
     this.authForm = this.fb.group({
       digit1: ['', [Validators.required, Validators.pattern(/^[0-9]$/)]],
@@ -57,12 +60,22 @@ export class AuthComponent implements OnInit, OnDestroy, AfterViewInit {
     if (isPlatformBrowser(this.platformId)) {
       this.focusInput('digit1');
 
-      this.rfidSubscription = this.rfidWebsocketService.getCardScans()
-        .subscribe(data => {
-          if (data.cardID) {
-            this.loginWithRfid(data.cardID);
+      // RFID subscription
+      this.rfidSubscription = this.rfidWebsocketService.getRfidScans()
+      .subscribe((data: RFIDMessage) => {
+        if (data.value) {
+          this.loginWithRfid(data.value);
+        }
+      });
+      // Keypad subscription
+      this.keypadSubscription = this.websocketService.getMessages().subscribe({
+        next: (msg: any) => {
+          if (msg.type === 'keypad' && /^[0-9]$/.test(msg.value) && !this.isLocked) {
+            this.fillNextInput(msg.value);
           }
-        });
+        },
+        error: (err) => console.error('Erreur WebSocket Keypad:', err)
+      });
 
       this.checkLockState();
     }
@@ -78,8 +91,28 @@ export class AuthComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.rfidSubscription) {
       this.rfidSubscription.unsubscribe();
     }
+    if (this.keypadSubscription) {
+      this.keypadSubscription.unsubscribe();
+    }
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
+    }
+  }
+
+  fillNextInput(value: string): void {
+    for (let i = 1; i <= 4; i++) {
+      const controlName = `digit${i}`;
+      if (!this.authForm.get(controlName)?.value) {
+        this.authForm.get(controlName)?.setValue(value);
+        if (i < 4) {
+          this.focusInput(`digit${i + 1}`);
+        }
+        break;
+      }
+    }
+
+    if (this.authForm.valid) {
+      this.onSubmit();
     }
   }
 
@@ -180,7 +213,7 @@ export class AuthComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onSubmit(): void {
-    if (this.authForm.invalid) {
+    if (this.authForm.invalid || this.isLocked) {
       this.focusInput('digit1');
       return;
     }
@@ -193,6 +226,7 @@ export class AuthComponent implements OnInit, OnDestroy, AfterViewInit {
     this.authService.loginWithCode(code).subscribe({
       next: (response) => {
         if (response.success) {
+          this.showSuccessAlert();
           this.redirectBasedOnRole();
         } else {
           this.handleFailedLogin();
@@ -222,6 +256,8 @@ export class AuthComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private loginWithRfid(cardID: string): void {
+    if (this.isLocked) return;
+
     this.isLoading = true;
     this.authService.loginWithRFID(cardID).subscribe({
       next: (response) => {
@@ -234,7 +270,17 @@ export class AuthComponent implements OnInit, OnDestroy, AfterViewInit {
       },
       error: (error) => {
         console.error('Erreur de connexion:', error);
-        this.handleFailedLogin();
+        if (error.status === 403) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Compte bloqué',
+            text: error.error.message || 'Votre compte est désactivé. Veuillez contacter l\'administrateur.',
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'OK'
+          });
+        } else {
+          this.handleFailedLogin();
+        }
       },
       complete: () => {
         this.isLoading = false;
@@ -261,7 +307,7 @@ export class AuthComponent implements OnInit, OnDestroy, AfterViewInit {
     this.remainingAttempts = 3 - this.attempts;
 
     if (this.attempts >= 3) {
-      this.showPopup = true;
+      this.lockInputs();
     }
 
     this.authForm.reset();
@@ -327,12 +373,5 @@ export class AuthComponent implements OnInit, OnDestroy, AfterViewInit {
         inputElement.disabled = false;
       }
     });
-  }
-
-  focusFirstInput(): void {
-    const firstInputElement = document.querySelector('input[formControlName]') as HTMLInputElement;
-    if (firstInputElement) {
-      firstInputElement.focus();
-    }
   }
 }
