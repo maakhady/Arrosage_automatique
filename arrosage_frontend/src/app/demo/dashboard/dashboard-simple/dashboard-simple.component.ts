@@ -7,7 +7,9 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { HttpClientModule } from '@angular/common/http';
 import { AuthService } from '../../../services/auth.service';
 import { Router } from '@angular/router';
-import { WebSocketService } from '../../../services/capteur.service'; // Importez votre service WebSocket
+import { WebSocketService } from '../../../services/capteur.service';
+import { ArrosageService } from '../../../services/arrosage.service';
+import { Arrosage } from '../../../models/arrosage.model';
 
 @Component({
   selector: 'app-dashboard-simple',
@@ -19,7 +21,7 @@ import { WebSocketService } from '../../../services/capteur.service'; // Importe
     FontAwesomeModule,
     HttpClientModule
   ],
-  providers: [AuthService],
+  providers: [AuthService, ArrosageService],
   templateUrl: './dashboard-simple.component.html',
   styleUrls: ['./dashboard-simple.component.css']
 })
@@ -29,22 +31,18 @@ export class DashboardSimpleComponent implements OnInit {
   isWatering = false;
   showModal = false;
   faTimes = faTimes;
-  public isEditing = false; // Rendre public
+  isEditing = false;
   editingIndex: number | null = null;
-  humidite: number | null = null; // Ajoutez cette propriété
-  luminosite: number | null = null; // Ajoutez cette propriété
+  humidite: number | null = null;
+  luminosite: number | null = null;
 
-  // Vos données existantes
-  arrosages = [
-    { date: '01/02/2025', heure: '08:30', duree: '10 min', type: 'Automatique', nom: 'John', prenom: 'Doe' },
-    { date: '02/02/2025', heure: '09:00', duree: '15 min', type: 'Manuel', nom: 'Jane', prenom: 'Doe' },
-    { date: '03/02/2025', heure: '07:45', duree: '12 min', type: 'Automatique', nom: 'John', prenom: 'Doe' }
-  ];
-
-  scheduledTimes = [
-    { name: 'John', firstName: 'Doe', date: '02/02/2025', hour: '06:00', preference: 'none', threshold: 0, duration: 30, type: 'Automatique' },
-    { name: 'Jane', firstName: 'Doe', date: '03/02/2025', hour: '07:00', preference: 'none', threshold: 0, duration: 45, type: 'Manuel' }
-  ];
+  // Nouvelles propriétés pour la pagination et les arrosages
+  paginatedArrosages: Arrosage[] = [];
+  currentPage: number = 1;
+  pageSize: number = 5;
+  totalPages: number = 0;
+  timer: any;
+  allArrosages: Arrosage[] = [];
 
   newSchedule = {
     hour: '',
@@ -57,7 +55,8 @@ export class DashboardSimpleComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private webSocketService: WebSocketService // Injectez votre service WebSocket
+    private webSocketService: WebSocketService,
+    private arrosageService: ArrosageService
   ) {}
 
   ngOnInit(): void {
@@ -67,27 +66,27 @@ export class DashboardSimpleComponent implements OnInit {
       }
     });
 
-    // Abonnez-vous aux données WebSocket
     this.webSocketService.socket$.subscribe((data) => {
       this.humidite = data.humidite;
       this.luminosite = data.lumiere;
       this.niveau_eau = data.niveau_eau;
     });
+
+    // Charger les arrosages au démarrage
+    this.loadArrosages();
   }
 
-  // Méthode pour démarrer l'arrosage
+  // Méthodes existantes
   startWatering() {
-    this.isWatering = true; // Activer l'état d'arrosage
-    this.decreaseVolume(); // Démarrer la diminution du volume
+    this.isWatering = true;
+    this.decreaseVolume();
   }
 
-  // Méthode pour arrêter l'arrosage
   stopWatering() {
-    this.isWatering = false; // Désactiver l'état d'arrosage
-    this.resetVolume(); // Réinitialiser le volume
+    this.isWatering = false;
+    this.resetVolume();
   }
 
-  // Diminuer le volume du réservoir
   decreaseVolume() {
     if (!isPlatformBrowser(this.platformId)) return;
 
@@ -100,17 +99,21 @@ export class DashboardSimpleComponent implements OnInit {
     }, 1000);
   }
 
-  // Réinitialiser le volume du réservoir
   resetVolume() {
-    this.niveau_eau = 500; // Réinitialiser à 50%
+    this.niveau_eau = 500;
   }
 
-  // Ouvrir le modal de programmation
+
+  getVolumeEau(arrosage: Arrosage): number {
+    if (arrosage.volumeEau) return arrosage.volumeEau;
+    if (arrosage.parametresArrosage?.volumeEau) return arrosage.parametresArrosage.volumeEau;
+    return 0;
+  }
+
   openModal() {
     this.showModal = true;
   }
 
-  // Fermer le modal de programmation
   closeModal() {
     this.showModal = false;
     this.isEditing = false;
@@ -118,44 +121,158 @@ export class DashboardSimpleComponent implements OnInit {
     this.resetNewSchedule();
   }
 
-  // Ajouter ou modifier un horaire
+  // Nouvelles méthodes pour la gestion des arrosages
+  loadArrosages() {
+    this.arrosageService.getMesArrosages().subscribe({
+      next: (arrosages) => {
+        this.allArrosages = arrosages; // Stockez tous les arrosages
+        this.updatePagination();
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des arrosages:', error);
+      }
+    });
+  }
+
+
+  updatePagination() {
+    this.totalPages = Math.ceil(this.allArrosages.length / this.pageSize);
+    const start = (this.currentPage - 1) * this.pageSize;
+    const end = start + this.pageSize;
+    this.paginatedArrosages = this.allArrosages.slice(start, end);
+  }
+
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePagination();
+    }
+  }
+
+  goToPage(page: number): void {
+    this.currentPage = page;
+    this.updatePagination();
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePagination();
+    }
+  }
+
+  startTimer(heureFin: any) {
+    this.stopTimer();
+    this.timer = setInterval(() => {
+      const now = new Date();
+      const end = new Date(heureFin);
+      const diff = end.getTime() - now.getTime();
+
+      if (diff <= 0) {
+        this.stopTimer();
+      }
+    }, 1000);
+  }
+
+  stopTimer() {
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
+  }
+
   saveSchedule() {
+    const [hours, minutes] = this.newSchedule.hour.split(':').map(Number);
+    const endHours = hours + Math.floor(this.newSchedule.duration / 60);
+    const endMinutes = minutes + (this.newSchedule.duration % 60);
+
+    const newArrosage: Arrosage = {
+      type: this.newSchedule.type,
+      heureDebut: {
+        heures: hours,
+        minutes: minutes,
+        secondes: 0  // Ajout des secondes
+      },
+      heureFin: {
+        heures: endHours,
+        minutes: endMinutes,
+        secondes: 0  // Ajout des secondes
+      },
+      volumeEau: this.newSchedule.duration,
+      plante: {
+        _id: '679adb05afe9042fc3bb9cb8',  // ID de la plante par défaut
+        nom: "Plante par défaut",
+        categorie: "Défaut"
+      },
+      utilisateur: this.authService.getCurrentUser()?.id || '',
+      actif: true
+    };
+
     if (this.isEditing && this.editingIndex !== null) {
-      this.scheduledTimes[this.editingIndex] = {
-        ...this.newSchedule,
-        name: 'John', // Remplacer par le nom de l'utilisateur connecté
-        firstName: 'Doe', // Remplacer par le prénom de l'utilisateur connecté
-        date: new Date().toLocaleDateString() // Date actuelle
-      };
-      this.isEditing = false;
-      this.editingIndex = null;
+      const arrosage = this.paginatedArrosages[this.editingIndex];
+      if (arrosage._id) {
+        this.arrosageService.modifierArrosage(arrosage._id, newArrosage).subscribe({
+          next: () => {
+            this.loadArrosages();
+            this.closeModal();
+          },
+          error: (error) => {
+            console.error('Erreur lors de la modification:', error);
+          }
+        });
+      }
     } else {
-      this.scheduledTimes.push({
-        ...this.newSchedule,
-        name: 'John', // Remplacer par le nom de l'utilisateur connecté
-        firstName: 'Doe', // Remplacer par le prénom de l'utilisateur connecté
-        date: new Date().toLocaleDateString() // Date actuelle
+      this.arrosageService.creerArrosage(newArrosage).subscribe({
+        next: () => {
+          this.loadArrosages();
+          this.closeModal();
+        },
+        error: (error) => {
+          console.error('Erreur lors de la création:', error);
+        }
       });
     }
-
-    console.log('Horaires programmés enregistrés:', this.scheduledTimes);
-    this.closeModal();
+  }
+  editSchedule(arrosage: Arrosage) {
+    if (arrosage._id) {
+      this.arrosageService.modifierArrosage(arrosage._id, arrosage).subscribe({
+        next: (updatedArrosage) => {
+          this.loadArrosages();
+          this.closeModal();
+        },
+        error: (error) => {
+          console.error('Erreur lors de la modification:', error);
+        }
+      });
+    }
   }
 
-  // Modifier un horaire
-  editSchedule(index: number) {
-    this.newSchedule = { ...this.scheduledTimes[index] };
-    this.isEditing = true;
-    this.editingIndex = index;
-    this.openModal();
+
+
+  deleteSchedule(arrosage: Arrosage) {
+    if (arrosage._id) {
+      this.arrosageService.supprimerArrosage(arrosage._id).subscribe({
+        next: () => {
+          this.loadArrosages();
+        },
+        error: (error) => {
+          console.error('Erreur lors de la suppression:', error);
+        }
+      });
+    }
   }
 
-  // Supprimer un horaire
-  deleteSchedule(index: number) {
-    this.scheduledTimes.splice(index, 1);
-  }
 
-  // Réinitialiser le programme d'arrosage
+  // Dans votre composant
+formatTime(time: { heures: number; minutes: number; secondes: number }): string {
+  const heures = time.heures.toString().padStart(2, '0');
+  const minutes = time.minutes.toString().padStart(2, '0');
+  const secondes = time.secondes.toString().padStart(2, '0');
+  return `${heures}:${minutes}:${secondes}`;
+}
+
+
   resetNewSchedule() {
     this.newSchedule = {
       hour: '',
@@ -176,5 +293,9 @@ export class DashboardSimpleComponent implements OnInit {
 
   navigateToUsers(): void {
     this.router.navigate(['/user-list']);
+  }
+
+  ngOnDestroy() {
+    this.stopTimer();
   }
 }

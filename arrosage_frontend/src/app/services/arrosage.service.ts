@@ -8,7 +8,7 @@ import { Arrosage } from '../models/arrosage.model';
   providedIn: 'root'
 })
 export class ArrosageService {
-  private apiUrl = 'http://localhost:3000/api/arrosage';
+  private apiUrl = 'http://localhost:3000/api/arrosage/mes-arrosages';
 
   constructor(private http: HttpClient) { }
 
