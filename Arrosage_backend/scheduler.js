@@ -37,7 +37,7 @@ const startScheduler = () => {
             // S'il y a des arrosages à démarrer
             if (arrosagesADemarrer.length > 0) {
                 try {
-                    const response = await axios.post('http://192.168.40.21:5000/api/arrosage/manuel/global', {}, {
+                    const response = await axios.post('http://192.168.1.26:5000/api/arrosage/manuel/global', {}, {
                         headers: {
                             'Authorization': 'Bearer VOTRE_TOKEN_AUTHENTIFICATION'
                         }
@@ -51,7 +51,7 @@ const startScheduler = () => {
             // S'il y a des arrosages à arrêter
             if (arrosagesAArreter.length > 0) {
                 try {
-                    const response = await axios.post('http://192.168.40.21:5000/api/arrosage/stop', {}, {
+                    const response = await axios.post('http://192.168.1.26:5000/api/arrosage/stop', {}, {
                         headers: {
                             'Authorization': 'Bearer VOTRE_TOKEN_AUTHENTIFICATION'
                         }

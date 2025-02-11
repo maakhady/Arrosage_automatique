@@ -8,7 +8,7 @@ import { AuthService } from './auth.service';
   providedIn: 'root'
 })
 export class PompeService {
-  private flaskUrl = 'http://192.168.40.21:5000/api/arrosage';
+  private flaskUrl = 'http://192.168.1.26:5000/api/arrosage';
 
   constructor(private http: HttpClient,
     private authService: AuthService  // Injectez le service d'authentification

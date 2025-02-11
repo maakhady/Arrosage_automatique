@@ -355,13 +355,11 @@ export class AuthComponent implements OnInit, OnDestroy, AfterViewInit {
   showTemporaryValue(inputElement: HTMLInputElement): void {
     if (!isPlatformBrowser(this.platformId)) return;
 
-    const originalType = inputElement.type;
     inputElement.type = 'text';
     setTimeout(() => {
-      inputElement.type = originalType;
-    }, 1000);
+      inputElement.type = 'password';
+    }, 1500);
   }
-
   updateInputStyles(): void {
     const inputElements = this.el.nativeElement.querySelectorAll('.form-control');
     inputElements.forEach((inputElement: HTMLInputElement) => {

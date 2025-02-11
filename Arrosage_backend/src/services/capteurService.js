@@ -1,6 +1,6 @@
 const axios = require('axios');
 const WebSocket = require('ws'); // Importez le module WebSocket
-const RASPBERRY_URL = 'http://192.168.40.21:5000/api/capteurs';
+const RASPBERRY_URL = 'http://192.168.1.26:5000/api/capteurs';
 let interval = null;
 let wss = null;
 

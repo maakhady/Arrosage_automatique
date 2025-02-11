@@ -1,5 +1,5 @@
 const axios = require('axios');
-const RASPBERRY_URL = 'http://192.168.40.21:5000';
+const RASPBERRY_URL = 'http://192.168.1.26:5000';
 
 const pompeService = {
     demarrerArrosageManuel: async () => {
